@@ -1,4 +1,4 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/thanhn-inc/incognito-cli)](https://goreportcard.com/report/github.com/thanhn-inc/incognito-cli)
+[![Go Report Card](https://goreportcard.com/badge/github.com/incognitochain/incognito-cli)](https://goreportcard.com/report/github.com/incognitochain/incognito-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/incognitochain/incognito-cli/blob/main/LICENSE)
 
 incognito-cli
