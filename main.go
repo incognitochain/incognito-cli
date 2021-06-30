@@ -177,6 +177,50 @@ func main() {
 			},
 			Action: getHistory,
 		},
+		{
+			Name:      "generateaccount",
+			Aliases:   []string{"genacc"},
+			Usage:     "generate a new account",
+			UsageText: "generateaccount",
+			Description: "This function helps generate a new mnemonic phrase and its Incognito account.",
+			Category: "account",
+			Action: genKeySet,
+		},
+		{
+			Name:      "submitkey",
+			Aliases:   []string{"sub"},
+			Usage:     "submit an ota key to the full-node",
+			UsageText: "submitkey --otaKey OTA_KEY --accessToken ACCESS_TOKEN --fromHeight FROM_HEIGHT --isReset IS_RESET",
+			Description: "This function submits an otaKey to the full-node to use the full-node's cache. If an access token " +
+				"is provided, it will submit the ota key in an authorized manner. See " +
+				"https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/submit_key.md " +
+				"for more details.",
+			Category: "account",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "otaKey",
+					Aliases:  []string{"ota"},
+					Usage:    "a base58-encoded ota key",
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:  "accessToken",
+					Usage: "a 64-character long hex-encoded authorized access token",
+					Value: "",
+				},
+				&cli.Uint64Flag{
+					Name:  "fromHeight",
+					Usage: "the beacon height at which the full-node will sync from",
+					Value: 0,
+				},
+				&cli.BoolFlag{
+					Name:  "isReset",
+					Usage: "whether the full-node should reset the cache for this ota key",
+					Value: false,
+				},
+			},
+			Action: submitKey,
+		},
 	}
 
 	app.Commands = make([]*cli.Command, 0)

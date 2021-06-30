@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/incognitochain/bridge-eth/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
 )
 
@@ -44,12 +45,12 @@ func keyInfo(c *cli.Context) error {
 		return fmt.Errorf("private key is invalid")
 	}
 
-	keyInfo, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
+	info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
 	if err != nil {
 		return err
 	}
 
-	jsb, err := json.MarshalIndent(keyInfo, "", "\t")
+	jsb, err := json.MarshalIndent(info, "", "\t")
 	if err != nil {
 		return fmt.Errorf("marshalling key info error: %v", err)
 	}
@@ -217,6 +218,55 @@ func getHistory(c *cli.Context) error {
 		fmt.Printf("END TxOuts\n")
 
 		fmt.Printf("TotalIn: %v, TotalOut: %v\n", totalIn, totalOut)
+	}
+
+	return nil
+}
+
+func genKeySet(_ *cli.Context) error {
+	w, mnemonic, err := wallet.NewMasterKey()
+	if err != nil {
+		return err
+	}
+
+	privateKey := w.Base58CheckSerialize(wallet.PrivateKeyType)
+	info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("mnemonic: %v\n", mnemonic)
+	jsb, err := json.MarshalIndent(info, "", "\t")
+	if err != nil {
+		return fmt.Errorf("marshalling key info error: %v", err)
+	}
+	fmt.Println(string(jsb))
+
+	return nil
+}
+
+func submitKey(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	otaKey := c.String("otaKey")
+	if otaKey == "" {
+		return fmt.Errorf("ota key is invalid")
+	}
+
+	accessToken := c.String("accessToken")
+	if accessToken != "" {
+		fromHeight := c.Uint64("fromHeight")
+		isReset := c.Bool("isReset")
+		err = client.AuthorizedSubmitKey(otaKey, accessToken, fromHeight, isReset)
+	} else {
+		err = client.SubmitKey(otaKey)
+	}
+
+	if err != nil {
+		return err
 	}
 
 	return nil
