@@ -94,10 +94,13 @@ func consolidateUTXOs(c *cli.Context) error {
 		return fmt.Errorf("numThreads in invalid")
 	}
 
+	fmt.Printf("CONSOLIDATING tokenID %v, version %v, numThreads %v, enableLog %v\n", tokenIDStr, version, numThreads, enableLog)
+
 	txList, err := client.Consolidate(privateKey, tokenIDStr, int8(version), numThreads)
 	if err != nil {
 		return err
 	}
+	fmt.Println("CONSOLIDATING FINISHED!!")
 	fmt.Println(txList)
 
 	return nil
