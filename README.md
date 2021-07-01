@@ -31,6 +31,7 @@ go clean --modcache
 There are two options for you to run the Incognito CLI by:
 1. Downloading the pre-compiled executable binary file, you can find it in the [releases](https://github.com/incognitochain/incognito-cli/releases).
 2. Compiling your own executable binary file from source as in the Installation instruction above.
+
 Then execute the binary file with the following commands.
 
 ```shell
