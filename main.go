@@ -32,6 +32,7 @@ func main() {
 		},
 	}
 
+	// all account-related commands
 	accountCommands := []*cli.Command{
 		{
 			Name:      "keyinfo",
@@ -178,13 +179,13 @@ func main() {
 			Action: getHistory,
 		},
 		{
-			Name:      "generateaccount",
-			Aliases:   []string{"genacc"},
-			Usage:     "generate a new account",
-			UsageText: "generateaccount",
+			Name:        "generateaccount",
+			Aliases:     []string{"genacc"},
+			Usage:       "generate a new account",
+			UsageText:   "generateaccount",
 			Description: "This function helps generate a new mnemonic phrase and its Incognito account.",
-			Category: "account",
-			Action: genKeySet,
+			Category:    "account",
+			Action:      genKeySet,
 		},
 		{
 			Name:      "submitkey",
@@ -223,8 +224,61 @@ func main() {
 		},
 	}
 
+	// all committee-related commands
+	committeeCommands := []*cli.Command{
+		{
+			Name:      "checkrewards",
+			Usage:     "get all rewards of a payment address",
+			UsageText: "checkRewards --address PAYMENT_ADDRESS",
+			ArgsUsage: "--address PAYMENT_ADDRESS",
+			Category:  "committee",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "address",
+					Aliases:  []string{"addr"},
+					Usage:    "a base58-encoded payment address",
+					Required: true,
+				},
+			},
+			Action: checkRewards,
+		},
+		{
+			Name:      "withdrawreward",
+			Usage:     "withdraw the reward of a privateKey w.r.t to a tokenID.",
+			UsageText: "withdrawreward --privateKey PRIVATE_KEY --tokenID TOKEN_ID --version VERSION",
+			ArgsUsage: "--privateKey PRIVATE_KEY --tokenID TOKEN_ID",
+			Category:  "committee",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "privateKey",
+					Aliases:  []string{"prvKey"},
+					Usage:    "a base58-encoded private key",
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:    "address",
+					Aliases: []string{"addr"},
+					Usage:   "the payment address of a candidate (default: the payment address of the privateKey)",
+				},
+				&cli.StringFlag{
+					Name:  "tokenID",
+					Usage: "ID of the token",
+					Value: common.PRVIDStr,
+				},
+				&cli.IntFlag{
+					Name:    "version",
+					Aliases: []string{"v"},
+					Usage:   "version of the transaction (1 or 2)",
+					Value:   2,
+				},
+			},
+			Action: withdrawReward,
+		},
+	}
+
 	app.Commands = make([]*cli.Command, 0)
 	app.Commands = append(app.Commands, accountCommands...)
+	app.Commands = append(app.Commands, committeeCommands...)
 
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
