@@ -7,6 +7,19 @@ import (
 )
 
 var defaultFlags = map[string]cli.Flag{
+	networkFlag: &cli.StringFlag{
+		Name:        networkFlag,
+		Aliases:     aliases[networkFlag],
+		Usage:       "network environment (mainnet, testnet, testnet1, devnet, local, custom)",
+		Value:       "mainnet",
+		Destination: &network,
+	},
+	hostFlag: &cli.StringFlag{
+		Name:        hostFlag,
+		Usage:       "custom full-node host",
+		Value:       "",
+		Destination: &host,
+	},
 	privateKeyFlag: &cli.StringFlag{
 		Name:     privateKeyFlag,
 		Aliases:  aliases[privateKeyFlag],

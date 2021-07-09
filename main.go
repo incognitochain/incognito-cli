@@ -2,8 +2,6 @@ package main
 
 import (
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
-	"log"
-	"os"
 	"sort"
 
 	"github.com/urfave/cli/v2"
@@ -13,7 +11,7 @@ func main() {
 	app := &cli.App{
 		Name:    "incognito-cli",
 		Usage:   "A simple CLI application for the Incognito network",
-		Version: "v0.0.1",
+		Version: "v0.0.2",
 		Description: "A simple CLI application for the Incognito network. With this tool, you can run some basic functions" +
 			" on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens," +
 			" consolidating and converting your UTXOs, etc.",
@@ -23,33 +21,22 @@ func main() {
 				Email: "support@incognito.org",
 			},
 		},
-		Copyright: "This tool is created and managed by the Incognito Devs Team. It is free for anyone. However, any " +
+		Copyright: "This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any " +
 			"commercial usages should be acknowledged by the Incognito Devs Team.",
 	}
 	app.EnableBashCompletion = true
 
 	// set app defaultFlags
 	app.Flags = []cli.Flag{
-		&cli.StringFlag{
-			Name:        networkFlag,
-			Aliases:     aliases[networkFlag],
-			Usage:       "network environment (mainnet, testnet, testnet1, devnet, local, custom)",
-			Value:       "mainnet",
-			Destination: &network,
-		},
-		&cli.StringFlag{
-			Name:        hostFlag,
-			Usage:       "custom full-node host",
-			Value:       "",
-			Destination: &host,
-		},
+		defaultFlags[networkFlag],
+		defaultFlags[hostFlag],
 	}
 
 	// all account-related commands
 	accountCommands := []*cli.Command{
 		{
 			Name:     "keyinfo",
-			Usage:    "print all related-keys of a private key",
+			Usage:    "Print all related-keys of a private key.",
 			Category: accountCat,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
@@ -63,7 +50,7 @@ func main() {
 		},
 		{
 			Name:     "balance",
-			Usage:    "check the balance of an account",
+			Usage:    "Check the balance of an account.",
 			Category: accountCat,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
@@ -82,7 +69,7 @@ func main() {
 		},
 		{
 			Name:     "utxo",
-			Usage:    "print the UTXOs of an account",
+			Usage:    "Print the UTXOs of an account.",
 			Category: accountCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -93,7 +80,7 @@ func main() {
 		{
 			Name:    "consolidate",
 			Aliases: []string{"csl"},
-			Usage:   "consolidate UTXOs of an account",
+			Usage:   "Consolidate UTXOs of an account.",
 			Description: "This function helps consolidate UTXOs of an account. It consolidates a version of UTXOs at a time, users need to specify which version they need to consolidate. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
 			Category: accountCat,
@@ -110,7 +97,7 @@ func main() {
 		{
 			Name:    "history",
 			Aliases: []string{"hst"},
-			Usage:   "retrieve the history of an account",
+			Usage:   "Retrieve the history of an account.",
 			Description: "This function helps retrieve the history of an account w.r.t a tokenID. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
 			Category: accountCat,
@@ -131,7 +118,7 @@ func main() {
 		{
 			Name:        "generateaccount",
 			Aliases:     []string{"genacc"},
-			Usage:       "generate a new account",
+			Usage:       "Generate a new Incognito account.",
 			Description: "This function helps generate a new mnemonic phrase and its Incognito account.",
 			Category:    accountCat,
 			Action:      genKeySet,
@@ -139,7 +126,7 @@ func main() {
 		{
 			Name:    "submitkey",
 			Aliases: []string{"sub"},
-			Usage:   "submit an ota key to the full-node",
+			Usage:   "Submit an ota key to the full-node.",
 			Description: "This function submits an otaKey to the full-node to use the full-node's cache. If an access token " +
 				"is provided, it will submit the ota key in an authorized manner. See " +
 				"https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/submit_key.md " +
@@ -159,7 +146,7 @@ func main() {
 	committeeCommands := []*cli.Command{
 		{
 			Name:     "checkrewards",
-			Usage:    "get all rewards of a payment address",
+			Usage:    "Get all rewards of a payment address.",
 			Category: committeeCat,
 			Flags: []cli.Flag{
 				defaultFlags[addressFlag],
@@ -168,7 +155,7 @@ func main() {
 		},
 		{
 			Name:     "withdrawreward",
-			Usage:    "withdraw the reward of a privateKey w.r.t to a tokenID.",
+			Usage:    "Withdraw the reward of a privateKey w.r.t to a tokenID.",
 			Category: committeeCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -188,7 +175,7 @@ func main() {
 	txCommands := []*cli.Command{
 		{
 			Name:  "send",
-			Usage: "send an amount of PRV or token from one wallet to another wallet",
+			Usage: "Send an amount of PRV or token from one wallet to another wallet.",
 			Description: "This function sends an amount of PRV or token from one wallet to another wallet. By default, " +
 				"it used 100 nano PRVs to pay the transaction fee.",
 			Category: transactionCat,
@@ -204,7 +191,7 @@ func main() {
 		},
 		{
 			Name:  "convert",
-			Usage: "convert UTXOs of an account w.r.t a tokenID",
+			Usage: "Convert UTXOs of an account w.r.t a tokenID.",
 			Description: "This function helps convert UTXOs v1 of a user to UTXO v2 w.r.t a tokenID. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
 			Category: transactionCat,
@@ -231,8 +218,13 @@ func main() {
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
 
-	err := app.Run(os.Args)
+	err := generateDocsToFile(app, "docs.md")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
+
+	//err := app.Run(append(os.Args, "--generate-bash-completion"))
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 }

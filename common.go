@@ -43,9 +43,9 @@ var aliases = map[string][]string{
 
 // category constants
 const (
-	accountCat     = "Account"
-	committeeCat   = "Committee"
-	transactionCat = "Transaction"
+	accountCat     = "ACCOUNTS"
+	committeeCat   = "COMMITTEES"
+	transactionCat = "TRANSACTIONS"
 )
 
 var client *incclient.IncClient
@@ -141,5 +141,5 @@ func buildUsageTextFromCommand(command *cli.Command) {
 		res += flagString
 	}
 
-	command.UsageText = res + "\n\n\t Optional flags are denoted with a [] symbol."
+	command.UsageText = res + "\n\n\t OPTIONAL flags are denoted by a [] bracket."
 }
