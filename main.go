@@ -11,38 +11,38 @@ import (
 
 func main() {
 	app := &cli.App{
-		Name:        "incognito-cli",
-		Version:     "v0.0.1",
-		Description: "A simple CLI application for the Incognito network",
+		Name:    "incognito-cli",
+		Usage:   "A simple CLI application for the Incognito network",
+		Version: "v0.0.2",
+		Description: "A simple CLI application for the Incognito network. With this tool, you can run some basic functions" +
+			" on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens," +
+			" consolidating and converting your UTXOs, etc.",
+		Authors: []*cli.Author{
+			{
+				Name: "Incognito Devs Team",
+			},
+		},
+		Copyright: "This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any " +
+			"commercial usages should be acknowledged by the Incognito Devs Team.",
 	}
+	app.EnableBashCompletion = true
 
-	// set app flags
+	// set app defaultFlags
 	app.Flags = []cli.Flag{
-		&cli.StringFlag{
-			Name:        "network",
-			Aliases:     []string{"net"},
-			Usage:       "network environment (mainnet, testnet, testnet1, devnet, local, custom)",
-			Value:       "mainnet",
-			Destination: &network,
-		},
-		&cli.StringFlag{
-			Name:        "host",
-			Usage:       "custom full-node host",
-			Destination: &host,
-		},
+		defaultFlags[networkFlag],
+		defaultFlags[hostFlag],
 	}
 
+	// all account-related commands
 	accountCommands := []*cli.Command{
 		{
-			Name:      "keyinfo",
-			Usage:     "print all related-keys of a private key",
-			UsageText: "keyinfo --privateKey PRIVATE_KEY",
-			ArgsUsage: "--privateKey PRIVATE_KEY",
-			Category:  "account",
+			Name:     "keyinfo",
+			Usage:    "Print all related-keys of a private key.",
+			Category: accountCat,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
-					Name:     "privateKey",
-					Aliases:  []string{"prvKey"},
+					Name:     privateKeyFlag,
+					Aliases:  aliases[privateKeyFlag],
 					Usage:    "a base58-encoded private key",
 					Required: true,
 				},
@@ -50,20 +50,18 @@ func main() {
 			Action: keyInfo,
 		},
 		{
-			Name:      "balance",
-			Usage:     "check the balance of an account",
-			UsageText: "balance --privateKey PRIVATE_KEY --tokenID TOKEN_ID",
-			ArgsUsage: "--privateKey PRIVATE_KEY --tokenID TOKEN_ID",
-			Category:  "account",
+			Name:     "balance",
+			Usage:    "Check the balance of an account.",
+			Category: accountCat,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
-					Name:     "privateKey",
-					Aliases:  []string{"prvKey"},
+					Name:     privateKeyFlag,
+					Aliases:  aliases[privateKeyFlag],
 					Usage:    "a base58-encoded private key",
 					Required: true,
 				},
 				&cli.StringFlag{
-					Name:  "tokenID",
+					Name:  tokenIDFlag,
 					Usage: "ID of the token",
 					Value: common.PRVIDStr,
 				},
@@ -71,121 +69,157 @@ func main() {
 			Action: checkBalance,
 		},
 		{
-			Name:      "utxo",
-			Usage:     "print the UTXOs of an account",
-			UsageText: "utxo --privateKey PRIVATE_KEY --tokenID TOKEN_ID",
-			ArgsUsage: "--privateKey PRIVATE_KEY --tokenID TOKEN_ID",
-			Category:  "account",
+			Name:     "utxo",
+			Usage:    "Print the UTXOs of an account.",
+			Category: accountCat,
 			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     "privateKey",
-					Aliases:  []string{"prvKey"},
-					Usage:    "a base58-encoded private key",
-					Required: true,
-				},
-				&cli.StringFlag{
-					Name:  "tokenID",
-					Usage: "ID of the token",
-					Value: common.PRVIDStr,
-				},
+				defaultFlags[privateKeyFlag],
+				defaultFlags[tokenIDFlag],
 			},
 			Action: checkUTXOs,
 		},
 		{
-			Name:      "consolidate",
-			Aliases:   []string{"csl"},
-			Usage:     "consolidate UTXOs of an account",
-			UsageText: "consolidate --privateKey PRIVATE_KEY --tokenID TOKEN_ID --version VERSION --numThreads NUM_THREADS --enableLog ENABLE_LOG --logFile LOG_FILE",
-			ArgsUsage: "--privateKey PRIVATE_KEY --tokenID TOKEN_ID",
+			Name:    "consolidate",
+			Aliases: []string{"csl"},
+			Usage:   "Consolidate UTXOs of an account.",
 			Description: "This function helps consolidate UTXOs of an account. It consolidates a version of UTXOs at a time, users need to specify which version they need to consolidate. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
-			Category: "account",
+			Category: accountCat,
 			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     "privateKey",
-					Aliases:  []string{"prvKey"},
-					Usage:    "a base58-encoded private key",
-					Required: true,
-				},
-				&cli.StringFlag{
-					Name:  "tokenID",
-					Usage: "ID of the token",
-					Value: common.PRVIDStr,
-				},
-				&cli.IntFlag{
-					Name:  "version",
-					Usage: "version of the UTXOs being converted (1, 2)",
-					Value: 1,
-				},
-				&cli.IntFlag{
-					Name:  "numThreads",
-					Usage: "number of threads used in this action",
-					Value: 4,
-				},
-				&cli.BoolFlag{
-					Name:  "enableLog",
-					Usage: "enable log for this action",
-					Value: false,
-				},
-				&cli.StringFlag{
-					Name:  "logFile",
-					Usage: "location of the log file",
-					Value: "os.Stdout",
-				},
+				defaultFlags[privateKeyFlag],
+				defaultFlags[tokenIDFlag],
+				defaultFlags[versionFlag],
+				defaultFlags[numThreadsFlag],
+				defaultFlags[enableLogFlag],
+				defaultFlags[logFileFlag],
 			},
 			Action: consolidateUTXOs,
 		},
 		{
-			Name:      "history",
-			Aliases:   []string{"hst"},
-			Usage:     "retrieve the history of an account",
-			UsageText: "history --privateKey PRIVATE_KEY --tokenID TOKEN_ID --numThreads NUM_THREADS --enableLog ENABLE_LOG --logFile LOG_FILE --csvFile CSV_FILE",
+			Name:    "history",
+			Aliases: []string{"hst"},
+			Usage:   "Retrieve the history of an account.",
 			Description: "This function helps retrieve the history of an account w.r.t a tokenID. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
-			Category: "account",
+			Category: accountCat,
 			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     "privateKey",
-					Aliases:  []string{"prvKey"},
-					Usage:    "a base58-encoded private key",
-					Required: true,
-				},
+				defaultFlags[privateKeyFlag],
 				&cli.StringFlag{
 					Name:  "tokenID",
 					Usage: "ID of the token",
 					Value: common.PRVIDStr,
 				},
-				&cli.IntFlag{
-					Name:  "numThreads",
-					Usage: "number of threads used in this action",
-					Value: 4,
-				},
-				&cli.BoolFlag{
-					Name:  "enableLog",
-					Usage: "enable log for this action",
-					Value: false,
-				},
-				&cli.StringFlag{
-					Name:  "logFile",
-					Usage: "location of the log file",
-					Value: "os.Stdout",
-				},
-				&cli.StringFlag{
-					Name:  "csvFile",
-					Usage: "the csv file location to store the history",
-				},
+				defaultFlags[numThreadsFlag],
+				defaultFlags[enableLogFlag],
+				defaultFlags[logFileFlag],
+				defaultFlags[csvFileFlag],
 			},
 			Action: getHistory,
+		},
+		{
+			Name:        "generateaccount",
+			Aliases:     []string{"genacc"},
+			Usage:       "Generate a new Incognito account.",
+			Description: "This function helps generate a new mnemonic phrase and its Incognito account.",
+			Category:    accountCat,
+			Action:      genKeySet,
+		},
+		{
+			Name:    "submitkey",
+			Aliases: []string{"sub"},
+			Usage:   "Submit an ota key to the full-node.",
+			Description: "This function submits an otaKey to the full-node to use the full-node's cache. If an access token " +
+				"is provided, it will submit the ota key in an authorized manner. See " +
+				"https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/submit_key.md " +
+				"for more details.",
+			Category: accountCat,
+			Flags: []cli.Flag{
+				defaultFlags[otaKeyFlag],
+				defaultFlags[accessTokenFlag],
+				defaultFlags[fromHeightFlag],
+				defaultFlags[isResetFlag],
+			},
+			Action: submitKey,
+		},
+	}
+
+	// all committee-related commands
+	committeeCommands := []*cli.Command{
+		{
+			Name:     "checkrewards",
+			Usage:    "Get all rewards of a payment address.",
+			Category: committeeCat,
+			Flags: []cli.Flag{
+				defaultFlags[addressFlag],
+			},
+			Action: checkRewards,
+		},
+		{
+			Name:     "withdrawreward",
+			Usage:    "Withdraw the reward of a privateKey w.r.t to a tokenID.",
+			Category: committeeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				&cli.StringFlag{
+					Name:    addressFlag,
+					Aliases: aliases[addressFlag],
+					Usage:   "the payment address of a candidate (default: the payment address of the privateKey)",
+				},
+				defaultFlags[tokenIDFlag],
+				defaultFlags[versionFlag],
+			},
+			Action: withdrawReward,
+		},
+	}
+
+	// all tx-related commands
+	txCommands := []*cli.Command{
+		{
+			Name:  "send",
+			Usage: "Send an amount of PRV or token from one wallet to another wallet.",
+			Description: "This function sends an amount of PRV or token from one wallet to another wallet. By default, " +
+				"it used 100 nano PRVs to pay the transaction fee.",
+			Category: transactionCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[addressFlag],
+				defaultFlags[amountFlag],
+				defaultFlags[tokenIDFlag],
+				defaultFlags[feeFlag],
+				defaultFlags[versionFlag],
+			},
+			Action: send,
+		},
+		{
+			Name:  "convert",
+			Usage: "Convert UTXOs of an account w.r.t a tokenID.",
+			Description: "This function helps convert UTXOs v1 of a user to UTXO v2 w.r.t a tokenID. " +
+				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
+			Category: transactionCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[tokenIDFlag],
+				defaultFlags[numThreadsFlag],
+				defaultFlags[enableLogFlag],
+				defaultFlags[logFileFlag],
+			},
+			Action: convertUTXOs,
 		},
 	}
 
 	app.Commands = make([]*cli.Command, 0)
 	app.Commands = append(app.Commands, accountCommands...)
+	app.Commands = append(app.Commands, committeeCommands...)
+	app.Commands = append(app.Commands, txCommands...)
+
+	for _, command := range app.Commands {
+		buildUsageTextFromCommand(command)
+	}
 
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
 
-	err := app.Run(os.Args)
+	err := app.Run(append(os.Args, "--generate-bash-completion"))
 	if err != nil {
 		log.Fatal(err)
 	}
