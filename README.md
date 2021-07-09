@@ -13,7 +13,7 @@ A command line tool for the Incognito network
 # Usage
 <!-- usage -->
 ## Installation
-Install to the `$GOPATH` folder. 
+Install to the `$GOPATH` folder.
 ```shell
 $ go install
 ```
@@ -28,6 +28,12 @@ go clean --modcache
 ```
 
 ## Usage
+There are two options for you to run the Incognito CLI by:
+1. Downloading the pre-compiled executable binary file, you can find it in the [releases](https://github.com/incognitochain/incognito-cli/releases).
+2. Compiling your own executable binary file from source as in the Installation instruction above.
+
+Then execute the binary file with the following commands.
+
 ```shell
 $ incognito-cli [global options] command [command options] [arguments...]
 some command is running here...
@@ -65,7 +71,7 @@ GLOBAL OPTIONS:
 # Commands
 <!-- commands -->
 * [`Accounts`](#accounts)
-    * [`balancee`](#balance)
+    * [`balance`](#balance)
     * [`keyinfo`](#keyinfo)
     * [`utxo`](#utxo)
     * [`consolidate`](#consolidate)
