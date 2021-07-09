@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
+	"log"
+	"os"
 	"sort"
 
 	"github.com/urfave/cli/v2"
@@ -17,8 +19,7 @@ func main() {
 			" consolidating and converting your UTXOs, etc.",
 		Authors: []*cli.Author{
 			{
-				Name:  "Incognito Devs Team",
-				Email: "support@incognito.org",
+				Name: "Incognito Devs Team",
 			},
 		},
 		Copyright: "This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any " +
@@ -218,13 +219,8 @@ func main() {
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
 
-	err := generateDocsToFile(app, "docs.md")
+	err := app.Run(append(os.Args, "--generate-bash-completion"))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	//err := app.Run(append(os.Args, "--generate-bash-completion"))
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
 }

@@ -49,7 +49,7 @@ DESCRIPTION:
    A simple CLI application for the Incognito network. With this tool, you can run some basic functions on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens, consolidating and converting your UTXOs, etc.
 
 AUTHOR:
-   Incognito Devs Team <support@incognito.org>
+   Incognito Devs Team
 
 COMMANDS:
    help, h  Shows a list of commands or help for one command
