@@ -219,7 +219,7 @@ func main() {
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
 
-	err := app.Run(append(os.Args, "--generate-bash-completion"))
+	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
