@@ -21,6 +21,12 @@ var defaultFlags = map[string]cli.Flag{
 		Value:       "",
 		Destination: &host,
 	},
+	clientVersionFlag: &cli.IntFlag{
+		Name:  clientVersionFlag,
+		Usage: "version of the incclient",
+		Value: 2,
+		Destination: &clientVersion,
+	},
 	privateKeyFlag: &cli.StringFlag{
 		Name:     privateKeyFlag,
 		Aliases:  aliases[privateKeyFlag],
@@ -97,8 +103,8 @@ var defaultFlags = map[string]cli.Flag{
 		Value: false,
 	},
 	txHashFlag: &cli.StringFlag{
-		Name:  txHashFlag,
-		Usage: "the transaction hash",
+		Name:     txHashFlag,
+		Usage:    "the transaction hash",
 		Required: true,
 	},
 	tokenIDToSellFlag: &cli.StringFlag{
@@ -127,13 +133,13 @@ var defaultFlags = map[string]cli.Flag{
 		Value: 0,
 	},
 	pairIDFlag: &cli.StringFlag{
-		Name:  pairIDFlag,
-		Usage: "the ID of the contributing pair (see https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md)",
+		Name:     pairIDFlag,
+		Usage:    "the ID of the contributing pair (see https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md)",
 		Required: true,
 	},
 	tokenID1Flag: &cli.StringFlag{
-		Name:  tokenID1Flag,
-		Usage: "ID of the first token",
+		Name:     tokenID1Flag,
+		Usage:    "ID of the first token",
 		Required: true,
 	},
 	tokenID2Flag: &cli.StringFlag{
