@@ -16,7 +16,7 @@ func main() {
 		Version: "v0.0.2",
 		Description: "A simple CLI application for the Incognito network. With this tool, you can run some basic functions" +
 			" on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens," +
-			" consolidating and converting your UTXOs, etc.",
+			" consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, etc.",
 		Authors: []*cli.Author{
 			{
 				Name: "Incognito Devs Team",
@@ -25,7 +25,6 @@ func main() {
 		Copyright: "This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any " +
 			"commercial usages should be acknowledged by the Incognito Devs Team.",
 	}
-	app.EnableBashCompletion = true
 
 	// set app defaultFlags
 	app.Flags = []cli.Flag{
@@ -302,6 +301,8 @@ func main() {
 
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
+
+	//_ = generateDocsToFile(app, "commands.md") // un-comment this line to generate docs for the app's commands.
 
 	err := app.Run(os.Args)
 	if err != nil {
