@@ -10,7 +10,7 @@ var host string
 
 func initNetWork() error {
 	if host != "" {
-		return initClient(host, host, 1)
+		return initClient(host, host, 2)
 	}
 	switch network {
 	case "mainnet":
