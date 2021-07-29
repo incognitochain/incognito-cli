@@ -28,6 +28,16 @@ const (
 	accessTokenFlag = "accessToken"
 	fromHeightFlag  = "fromHeight"
 	isResetFlag     = "isReset"
+	txHashFlag      = "txHash"
+
+	tokenIDToSellFlag       = "sellTokenID"
+	tokenIDToBuyFlag        = "buyTokenID"
+	sellingAmountFlag       = "sellingAmount"
+	minAcceptableAmountFlag = "minAcceptAmount"
+	tradingFeeFlag          = "tradingFee"
+	pairIDFlag              = "pairId"
+	tokenID1Flag            = "tokenID1"
+	tokenID2Flag            = "tokenID2"
 )
 
 // aliases for defaultFlags
@@ -46,6 +56,7 @@ const (
 	accountCat     = "ACCOUNTS"
 	committeeCat   = "COMMITTEES"
 	transactionCat = "TRANSACTIONS"
+	pDEXCat        = "PDEX"
 )
 
 var client *incclient.IncClient
