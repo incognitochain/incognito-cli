@@ -16,7 +16,7 @@ func main() {
 		Version: "v0.0.2",
 		Description: "A simple CLI application for the Incognito network. With this tool, you can run some basic functions" +
 			" on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens," +
-			" consolidating and converting your UTXOs, etc.",
+			" consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, etc.",
 		Authors: []*cli.Author{
 			{
 				Name: "Incognito Devs Team",
@@ -25,7 +25,6 @@ func main() {
 		Copyright: "This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any " +
 			"commercial usages should be acknowledged by the Incognito Devs Team.",
 	}
-	app.EnableBashCompletion = true
 
 	// set app defaultFlags
 	app.Flags = []cli.Flag{
@@ -207,10 +206,94 @@ func main() {
 		},
 	}
 
+	// pDEX command
+	pDEXCommands := []*cli.Command{
+		{
+			Name:  "pdecheckprice",
+			Usage: "Check the price between two tokenIDs",
+			Description: "This function checks the price of a pair of tokenIds. It must be supplied with the selling amount " +
+				"since the pDEX uses the AMM algorithm.",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[tokenIDToSellFlag],
+				defaultFlags[tokenIDToBuyFlag],
+				defaultFlags[sellingAmountFlag],
+			},
+			Action: pDEXCheckPrice,
+		},
+		{
+			Name:  "pdetrade",
+			Usage: "Create a trade transaction",
+			Description: "This function creates a trade transaction on the pDEX.",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[tokenIDToSellFlag],
+				defaultFlags[tokenIDToBuyFlag],
+				defaultFlags[sellingAmountFlag],
+				defaultFlags[minAcceptableAmountFlag],
+				defaultFlags[tradingFeeFlag],
+			},
+			Action: pDEXTrade,
+		},
+		{
+			Name:  "pdecontribute",
+			Usage: "Create a pDEX contributing transaction",
+			Description: "This function creates a pDEX contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[pairIDFlag],
+				defaultFlags[tokenIDFlag],
+				defaultFlags[amountFlag],
+				defaultFlags[versionFlag],
+			},
+			Action: pDEXContribute,
+		},
+		{
+			Name:  "pdewithdraw",
+			Usage: "Create a pDEX withdrawal transaction",
+			Description: "This function creates a transaction withdrawing an amount of `shared` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[amountFlag],
+				defaultFlags[tokenID1Flag],
+				defaultFlags[tokenID2Flag],
+				defaultFlags[versionFlag],
+			},
+			Action: pDEXWithdraw,
+		},
+		{
+			Name:  "pdeshare",
+			Usage: "Retrieve the share amount of a pDEX pair",
+			Description: "This function returns the share amount of a user within a pDEX pair.",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[addressFlag],
+				defaultFlags[tokenID1Flag],
+				defaultFlags[tokenID2Flag],
+			},
+			Action: pDEXGetShare,
+		},
+		{
+			Name:  "pdetradestatus",
+			Usage: "Get the status of a trade",
+			Description: "This function returns the status of a trade (1: successful, 2: failed). If a `not found` error occurs, " +
+				"it means that the trade has not been acknowledged by the beacon chain. Just wait and check again later.",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: pDEXTradeStatus,
+		},
+	}
+
 	app.Commands = make([]*cli.Command, 0)
 	app.Commands = append(app.Commands, accountCommands...)
 	app.Commands = append(app.Commands, committeeCommands...)
 	app.Commands = append(app.Commands, txCommands...)
+	app.Commands = append(app.Commands, pDEXCommands...)
 
 	for _, command := range app.Commands {
 		buildUsageTextFromCommand(command)
@@ -218,6 +301,8 @@ func main() {
 
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
+
+	//_ = generateDocsToFile(app, "commands.md") // un-comment this line to generate docs for the app's commands.
 
 	err := app.Run(os.Args)
 	if err != nil {

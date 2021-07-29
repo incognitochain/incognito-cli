@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
@@ -46,7 +47,7 @@ var defaultFlags = map[string]cli.Flag{
 	amountFlag: &cli.Uint64Flag{
 		Name:     amountFlag,
 		Aliases:  aliases[amountFlag],
-		Usage:    "the amount being transferred",
+		Usage:    "the amount of the action",
 		Required: true,
 	},
 	feeFlag: &cli.Uint64Flag{
@@ -94,5 +95,50 @@ var defaultFlags = map[string]cli.Flag{
 		Name:  "isReset",
 		Usage: "whether the full-node should reset the cache for this ota key",
 		Value: false,
+	},
+	txHashFlag: &cli.StringFlag{
+		Name:  txHashFlag,
+		Usage: "the transaction hash",
+		Required: true,
+	},
+	tokenIDToSellFlag: &cli.StringFlag{
+		Name:     tokenIDToSellFlag,
+		Usage:    "ID of the token to sell",
+		Required: true,
+	},
+	tokenIDToBuyFlag: &cli.StringFlag{
+		Name:     tokenIDToBuyFlag,
+		Usage:    "ID of the token to buy",
+		Required: true,
+	},
+	sellingAmountFlag: &cli.Uint64Flag{
+		Name:     sellingAmountFlag,
+		Usage:    fmt.Sprintf("the amount of %v wished to sell", tokenIDToSellFlag),
+		Required: true,
+	},
+	minAcceptableAmountFlag: &cli.Uint64Flag{
+		Name:  minAcceptableAmountFlag,
+		Usage: fmt.Sprintf("the minimum acceptable amount of %v wished to receive", tokenIDToBuyFlag),
+		Value: 0,
+	},
+	tradingFeeFlag: &cli.Uint64Flag{
+		Name:  tradingFeeFlag,
+		Usage: "the trading fee (measured in nano PRV)",
+		Value: 0,
+	},
+	pairIDFlag: &cli.StringFlag{
+		Name:  pairIDFlag,
+		Usage: "the ID of the contributing pair (see https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md)",
+		Required: true,
+	},
+	tokenID1Flag: &cli.StringFlag{
+		Name:  tokenID1Flag,
+		Usage: "ID of the first token",
+		Required: true,
+	},
+	tokenID2Flag: &cli.StringFlag{
+		Name:  tokenID2Flag,
+		Usage: "ID of the second token",
+		Value: common.PRVIDStr,
 	},
 }
