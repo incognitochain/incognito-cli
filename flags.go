@@ -59,7 +59,7 @@ var defaultFlags = map[string]cli.Flag{
 		Name:    versionFlag,
 		Aliases: aliases[versionFlag],
 		Usage:   "version of the transaction (1 or 2)",
-		Value:   1,
+		Value:   2,
 	},
 	numThreadsFlag: &cli.IntFlag{
 		Name:  numThreadsFlag,
