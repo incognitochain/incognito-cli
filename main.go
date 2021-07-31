@@ -30,6 +30,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		defaultFlags[networkFlag],
 		defaultFlags[hostFlag],
+		defaultFlags[clientVersionFlag],
 	}
 
 	// all account-related commands

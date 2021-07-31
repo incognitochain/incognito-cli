@@ -76,6 +76,7 @@ COMMANDS:
      send     Send an amount of PRV or token from one wallet to another wallet.
 
 GLOBAL OPTIONS:
+   --clientVersion value         version of the incclient (default: 2)
    --host value                  custom full-node host
    --network value, --net value  network environment (mainnet, testnet, testnet1, devnet, local, custom) (default: "mainnet")
    --help, -h                    show help (default: false)
@@ -150,7 +151,7 @@ DESCRIPTION:
 OPTIONS:
    --privateKey value, --prvKey value  a base58-encoded private key
    --tokenID value                     ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --version value, -v value           version of the transaction (1 or 2) (default: 1)
+   --version value, -v value           version of the transaction (1 or 2) (default: 2)
    --numThreads value                  number of threads used in this action (default: 4)
    --enableLog                         enable log for this action (default: false)
    --logFile value                     location of the log file (default: "os.Stdout")
@@ -311,7 +312,7 @@ OPTIONS:
    --privateKey value, --prvKey value  a base58-encoded private key
    --address value, --addr value       the payment address of a candidate (default: the payment address of the privateKey)
    --tokenID value                     ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --version value, -v value           version of the transaction (1 or 2) (default: 1)
+   --version value, -v value           version of the transaction (1 or 2) (default: 2)
    
 ```
 
@@ -364,7 +365,7 @@ OPTIONS:
    --pairId value                      the ID of the contributing pair (see https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md)
    --tokenID value                     ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --amount value, --amt value         the amount of the action (default: 0)
-   --version value, -v value           version of the transaction (1 or 2) (default: 1)
+   --version value, -v value           version of the transaction (1 or 2) (default: 2)
    
 ```
 
@@ -467,7 +468,7 @@ OPTIONS:
    --amount value, --amt value         the amount of the action (default: 0)
    --tokenID1 value                    ID of the first token
    --tokenID2 value                    ID of the second token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --version value, -v value           version of the transaction (1 or 2) (default: 1)
+   --version value, -v value           version of the transaction (1 or 2) (default: 2)
    
 ```
 
@@ -523,7 +524,7 @@ OPTIONS:
    --amount value, --amt value         the amount of the action (default: 0)
    --tokenID value                     ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --fee value                         the PRV amount for paying the transaction fee (default: 100)
-   --version value, -v value           version of the transaction (1 or 2) (default: 1)
+   --version value, -v value           version of the transaction (1 or 2) (default: 2)
    
 ```
 

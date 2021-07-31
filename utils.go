@@ -7,10 +7,11 @@ import (
 
 var network string
 var host string
+var clientVersion int
 
 func initNetWork() error {
 	if host != "" {
-		return initClient(host, host, 1)
+		return initClient(host, "", clientVersion)
 	}
 	switch network {
 	case "mainnet":
