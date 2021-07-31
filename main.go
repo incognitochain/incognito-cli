@@ -205,6 +205,20 @@ func main() {
 			},
 			Action: convertUTXOs,
 		},
+		{
+			Name:  "convertall",
+			Usage: "Convert UTXOs of an account for all assets.",
+			Description: "This function helps convert UTXOs v1 of a user to UTXO v2 for all assets. " +
+				"It will automatically check for all UTXOs v1 of all tokens and convert them. " +
+				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
+			Category: transactionCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[numThreadsFlag],
+				defaultFlags[logFileFlag],
+			},
+			Action: convertAll,
+		},
 	}
 
 	// pDEX command
