@@ -10,7 +10,7 @@ require (
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/incognitochain/bridge-eth v0.0.0-20210429050541-edfe3725b21a
-	github.com/incognitochain/go-incognito-sdk-v2 v0.0.0-20210731175816-9f9fa7fcbf99
+	github.com/incognitochain/go-incognito-sdk-v2 v0.0.0-20210801135604-8f7d1f5febdc
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca // indirect
