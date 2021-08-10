@@ -153,4 +153,9 @@ var defaultFlags = map[string]cli.Flag{
 		Usage: "ID of the second token",
 		Value: common.PRVIDStr,
 	},
+	numShardsFlags: &cli.IntFlag{
+		Name:        numShardsFlags,
+		Usage:       "the number of shard",
+		Value:       8,
+	},
 }

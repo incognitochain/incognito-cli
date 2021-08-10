@@ -122,6 +122,9 @@ func main() {
 			Usage:       "Generate a new Incognito account.",
 			Description: "This function helps generate a new mnemonic phrase and its Incognito account.",
 			Category:    accountCat,
+			Flags: []cli.Flag{
+				defaultFlags[numShardsFlags],
+			},
 			Action:      genKeySet,
 		},
 		{

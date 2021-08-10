@@ -40,7 +40,7 @@ NAME:
    incognito-cli - A simple CLI application for the Incognito network
 
 USAGE:
-   incognito-cli [global options] command [command options] [arguments...]
+   cli [global options] command [command options] [arguments...]
 
 VERSION:
    v0.0.2
@@ -72,9 +72,10 @@ COMMANDS:
      pdetradestatus  Get the status of a trade
      pdewithdraw     Create a pDEX withdrawal transaction
    TRANSACTIONS:
-     convert     Convert UTXOs of an account w.r.t a tokenID.
-     convertall  Convert UTXOs of an account for all assets.
-     send        Send an amount of PRV or token from one wallet to another wallet.
+     checkreceiver  Check if an OTA key is a receiver of a transaction.
+     convert        Convert UTXOs of an account w.r.t a tokenID.
+     convertall     Convert UTXOs of an account for all assets.
+     send           Send an amount of PRV or token from one wallet to another wallet.
 
 GLOBAL OPTIONS:
    --clientVersion value         version of the incclient (default: 2)
@@ -107,6 +108,7 @@ COPYRIGHT:
   * [`pdetradestatus`](#pdetradestatus)
   * [`pdewithdraw`](#pdewithdraw)
 * [`TRANSACTIONS`](#transactions)
+  * [`checkreceiver`](#checkreceiver)
   * [`convert`](#convert)
   * [`convertall`](#convertall)
   * [`send`](#send)
@@ -116,7 +118,7 @@ Check the balance of an account.
 ```shell
 $ incognito-cli help balance
 NAME:
-   incognito-cli balance - Check the balance of an account.
+   cli balance - Check the balance of an account.
 
 USAGE:
    balance --privateKey PRIVATE_KEY [--tokenID TOKEN_ID]
@@ -137,7 +139,7 @@ This function helps consolidate UTXOs of an account. It consolidates a version o
 ```shell
 $ incognito-cli help consolidate
 NAME:
-   incognito-cli consolidate - Consolidate UTXOs of an account.
+   cli consolidate - Consolidate UTXOs of an account.
 
 USAGE:
    consolidate --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--version VERSION] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE]
@@ -165,10 +167,10 @@ This function helps generate a new mnemonic phrase and its Incognito account.
 ```shell
 $ incognito-cli help generateaccount
 NAME:
-   incognito-cli generateaccount - Generate a new Incognito account.
+   cli generateaccount - Generate a new Incognito account.
 
 USAGE:
-   generateaccount
+   generateaccount [--numShards NUM_SHARDS]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -177,6 +179,10 @@ CATEGORY:
 
 DESCRIPTION:
    This function helps generate a new mnemonic phrase and its Incognito account.
+
+OPTIONS:
+   --numShards value  the number of shard (default: 8)
+   
 ```
 
 ### history
@@ -184,7 +190,7 @@ This function helps retrieve the history of an account w.r.t a tokenID. Please n
 ```shell
 $ incognito-cli help history
 NAME:
-   incognito-cli history - Retrieve the history of an account.
+   cli history - Retrieve the history of an account.
 
 USAGE:
    history --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE] [--csvFile CSV_FILE]
@@ -212,7 +218,7 @@ Print all related-keys of a private key.
 ```shell
 $ incognito-cli help keyinfo
 NAME:
-   incognito-cli keyinfo - Print all related-keys of a private key.
+   cli keyinfo - Print all related-keys of a private key.
 
 USAGE:
    keyinfo --privateKey PRIVATE_KEY
@@ -232,7 +238,7 @@ This function submits an otaKey to the full-node to use the full-node's cache. I
 ```shell
 $ incognito-cli help submitkey
 NAME:
-   incognito-cli submitkey - Submit an ota key to the full-node.
+   cli submitkey - Submit an ota key to the full-node.
 
 USAGE:
    submitkey --otaKey OTA_KEY [--accessToken ACCESS_TOKEN] [--fromHeight FROM_HEIGHT] [--isReset IS_RESET]
@@ -258,7 +264,7 @@ Print the UTXOs of an account.
 ```shell
 $ incognito-cli help utxo
 NAME:
-   incognito-cli utxo - Print the UTXOs of an account.
+   cli utxo - Print the UTXOs of an account.
 
 USAGE:
    utxo --privateKey PRIVATE_KEY [--tokenID TOKEN_ID]
@@ -280,7 +286,7 @@ Get all rewards of a payment address.
 ```shell
 $ incognito-cli help checkrewards
 NAME:
-   incognito-cli checkrewards - Get all rewards of a payment address.
+   cli checkrewards - Get all rewards of a payment address.
 
 USAGE:
    checkrewards --address ADDRESS
@@ -300,7 +306,7 @@ Withdraw the reward of a privateKey w.r.t to a tokenID.
 ```shell
 $ incognito-cli help withdrawreward
 NAME:
-   incognito-cli withdrawreward - Withdraw the reward of a privateKey w.r.t to a tokenID.
+   cli withdrawreward - Withdraw the reward of a privateKey w.r.t to a tokenID.
 
 USAGE:
    withdrawreward --privateKey PRIVATE_KEY [--address ADDRESS] [--tokenID TOKEN_ID] [--version VERSION]
@@ -324,7 +330,7 @@ This function checks the price of a pair of tokenIds. It must be supplied with t
 ```shell
 $ incognito-cli help pdecheckprice
 NAME:
-   incognito-cli pdecheckprice - Check the price between two tokenIDs
+   cli pdecheckprice - Check the price between two tokenIDs
 
 USAGE:
    pdecheckprice --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT
@@ -349,7 +355,7 @@ This function creates a pDEX contributing transaction. See more about this trans
 ```shell
 $ incognito-cli help pdecontribute
 NAME:
-   incognito-cli pdecontribute - Create a pDEX contributing transaction
+   cli pdecontribute - Create a pDEX contributing transaction
 
 USAGE:
    pdecontribute --privateKey PRIVATE_KEY --pairId PAIR_ID [--tokenID TOKEN_ID] --amount AMOUNT [--version VERSION]
@@ -376,7 +382,7 @@ This function returns the share amount of a user within a pDEX pair.
 ```shell
 $ incognito-cli help pdeshare
 NAME:
-   incognito-cli pdeshare - Retrieve the share amount of a pDEX pair
+   cli pdeshare - Retrieve the share amount of a pDEX pair
 
 USAGE:
    pdeshare --address ADDRESS --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2]
@@ -401,7 +407,7 @@ This function creates a trade transaction on the pDEX.
 ```shell
 $ incognito-cli help pdetrade
 NAME:
-   incognito-cli pdetrade - Create a trade transaction
+   cli pdetrade - Create a trade transaction
 
 USAGE:
    pdetrade --privateKey PRIVATE_KEY --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT [--minAcceptAmount MIN_ACCEPT_AMOUNT] [--tradingFee TRADING_FEE]
@@ -429,7 +435,7 @@ This function returns the status of a trade (1: successful, 2: failed). If a `no
 ```shell
 $ incognito-cli help pdetradestatus
 NAME:
-   incognito-cli pdetradestatus - Get the status of a trade
+   cli pdetradestatus - Get the status of a trade
 
 USAGE:
    pdetradestatus --txHash TX_HASH
@@ -452,7 +458,7 @@ This function creates a transaction withdrawing an amount of `shared` from the p
 ```shell
 $ incognito-cli help pdewithdraw
 NAME:
-   incognito-cli pdewithdraw - Create a pDEX withdrawal transaction
+   cli pdewithdraw - Create a pDEX withdrawal transaction
 
 USAGE:
    pdewithdraw --privateKey PRIVATE_KEY --amount AMOUNT --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2] [--version VERSION]
@@ -475,12 +481,37 @@ OPTIONS:
 ```
 
 ## TRANSACTIONS
+### checkreceiver
+This function checks if an OTA key is a receiver of a transaction. If so, it will try to decrypt the received outputs and return the receiving info.
+```shell
+$ incognito-cli help checkreceiver
+NAME:
+   cli checkreceiver - Check if an OTA key is a receiver of a transaction.
+
+USAGE:
+   checkreceiver --txHash TX_HASH --otaKey OTA_KEY [--readonlyKey READONLY_KEY]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   TRANSACTIONS
+
+DESCRIPTION:
+   This function checks if an OTA key is a receiver of a transaction. If so, it will try to decrypt the received outputs and return the receiving info.
+
+OPTIONS:
+   --txHash value                   the transaction hash
+   --otaKey value, --ota value      a base58-encoded ota key
+   --readonlyKey value, --ro value  a base58-encoded read-only key
+   
+```
+
 ### convert
 This function helps convert UTXOs v1 of a user to UTXO v2 w.r.t a tokenID. Please note that this process is time-consuming and requires a considerable amount of CPU.
 ```shell
 $ incognito-cli help convert
 NAME:
-   incognito-cli convert - Convert UTXOs of an account w.r.t a tokenID.
+   cli convert - Convert UTXOs of an account w.r.t a tokenID.
 
 USAGE:
    convert --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE]
@@ -507,7 +538,7 @@ This function helps convert UTXOs v1 of a user to UTXO v2 for all assets. It wil
 ```shell
 $ incognito-cli help convertall
 NAME:
-   incognito-cli convertall - Convert UTXOs of an account for all assets.
+   cli convertall - Convert UTXOs of an account for all assets.
 
 USAGE:
    convertall --privateKey PRIVATE_KEY [--numThreads NUM_THREADS] [--logFile LOG_FILE]
@@ -532,7 +563,7 @@ This function sends an amount of PRV or token from one wallet to another wallet.
 ```shell
 $ incognito-cli help send
 NAME:
-   incognito-cli send - Send an amount of PRV or token from one wallet to another wallet.
+   cli send - Send an amount of PRV or token from one wallet to another wallet.
 
 USAGE:
    send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--fee FEE] [--version VERSION]

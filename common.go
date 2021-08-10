@@ -40,6 +40,8 @@ const (
 	pairIDFlag              = "pairId"
 	tokenID1Flag            = "tokenID1"
 	tokenID2Flag            = "tokenID2"
+
+	numShardsFlags			= "numShards"
 )
 
 // aliases for defaultFlags
