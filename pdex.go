@@ -100,12 +100,12 @@ func pDEXContribute(c *cli.Context) error {
 
 	tokenId := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenId) {
-		return fmt.Errorf("%v is invalid", tokenId)
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
 
 	amount := c.Uint64(amountFlag)
 	if amount == 0 {
-		return fmt.Errorf("%v cannot be zero", amount)
+		return fmt.Errorf("%v cannot be zero", amountFlag)
 	}
 
 	version := c.Int(versionFlag)
@@ -153,7 +153,7 @@ func pDEXWithdraw(c *cli.Context) error {
 
 	amount := c.Uint64(amountFlag)
 	if amount == 0 {
-		return fmt.Errorf("%v cannot be zero", amount)
+		return fmt.Errorf("%v cannot be zero", amountFlag)
 	}
 
 	version := c.Int(versionFlag)
@@ -186,7 +186,7 @@ func pDEXGetShare(c *cli.Context) error {
 
 	address := c.String(addressFlag)
 	if !isValidAddress(address) {
-		return fmt.Errorf("%v is invalid", address)
+		return fmt.Errorf("%v is invalid", addressFlag)
 	}
 
 	tokenId1 := c.String(tokenID1Flag)
@@ -225,4 +225,3 @@ func pDEXTradeStatus(c *cli.Context) error {
 
 	return nil
 }
-

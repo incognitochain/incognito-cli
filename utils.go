@@ -11,6 +11,7 @@ var clientVersion int
 
 func initNetWork() error {
 	if host != "" {
+		fmt.Printf("host: %v\n", host)
 		return initClient(host, "", clientVersion)
 	}
 	switch network {

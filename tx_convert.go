@@ -125,8 +125,8 @@ func convertAll(c *cli.Context) error {
 	incclient.Logger.Println("Checking v1 UTXOs of these token...")
 	listTokensV1 := make(map[string]int)
 	numChecked := 0
-	for tokenIDStr, _ := range listTokens {
-		if numChecked % 50 == 0 {
+	for tokenIDStr := range listTokens {
+		if numChecked%50 == 0 {
 			incclient.Logger.Printf("[CONVERTALL] numChecked: %v, timeElapsed: %v\n", numChecked, time.Since(start).Seconds())
 		}
 		utxoList, _, err := client.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
@@ -147,7 +147,7 @@ func convertAll(c *cli.Context) error {
 
 	incclient.Logger.Printf("There are %v tokens with UTXOs v1\n", len(listTokensV1))
 	numConverted := 0
-	for tokenIDStr, _ := range listTokensV1 {
+	for tokenIDStr := range listTokensV1 {
 		incclient.Logger.Printf("[%v] CONVERTING TOKEN %v\n", numConverted, tokenIDStr)
 		txList, err = client.ConvertAllUTXOs(privateKey, tokenIDStr, numThreads)
 		if err != nil {

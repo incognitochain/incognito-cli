@@ -68,3 +68,47 @@ func send(c *cli.Context) error {
 
 	return nil
 }
+
+// checkReceiver if a user is a receiver of a transaction.
+func checkReceiver(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	txHash := c.String(txHashFlag)
+	if txHash == "" {
+		return fmt.Errorf("%v is invalid", txHashFlag)
+	}
+
+	otaKey := c.String(otaKeyFlag)
+	if !isValidOtaKey(otaKey) {
+		return fmt.Errorf("%v is invalid", otaKeyFlag)
+	}
+
+	readonlyKey := c.String(readonlyKeyFlag)
+	if readonlyKey != "" && !isValidReadonlyKey(otaKey) {
+		return fmt.Errorf("%v is invalid", readonlyKeyFlag)
+	}
+
+	var received bool
+	var res map[string]uint64
+	if readonlyKey == "" {
+		received, res, err = client.GetReceivingInfo(txHash, otaKey)
+	} else {
+		received, res, err = client.GetReceivingInfo(txHash, otaKey, readonlyKey)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if !received {
+		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKeyFlag, txHash)
+	} else {
+		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKeyFlag, txHash)
+		fmt.Printf("Receiving info: %v\n", res)
+	}
+
+	return nil
+}

@@ -219,6 +219,19 @@ func main() {
 			},
 			Action: convertAll,
 		},
+		{
+			Name:  "checkreceiver",
+			Usage: "Check if an OTA key is a receiver of a transaction.",
+			Description: "This function checks if an OTA key is a receiver of a transaction. If so, it will try to decrypt " +
+				"the received outputs and return the receiving info.",
+			Category: transactionCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+				defaultFlags[otaKeyFlag],
+				defaultFlags[readonlyKeyFlag],
+			},
+			Action: checkReceiver,
+		},
 	}
 
 	// pDEX command
@@ -237,10 +250,10 @@ func main() {
 			Action: pDEXCheckPrice,
 		},
 		{
-			Name:  "pdetrade",
-			Usage: "Create a trade transaction",
+			Name:        "pdetrade",
+			Usage:       "Create a trade transaction",
 			Description: "This function creates a trade transaction on the pDEX.",
-			Category: pDEXCat,
+			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[tokenIDToSellFlag],
@@ -252,10 +265,10 @@ func main() {
 			Action: pDEXTrade,
 		},
 		{
-			Name:  "pdecontribute",
-			Usage: "Create a pDEX contributing transaction",
+			Name:        "pdecontribute",
+			Usage:       "Create a pDEX contributing transaction",
 			Description: "This function creates a pDEX contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md",
-			Category: pDEXCat,
+			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[pairIDFlag],
@@ -266,10 +279,10 @@ func main() {
 			Action: pDEXContribute,
 		},
 		{
-			Name:  "pdewithdraw",
-			Usage: "Create a pDEX withdrawal transaction",
+			Name:        "pdewithdraw",
+			Usage:       "Create a pDEX withdrawal transaction",
 			Description: "This function creates a transaction withdrawing an amount of `shared` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
-			Category: pDEXCat,
+			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[amountFlag],
@@ -280,10 +293,10 @@ func main() {
 			Action: pDEXWithdraw,
 		},
 		{
-			Name:  "pdeshare",
-			Usage: "Retrieve the share amount of a pDEX pair",
+			Name:        "pdeshare",
+			Usage:       "Retrieve the share amount of a pDEX pair",
 			Description: "This function returns the share amount of a user within a pDEX pair.",
-			Category: pDEXCat,
+			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[addressFlag],
 				defaultFlags[tokenID1Flag],

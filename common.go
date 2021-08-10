@@ -18,6 +18,7 @@ const (
 	privateKeyFlag    = "privateKey"
 	addressFlag       = "address"
 	otaKeyFlag        = "otaKey"
+	readonlyKeyFlag   = "readonlyKey"
 	tokenIDFlag       = "tokenID"
 	amountFlag        = "amount"
 	feeFlag           = "fee"
@@ -43,13 +44,14 @@ const (
 
 // aliases for defaultFlags
 var aliases = map[string][]string{
-	networkFlag:    {"net"},
-	privateKeyFlag: {"prvKey"},
-	otaKeyFlag:     {"ota"},
-	addressFlag:    {"addr"},
-	amountFlag:     {"amt"},
-	versionFlag:    {"v"},
-	csvFileFlag:    {"csv"},
+	networkFlag:     {"net"},
+	privateKeyFlag:  {"prvKey"},
+	otaKeyFlag:      {"ota"},
+	readonlyKeyFlag: {"ro"},
+	addressFlag:     {"addr"},
+	amountFlag:      {"amt"},
+	versionFlag:     {"v"},
+	csvFileFlag:     {"csv"},
 }
 
 // category constants
@@ -95,6 +97,46 @@ func isValidAddress(address string) bool {
 		return false
 	}
 	if kWallet.KeySet.PaymentAddress.Tk == nil {
+		return false
+	}
+
+	return true
+}
+
+// isValidOtaKey checks if a base58-encoded ota key is valid or not.
+func isValidOtaKey(otaKeyStr string) bool {
+	if otaKeyStr == "" {
+		return false
+	}
+
+	kWallet, err := wallet.Base58CheckDeserialize(otaKeyStr)
+	if err != nil {
+		return false
+	}
+
+	otaKey := kWallet.KeySet.OTAKey
+
+	if otaKey.GetPublicSpend() == nil || otaKey.GetOTASecretKey() == nil {
+		return false
+	}
+
+	return true
+}
+
+// isValidReadonlyKey checks if a base58-encoded read-only key is valid or not.
+func isValidReadonlyKey(readonlyKeyStr string) bool {
+	if readonlyKeyStr == "" {
+		return false
+	}
+
+	kWallet, err := wallet.Base58CheckDeserialize(readonlyKeyStr)
+	if err != nil {
+		return false
+	}
+
+	readonlyKey := kWallet.KeySet.ReadonlyKey
+
+	if readonlyKey.GetPublicSpend() == nil || readonlyKey.GetPrivateView() == nil {
 		return false
 	}
 

@@ -22,9 +22,9 @@ var defaultFlags = map[string]cli.Flag{
 		Destination: &host,
 	},
 	clientVersionFlag: &cli.IntFlag{
-		Name:  clientVersionFlag,
-		Usage: "version of the incclient",
-		Value: 2,
+		Name:        clientVersionFlag,
+		Usage:       "version of the incclient",
+		Value:       2,
 		Destination: &clientVersion,
 	},
 	privateKeyFlag: &cli.StringFlag{
@@ -44,6 +44,12 @@ var defaultFlags = map[string]cli.Flag{
 		Aliases:  aliases[otaKeyFlag],
 		Usage:    "a base58-encoded ota key",
 		Required: true,
+	},
+	readonlyKeyFlag: &cli.StringFlag{
+		Name:    readonlyKeyFlag,
+		Aliases: aliases[readonlyKeyFlag],
+		Usage:   "a base58-encoded read-only key",
+		Value:   "",
 	},
 	tokenIDFlag: &cli.StringFlag{
 		Name:  tokenIDFlag,
