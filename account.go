@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/bridge-eth/common/base58"
+	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
@@ -218,11 +219,17 @@ func getHistory(c *cli.Context) error {
 	return nil
 }
 
-func genKeySet(_ *cli.Context) error {
+func genKeySet(c *cli.Context) error {
 	w, mnemonic, err := wallet.NewMasterKey()
 	if err != nil {
 		return err
 	}
+
+	numShards := c.Int(numShardsFlags)
+	if numShards == 0 {
+		return fmt.Errorf("%v is invalid", numShardsFlags)
+	}
+	common.MaxShardNumber = numShards
 
 	privateKey := w.Base58CheckSerialize(wallet.PrivateKeyType)
 	info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
