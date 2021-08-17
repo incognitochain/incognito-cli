@@ -40,7 +40,7 @@ NAME:
    incognito-cli - A simple CLI application for the Incognito network
 
 USAGE:
-   cli [global options] command [command options] [arguments...]
+   incognito-cli [global options] command [command options] [arguments...]
 
 VERSION:
    v0.0.2
@@ -79,6 +79,7 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    --clientVersion value         version of the incclient (default: 2)
+   --debug value                 whether to enable the debug mode (0 - disabled, != 0 - enabled) (default: 1)
    --host value                  custom full-node host
    --network value, --net value  network environment (mainnet, testnet, testnet1, devnet, local, custom) (default: "mainnet")
    --help, -h                    show help (default: false)
@@ -118,7 +119,7 @@ Check the balance of an account.
 ```shell
 $ incognito-cli help balance
 NAME:
-   cli balance - Check the balance of an account.
+   incognito-cli balance - Check the balance of an account.
 
 USAGE:
    balance --privateKey PRIVATE_KEY [--tokenID TOKEN_ID]
@@ -139,7 +140,7 @@ This function helps consolidate UTXOs of an account. It consolidates a version o
 ```shell
 $ incognito-cli help consolidate
 NAME:
-   cli consolidate - Consolidate UTXOs of an account.
+   incognito-cli consolidate - Consolidate UTXOs of an account.
 
 USAGE:
    consolidate --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--version VERSION] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE]
@@ -167,7 +168,7 @@ This function helps generate a new mnemonic phrase and its Incognito account.
 ```shell
 $ incognito-cli help generateaccount
 NAME:
-   cli generateaccount - Generate a new Incognito account.
+   incognito-cli generateaccount - Generate a new Incognito account.
 
 USAGE:
    generateaccount [--numShards NUM_SHARDS]
@@ -190,7 +191,7 @@ This function helps retrieve the history of an account w.r.t a tokenID. Please n
 ```shell
 $ incognito-cli help history
 NAME:
-   cli history - Retrieve the history of an account.
+   incognito-cli history - Retrieve the history of an account.
 
 USAGE:
    history --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE] [--csvFile CSV_FILE]
@@ -218,7 +219,7 @@ Print all related-keys of a private key.
 ```shell
 $ incognito-cli help keyinfo
 NAME:
-   cli keyinfo - Print all related-keys of a private key.
+   incognito-cli keyinfo - Print all related-keys of a private key.
 
 USAGE:
    keyinfo --privateKey PRIVATE_KEY
@@ -238,7 +239,7 @@ This function submits an otaKey to the full-node to use the full-node's cache. I
 ```shell
 $ incognito-cli help submitkey
 NAME:
-   cli submitkey - Submit an ota key to the full-node.
+   incognito-cli submitkey - Submit an ota key to the full-node.
 
 USAGE:
    submitkey --otaKey OTA_KEY [--accessToken ACCESS_TOKEN] [--fromHeight FROM_HEIGHT] [--isReset IS_RESET]
@@ -264,7 +265,7 @@ Print the UTXOs of an account.
 ```shell
 $ incognito-cli help utxo
 NAME:
-   cli utxo - Print the UTXOs of an account.
+   incognito-cli utxo - Print the UTXOs of an account.
 
 USAGE:
    utxo --privateKey PRIVATE_KEY [--tokenID TOKEN_ID]
@@ -286,7 +287,7 @@ Get all rewards of a payment address.
 ```shell
 $ incognito-cli help checkrewards
 NAME:
-   cli checkrewards - Get all rewards of a payment address.
+   incognito-cli checkrewards - Get all rewards of a payment address.
 
 USAGE:
    checkrewards --address ADDRESS
@@ -306,7 +307,7 @@ Withdraw the reward of a privateKey w.r.t to a tokenID.
 ```shell
 $ incognito-cli help withdrawreward
 NAME:
-   cli withdrawreward - Withdraw the reward of a privateKey w.r.t to a tokenID.
+   incognito-cli withdrawreward - Withdraw the reward of a privateKey w.r.t to a tokenID.
 
 USAGE:
    withdrawreward --privateKey PRIVATE_KEY [--address ADDRESS] [--tokenID TOKEN_ID] [--version VERSION]
@@ -330,7 +331,7 @@ This function checks the price of a pair of tokenIds. It must be supplied with t
 ```shell
 $ incognito-cli help pdecheckprice
 NAME:
-   cli pdecheckprice - Check the price between two tokenIDs
+   incognito-cli pdecheckprice - Check the price between two tokenIDs
 
 USAGE:
    pdecheckprice --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT
@@ -355,7 +356,7 @@ This function creates a pDEX contributing transaction. See more about this trans
 ```shell
 $ incognito-cli help pdecontribute
 NAME:
-   cli pdecontribute - Create a pDEX contributing transaction
+   incognito-cli pdecontribute - Create a pDEX contributing transaction
 
 USAGE:
    pdecontribute --privateKey PRIVATE_KEY --pairId PAIR_ID [--tokenID TOKEN_ID] --amount AMOUNT [--version VERSION]
@@ -382,7 +383,7 @@ This function returns the share amount of a user within a pDEX pair.
 ```shell
 $ incognito-cli help pdeshare
 NAME:
-   cli pdeshare - Retrieve the share amount of a pDEX pair
+   incognito-cli pdeshare - Retrieve the share amount of a pDEX pair
 
 USAGE:
    pdeshare --address ADDRESS --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2]
@@ -407,7 +408,7 @@ This function creates a trade transaction on the pDEX.
 ```shell
 $ incognito-cli help pdetrade
 NAME:
-   cli pdetrade - Create a trade transaction
+   incognito-cli pdetrade - Create a trade transaction
 
 USAGE:
    pdetrade --privateKey PRIVATE_KEY --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT [--minAcceptAmount MIN_ACCEPT_AMOUNT] [--tradingFee TRADING_FEE]
@@ -435,7 +436,7 @@ This function returns the status of a trade (1: successful, 2: failed). If a `no
 ```shell
 $ incognito-cli help pdetradestatus
 NAME:
-   cli pdetradestatus - Get the status of a trade
+   incognito-cli pdetradestatus - Get the status of a trade
 
 USAGE:
    pdetradestatus --txHash TX_HASH
@@ -458,7 +459,7 @@ This function creates a transaction withdrawing an amount of `shared` from the p
 ```shell
 $ incognito-cli help pdewithdraw
 NAME:
-   cli pdewithdraw - Create a pDEX withdrawal transaction
+   incognito-cli pdewithdraw - Create a pDEX withdrawal transaction
 
 USAGE:
    pdewithdraw --privateKey PRIVATE_KEY --amount AMOUNT --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2] [--version VERSION]
@@ -486,7 +487,7 @@ This function checks if an OTA key is a receiver of a transaction. If so, it wil
 ```shell
 $ incognito-cli help checkreceiver
 NAME:
-   cli checkreceiver - Check if an OTA key is a receiver of a transaction.
+   incognito-cli checkreceiver - Check if an OTA key is a receiver of a transaction.
 
 USAGE:
    checkreceiver --txHash TX_HASH --otaKey OTA_KEY [--readonlyKey READONLY_KEY]
@@ -511,7 +512,7 @@ This function helps convert UTXOs v1 of a user to UTXO v2 w.r.t a tokenID. Pleas
 ```shell
 $ incognito-cli help convert
 NAME:
-   cli convert - Convert UTXOs of an account w.r.t a tokenID.
+   incognito-cli convert - Convert UTXOs of an account w.r.t a tokenID.
 
 USAGE:
    convert --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE]
@@ -538,7 +539,7 @@ This function helps convert UTXOs v1 of a user to UTXO v2 for all assets. It wil
 ```shell
 $ incognito-cli help convertall
 NAME:
-   cli convertall - Convert UTXOs of an account for all assets.
+   incognito-cli convertall - Convert UTXOs of an account for all assets.
 
 USAGE:
    convertall --privateKey PRIVATE_KEY [--numThreads NUM_THREADS] [--logFile LOG_FILE]
@@ -563,7 +564,7 @@ This function sends an amount of PRV or token from one wallet to another wallet.
 ```shell
 $ incognito-cli help send
 NAME:
-   cli send - Send an amount of PRV or token from one wallet to another wallet.
+   incognito-cli send - Send an amount of PRV or token from one wallet to another wallet.
 
 USAGE:
    send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--fee FEE] [--version VERSION]
