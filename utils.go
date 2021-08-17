@@ -8,11 +8,15 @@ import (
 var network string
 var host string
 var clientVersion int
+var debug int
 
 func initNetWork() error {
+	if debug != 0 {
+		incclient.Logger.IsEnable = true
+	}
 	if host != "" {
 		fmt.Printf("host: %v\n", host)
-		return initClientWithCache(host, "", clientVersion)
+		return initClient(host, "", clientVersion)
 	}
 	switch network {
 	case "mainnet":
@@ -65,7 +69,7 @@ func initLocal(port string) error {
 
 	return nil
 }
-func initClientWithCache(rpcHost, ethHost string, version int) error {
+func initClient(rpcHost, ethHost string, version int) error {
 	var err error
 	client, err = incclient.NewIncClientWithCache(rpcHost, ethHost, version)
 

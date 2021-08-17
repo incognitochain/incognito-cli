@@ -15,6 +15,7 @@ const (
 	networkFlag       = "network"
 	hostFlag          = "host"
 	clientVersionFlag = "clientVersion"
+	debugFlag         = "enableDebug"
 	privateKeyFlag    = "privateKey"
 	addressFlag       = "address"
 	otaKeyFlag        = "otaKey"
@@ -41,7 +42,7 @@ const (
 	tokenID1Flag            = "tokenID1"
 	tokenID2Flag            = "tokenID2"
 
-	numShardsFlags			= "numShards"
+	numShardsFlags = "numShards"
 )
 
 // aliases for defaultFlags

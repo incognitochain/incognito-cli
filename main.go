@@ -31,6 +31,7 @@ func main() {
 		defaultFlags[networkFlag],
 		defaultFlags[hostFlag],
 		defaultFlags[clientVersionFlag],
+		defaultFlags[debugFlag],
 	}
 
 	// all account-related commands
