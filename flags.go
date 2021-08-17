@@ -29,7 +29,7 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	debugFlag: &cli.IntFlag{
 		Name:  "debug",
-		Usage: "whether to enable the debug mode (0 - disabled, != 0 - enabled)",
+		Usage: "whether to enable the debug mode (0 - disabled, <> 0 - enabled)",
 		Value: 1,
 		Destination: &debug,
 	},

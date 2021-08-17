@@ -79,7 +79,7 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    --clientVersion value         version of the incclient (default: 2)
-   --debug value                 whether to enable the debug mode (0 - disabled, != 0 - enabled) (default: 1)
+   --debug value                 whether to enable the debug mode (0 - disabled, <> 0 - enabled) (default: 1)
    --host value                  custom full-node host
    --network value, --net value  network environment (mainnet, testnet, testnet1, devnet, local, custom) (default: "mainnet")
    --help, -h                    show help (default: false)
