@@ -12,7 +12,7 @@ var clientVersion int
 func initNetWork() error {
 	if host != "" {
 		fmt.Printf("host: %v\n", host)
-		return initClient(host, "", clientVersion)
+		return initClientWithCache(host, "", clientVersion)
 	}
 	switch network {
 	case "mainnet":
@@ -31,19 +31,19 @@ func initNetWork() error {
 }
 func initMainNet() error {
 	var err error
-	client, err = incclient.NewMainNetClient()
+	client, err = incclient.NewMainNetClientWithCache()
 
 	return err
 }
 func initTestNet() error {
 	var err error
-	client, err = incclient.NewTestNetClient()
+	client, err = incclient.NewTestNetClientWithCache()
 
 	return err
 }
 func initTestNet1() error {
 	var err error
-	client, err = incclient.NewTestNet1Client()
+	client, err = incclient.NewTestNet1ClientWithCache()
 
 	return err
 }
@@ -58,16 +58,16 @@ func initDevNet() error {
 }
 func initLocal(port string) error {
 	var err error
-	client, err = incclient.NewLocalClient(port)
+	client, err = incclient.NewLocalClientWithCache()
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-func initClient(rpcHost, ethHost string, version int) error {
+func initClientWithCache(rpcHost, ethHost string, version int) error {
 	var err error
-	client, err = incclient.NewIncClient(rpcHost, ethHost, version)
+	client, err = incclient.NewIncClientWithCache(rpcHost, ethHost, version)
 
 	return err
 }
