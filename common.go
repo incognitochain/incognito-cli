@@ -48,7 +48,8 @@ const (
 // aliases for defaultFlags
 var aliases = map[string][]string{
 	networkFlag:     {"net"},
-	privateKeyFlag:  {"prvKey"},
+	debugFlag: 		 {"d"},
+	privateKeyFlag:  {"p"},
 	otaKeyFlag:      {"ota"},
 	readonlyKeyFlag: {"ro"},
 	addressFlag:     {"addr"},
