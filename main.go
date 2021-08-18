@@ -70,6 +70,18 @@ func main() {
 			Action: checkBalance,
 		},
 		{
+			Name:     "outcoin",
+			Usage:    "Print the output coins of an account.",
+			Category: accountCat,
+			Flags: []cli.Flag{
+				defaultFlags[addressFlag],
+				defaultFlags[otaKeyFlag],
+				defaultFlags[readonlyKeyFlag],
+				defaultFlags[tokenIDFlag],
+			},
+			Action: getOutCoins,
+		},
+		{
 			Name:     "utxo",
 			Usage:    "Print the UTXOs of an account.",
 			Category: accountCat,

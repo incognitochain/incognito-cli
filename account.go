@@ -6,6 +6,7 @@ import (
 	"github.com/incognitochain/bridge-eth/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
 )
@@ -147,6 +148,64 @@ func checkUTXOs(c *cli.Context) error {
 
 	fmt.Printf("#numUTXOsV1 %v, #numUTXOsV2 %v\n", numUTXOsV1, numUTXOsV2)
 	fmt.Printf("balanceV1 %v, balanceV2 %v, totalBalance %v\n", balanceV1, balanceV2, balanceV1+balanceV2)
+
+	return nil
+}
+
+func getOutCoins(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	address := c.String(addressFlag)
+	if !isValidAddress(address) {
+		return fmt.Errorf("%v is invalid", addressFlag)
+	}
+
+	otaKey := c.String(otaKeyFlag)
+	if !isValidOtaKey(otaKey) {
+		return fmt.Errorf("%v is invalid", otaKeyFlag)
+	}
+
+	readonlyKey := c.String(readonlyKeyFlag)
+	if readonlyKey != "" && !isValidReadonlyKey(readonlyKey) {
+		return fmt.Errorf("%v is invalid", readonlyKeyFlag)
+	}
+
+	tokenIDStr := c.String(tokenIDFlag)
+	if !isValidTokenID(tokenIDStr) {
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	}
+
+	outCoinKey := new(rpc.OutCoinKey)
+	outCoinKey.SetPaymentAddress(address)
+	outCoinKey.SetOTAKey(otaKey)
+	outCoinKey.SetReadonlyKey(readonlyKey)
+
+	outCoins, idxList, err := client.GetOutputCoins(outCoinKey, tokenIDStr, 0)
+	if err != nil {
+		return err
+	}
+
+	v1Count := 0
+	v2Count := 0
+	for i, outCoin := range outCoins {
+		if outCoin.GetVersion() == 1 {
+			v1Count += 1
+		} else {
+			v2Count += 1
+		}
+
+		fmt.Printf("idx %v, ver %v, encrypted %v, pubKey %v, cmtStr %v\n",
+			idxList[i].Int64(),
+			outCoin.GetVersion(),
+			outCoin.IsEncrypted(),
+			base58.Base58Check{}.Encode(outCoin.GetPublicKey().ToBytesS(), 0x00),
+			base58.Base58Check{}.Encode(outCoin.GetCommitment().ToBytesS(), 0x00))
+	}
+
+	fmt.Printf("#OutCoins: %v, #v1: %v, #v2: %v\n", len(outCoins), v1Count, v2Count)
 
 	return nil
 }
