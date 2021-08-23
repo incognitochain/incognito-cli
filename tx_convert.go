@@ -40,7 +40,7 @@ func convertUTXOs(c *cli.Context) error {
 	}
 
 	incclient.Logger.Printf("CONVERTING tokenID %v, numThreads %v, enableLog %v\n", tokenIDStr, numThreads, enableLog)
-	utxoList, _, err := client.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
+	utxoList, _, err := cfg.incClient.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func convertUTXOs(c *cli.Context) error {
 		incclient.Logger.Printf("No UTXOs v1 left to be converted")
 		return nil
 	} else if utxoV1Count <= 30 {
-		txHash, err := client.CreateAndSendRawConversionTransaction(privateKey, tokenIDStr)
+		txHash, err := cfg.incClient.CreateAndSendRawConversionTransaction(privateKey, tokenIDStr)
 		if err != nil {
 			return err
 		}
@@ -67,7 +67,7 @@ func convertUTXOs(c *cli.Context) error {
 		return nil
 	}
 
-	txList, err := client.ConvertAllUTXOs(privateKey, tokenIDStr, numThreads)
+	txList, err := cfg.incClient.ConvertAllUTXOs(privateKey, tokenIDStr, numThreads)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func convertAll(c *cli.Context) error {
 
 	//Convert PRV first (if have)
 	incclient.Logger.Println("CONVERTING PRV")
-	txList, err := client.ConvertAllUTXOs(privateKey, common.PRVIDStr, numThreads)
+	txList, err := cfg.incClient.ConvertAllUTXOs(privateKey, common.PRVIDStr, numThreads)
 	if err != nil {
 		if err.Error() == "no UTXOs to convert" {
 			incclient.Logger.Printf("no UTXOs to convert\n\n")
@@ -117,7 +117,7 @@ func convertAll(c *cli.Context) error {
 	incclient.Logger.Printf("[CONVERTALL] timeElapsed: %v\n\n", time.Since(start).Seconds())
 
 	incclient.Logger.Printf("CHECKING TOKENS V1...\n")
-	listTokens, err := client.GetListToken()
+	listTokens, err := cfg.incClient.GetListToken()
 	if err != nil {
 		return fmt.Errorf("cannot get list tokens: %v", err)
 	}
@@ -129,7 +129,7 @@ func convertAll(c *cli.Context) error {
 		if numChecked%50 == 0 {
 			incclient.Logger.Printf("[CONVERTALL] numChecked: %v, timeElapsed: %v\n", numChecked, time.Since(start).Seconds())
 		}
-		utxoList, _, err := client.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
+		utxoList, _, err := cfg.incClient.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
 		if err != nil {
 			return err
 		}
@@ -149,7 +149,7 @@ func convertAll(c *cli.Context) error {
 	numConverted := 0
 	for tokenIDStr := range listTokensV1 {
 		incclient.Logger.Printf("[%v] CONVERTING TOKEN %v\n", numConverted, tokenIDStr)
-		txList, err = client.ConvertAllUTXOs(privateKey, tokenIDStr, numThreads)
+		txList, err = cfg.incClient.ConvertAllUTXOs(privateKey, tokenIDStr, numThreads)
 		if err != nil {
 			if err.Error() == "no UTXOs to convert" {
 				incclient.Logger.Printf("no UTXOs to convert\n")

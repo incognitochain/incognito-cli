@@ -27,7 +27,7 @@ func pDEXCheckPrice(c *cli.Context) error {
 		return fmt.Errorf("%v cannot be zero", sellingAmountFlag)
 	}
 
-	expectedPrice, err := client.CheckXPrice(tokenIdToSell, tokenIdToBuy, sellingAmount)
+	expectedPrice, err := cfg.incClient.CheckXPrice(tokenIdToSell, tokenIdToBuy, sellingAmount)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func pDEXTrade(c *cli.Context) error {
 	minAcceptableAmount := c.Uint64(minAcceptableAmountFlag)
 	tradingFee := c.Uint64(tradingFeeFlag)
 
-	txHash, err := client.CreateAndSendPDETradeTransaction(
+	txHash, err := cfg.incClient.CreateAndSendPDETradeTransaction(
 		privateKey,
 		tokenIdToSell,
 		tokenIdToBuy,
@@ -113,7 +113,7 @@ func pDEXContribute(c *cli.Context) error {
 		return fmt.Errorf("%v is not supported", versionFlag)
 	}
 
-	txHash, err := client.CreateAndSendPDEContributeTransaction(
+	txHash, err := cfg.incClient.CreateAndSendPDEContributeTransaction(
 		privateKey,
 		pairID,
 		tokenId,
@@ -161,7 +161,7 @@ func pDEXWithdraw(c *cli.Context) error {
 		return fmt.Errorf("%v is not supported", versionFlag)
 	}
 
-	txHash, err := client.CreateAndSendPDEWithdrawalTransaction(
+	txHash, err := cfg.incClient.CreateAndSendPDEWithdrawalTransaction(
 		privateKey,
 		tokenId1,
 		tokenId2,
@@ -199,7 +199,7 @@ func pDEXGetShare(c *cli.Context) error {
 		return fmt.Errorf("%v is invalid", tokenID2Flag)
 	}
 
-	shareAmount, err := client.GetShareAmount(0, tokenId1, tokenId2, address)
+	shareAmount, err := cfg.incClient.GetShareAmount(0, tokenId1, tokenId2, address)
 	if err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func pDEXTradeStatus(c *cli.Context) error {
 	}
 
 	txHash := c.String(txHashFlag)
-	tradeStatus, err := client.CheckTradeStatus(txHash)
+	tradeStatus, err := cfg.incClient.CheckTradeStatus(txHash)
 	if err != nil {
 		return err
 	}

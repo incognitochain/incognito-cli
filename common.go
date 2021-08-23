@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/fatih/camelcase"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
-	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
 	"strings"
@@ -69,7 +68,7 @@ const (
 	pDEXCat        = "PDEX"
 )
 
-var client *incclient.IncClient
+var cfg *Config
 
 // isValidPrivateKey checks if a base58-encoded private key is valid or not.
 func isValidPrivateKey(privateKey string) bool {

@@ -17,7 +17,7 @@ func checkRewards(c *cli.Context) error {
 		return fmt.Errorf("payment address is invalid")
 	}
 
-	rewards, err := client.GetRewardAmount(addr)
+	rewards, err := cfg.incClient.GetRewardAmount(addr)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func withdrawReward(c *cli.Context) error {
 
 	fmt.Printf("Withdrawing the reward for tokenID %v, using tx version %v\n", tokenIDStr, version)
 
-	txHash, err := client.CreateAndSendWithDrawRewardTransaction(privateKey, addr, tokenIDStr, int8(version))
+	txHash, err := cfg.incClient.CreateAndSendWithDrawRewardTransaction(privateKey, addr, tokenIDStr, int8(version))
 	if err != nil {
 		return err
 	}

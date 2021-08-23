@@ -16,62 +16,51 @@ func initNetWork() error {
 	}
 	if host != "" {
 		fmt.Printf("host: %v\n", host)
-		return initClient(host, "", clientVersion)
+		return initClient(host, clientVersion)
 	}
 	switch network {
 	case "mainnet":
-		return initMainNet()
+		return NewMainNetConfig(nil)
 	case "testnet":
-		return initTestNet()
+		return NewTestNetConfig(nil)
 	case "testnet1":
-		return initTestNet1()
+		return NewTestNet1Config(nil)
 	case "devnet":
-		return initDevNet()
+		return NewDevNetConfig(nil)
 	case "local":
-		return initLocal("")
+		return NewLocalConfig(nil)
 	}
 
 	return fmt.Errorf("network not found")
 }
-func initMainNet() error {
+func initClient(rpcHost string, version int) error {
+	ethNode := incclient.MainNetETHHost
 	var err error
-	client, err = incclient.NewMainNetClientWithCache()
-
-	return err
-}
-func initTestNet() error {
-	var err error
-	client, err = incclient.NewTestNetClientWithCache()
-
-	return err
-}
-func initTestNet1() error {
-	var err error
-	client, err = incclient.NewTestNet1ClientWithCache()
-
-	return err
-}
-func initDevNet() error {
-	var err error
-	client, err = incclient.NewDevNetClient()
+	switch network {
+	case "testnet":
+		ethNode = incclient.TestNetETHHost
+		err = NewTestNetConfig(nil)
+	case "testnet1":
+		ethNode = incclient.TestNet1ETHHost
+		err = NewTestNet1Config(nil)
+	case "devnet":
+		ethNode = incclient.DevNetETHHost
+		err = NewDevNetConfig(nil)
+	case "local":
+		ethNode = incclient.LocalETHHost
+		err = NewLocalConfig(nil)
+	default:
+		err = NewMainNetConfig(nil)
+	}
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-func initLocal(port string) error {
-	var err error
-	client, err = incclient.NewLocalClientWithCache()
+	incClient, err := incclient.NewIncClientWithCache(rpcHost, ethNode, version)
 	if err != nil {
 		return err
 	}
 
+	cfg.incClient = incClient
 	return nil
-}
-func initClient(rpcHost, ethHost string, version int) error {
-	var err error
-	client, err = incclient.NewIncClientWithCache(rpcHost, ethHost, version)
-
-	return err
 }

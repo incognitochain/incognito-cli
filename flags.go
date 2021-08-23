@@ -11,13 +11,14 @@ var defaultFlags = map[string]cli.Flag{
 	networkFlag: &cli.StringFlag{
 		Name:        networkFlag,
 		Aliases:     aliases[networkFlag],
-		Usage:       "network environment (mainnet, testnet, testnet1, devnet, local, custom)",
+		Usage:       "network environment (mainnet, testnet, testnet1, devnet, local)",
 		Value:       "mainnet",
 		Destination: &network,
 	},
 	hostFlag: &cli.StringFlag{
 		Name:        hostFlag,
-		Usage:       "custom full-node host",
+		Usage:       "Custom full-node host. This flag is combined with the `network` flag to initialize the environment" +
+			" in which the custom host points to.",
 		Value:       "",
 		Destination: &host,
 	},
