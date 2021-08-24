@@ -32,15 +32,13 @@ var (
 
 // EVMAccount represents an account on the Ethereum/Binance networks.
 type EVMAccount struct {
-	evmConfig *Config
-
 	privateKey *ecdsa.PrivateKey
 	publicKey  *ecdsa.PublicKey
 	address    common.Address
 }
 
 // NewEVMAccount returns a new EVMAccount given a hex-encoded private key.
-func NewEVMAccount(hexPrivateKey string, evmConfig *Config) (*EVMAccount, error) {
+func NewEVMAccount(hexPrivateKey string) (*EVMAccount, error) {
 	privateKey, err := crypto.HexToECDSA(hexPrivateKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot decode hex private key: %v", err)
@@ -55,7 +53,6 @@ func NewEVMAccount(hexPrivateKey string, evmConfig *Config) (*EVMAccount, error)
 	address := crypto.PubkeyToAddress(*publicKeyECDSA)
 
 	return &EVMAccount{
-		evmConfig:  evmConfig,
 		privateKey: privateKey,
 		publicKey:  publicKeyECDSA,
 		address:    address,
@@ -63,14 +60,19 @@ func NewEVMAccount(hexPrivateKey string, evmConfig *Config) (*EVMAccount, error)
 
 }
 
-// NewTransactionOpts creates a new TransactOpts for an EVMAccount.
-func (acc EVMAccount) NewTransactionOpts(destAddr common.Address, gasPrice, gasLimit, amount uint64, data []byte) (*bind.TransactOpts, error) {
+// NewTransactionOpts creates a new bind.TransactOpts for an EVMAccount.
+func (acc EVMAccount) NewTransactionOpts(destAddr common.Address, gasPrice, gasLimit, amount uint64, data []byte, isBSC bool) (*bind.TransactOpts, error) {
+	evmClient := cfg.ethClient
+	if isBSC {
+		evmClient = cfg.bscClient
+	}
+
 	var err error
 
 	// calculate gas price if needed.
 	var gasPriceBigInt *big.Int
 	if gasPrice == 0 {
-		gasPriceBigInt, err = acc.evmConfig.ethClient.SuggestGasPrice(context.Background())
+		gasPriceBigInt, err = evmClient.SuggestGasPrice(context.Background())
 		if err != nil {
 			return nil, fmt.Errorf("cannot get gasPriceBigInt price")
 		}
@@ -80,18 +82,18 @@ func (acc EVMAccount) NewTransactionOpts(destAddr common.Address, gasPrice, gasL
 
 	//calculate gas limit
 	if gasLimit == 0 {
-		gasLimit, err = acc.evmConfig.ethClient.EstimateGas(context.Background(), ethereum.CallMsg{From: acc.address, To: &destAddr, Data: data})
+		gasLimit, err = evmClient.EstimateGas(context.Background(), ethereum.CallMsg{From: acc.address, To: &destAddr, Data: data})
 		if err != nil {
 			return nil, fmt.Errorf("estimate gas error: %v", err)
 		}
 	}
 
-	nonce, err := acc.evmConfig.ethClient.PendingNonceAt(context.Background(), acc.address)
+	nonce, err := evmClient.PendingNonceAt(context.Background(), acc.address)
 	if err != nil {
 		return nil, fmt.Errorf("get pending nonce error: %v", err)
 	}
 
-	chainID, err := acc.evmConfig.ethClient.ChainID(context.Background())
+	chainID, err := evmClient.ChainID(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -111,9 +113,15 @@ func (acc EVMAccount) NewTransactionOpts(destAddr common.Address, gasPrice, gasL
 }
 
 // EstimateDepositGas estimates the gas for depositing a token.
-func (acc EVMAccount) EstimateDepositGas(tokenAddress common.Address, depositedAmount *big.Int, incAddress string) (uint64, error) {
-	var gasLimit uint64
+func (acc EVMAccount) EstimateDepositGas(tokenAddress common.Address, depositedAmount *big.Int, incAddress string, isBSC bool) (uint64, error) {
+	evmClient := cfg.ethClient
+	vaultAddress := cfg.ethVaultAddress
+	if isBSC {
+		evmClient = cfg.bscClient
+		vaultAddress = cfg.bscVaultAddress
+	}
 
+	var gasLimit uint64
 	vaultABI, err := abi.JSON(strings.NewReader(vault.VaultABI))
 	if err != nil {
 		return 0, fmt.Errorf("cannot create vaultABI from file")
@@ -129,8 +137,8 @@ func (acc EVMAccount) EstimateDepositGas(tokenAddress common.Address, depositedA
 			return 0, err
 		}
 
-		gasLimit, err = acc.evmConfig.ethClient.EstimateGas(context.Background(),
-			ethereum.CallMsg{From: acc.address, Value: depositedAmount, To: &acc.evmConfig.ethVaultAddress, Data: data})
+		gasLimit, err = evmClient.EstimateGas(context.Background(),
+			ethereum.CallMsg{From: acc.address, Value: depositedAmount, To: &vaultAddress, Data: data})
 		if err != nil {
 			return 0, fmt.Errorf("estimateGas for native token error: %v", err)
 		}
@@ -145,8 +153,8 @@ func (acc EVMAccount) EstimateDepositGas(tokenAddress common.Address, depositedA
 			return 0, err
 		}
 
-		gasLimit, err = acc.evmConfig.ethClient.EstimateGas(context.Background(),
-			ethereum.CallMsg{From: acc.address, To: &acc.evmConfig.ethVaultAddress, Data: data})
+		gasLimit, err = evmClient.EstimateGas(context.Background(),
+			ethereum.CallMsg{From: acc.address, To: &vaultAddress, Data: data})
 		if err != nil {
 			return 0, err
 		}
@@ -157,11 +165,11 @@ func (acc EVMAccount) EstimateDepositGas(tokenAddress common.Address, depositedA
 
 // EstimateWithdrawalGas estimates the gas for withdrawing a token.
 func (acc EVMAccount) EstimateWithdrawalGas(burnProof *incclient.BurnProof, isBSC bool) (uint64, error) {
-	evmClient := acc.evmConfig.ethClient
-	vaultAddress := acc.evmConfig.ethVaultAddress
+	evmClient := cfg.ethClient
+	vaultAddress := cfg.ethVaultAddress
 	if isBSC {
-		evmClient = acc.evmConfig.bscClient
-		vaultAddress = acc.evmConfig.bscVaultAddress
+		evmClient = cfg.bscClient
+		vaultAddress = cfg.bscVaultAddress
 	}
 
 	vaultABI, err := abi.JSON(strings.NewReader(vault.VaultABI))
@@ -198,9 +206,9 @@ func (acc EVMAccount) EstimateWithdrawalGas(burnProof *incclient.BurnProof, isBS
 
 // GetBalance returns the balance of a token.
 func (acc EVMAccount) GetBalance(tokenAddress common.Address, isBSC bool) (uint64, error) {
-	evmClient := acc.evmConfig.ethClient
+	evmClient := cfg.ethClient
 	if isBSC {
-		evmClient = acc.evmConfig.bscClient
+		evmClient = cfg.bscClient
 	}
 	if tokenAddress.String() == nativeToken {
 		balance, err := evmClient.BalanceAt(context.Background(), acc.address, nil)
@@ -226,9 +234,9 @@ func (acc EVMAccount) GetBalance(tokenAddress common.Address, isBSC bool) (uint6
 
 // GetAllowance returns the allowance of an owner to a spender w.r.t to an ERC20 token.
 func (acc EVMAccount) GetAllowance(tokenAddress, spender common.Address, isBSC bool) (uint64, error) {
-	evmClient := acc.evmConfig.ethClient
+	evmClient := cfg.ethClient
 	if isBSC {
-		evmClient = acc.evmConfig.bscClient
+		evmClient = cfg.bscClient
 	}
 
 	erc20Instance, err := erc20.NewErc20(tokenAddress, evmClient)
@@ -246,9 +254,11 @@ func (acc EVMAccount) GetAllowance(tokenAddress, spender common.Address, isBSC b
 
 // ApproveERC20 approves the Incognito Vault to spend an ERC20/BEP20 token of an account.
 func (acc EVMAccount) ApproveERC20(tokenAddress, approved common.Address, approvedAmount, gasPrice uint64, isBSC bool) (*common.Hash, error) {
-	evmClient := acc.evmConfig.ethClient
+	prefix := "[ApproveERC20]"
+	evmClient := cfg.ethClient
 	if isBSC {
-		evmClient = acc.evmConfig.bscClient
+		evmClient = cfg.bscClient
+		prefix = "[ApproveBEP20]"
 	}
 
 	erc20Token, err := erc20.NewErc20(tokenAddress, evmClient)
@@ -273,13 +283,14 @@ func (acc EVMAccount) ApproveERC20(tokenAddress, approved common.Address, approv
 		return nil, err
 	}
 
-	gasPriceBigInt, gasLimit, err := acc.getGasLimitAndPrice(0, gasPrice, ethereum.CallMsg{To: &tokenAddress, Data: data})
+	gasPriceBigInt, gasLimit, err := acc.getGasLimitAndPrice(0, gasPrice, ethereum.CallMsg{To: &tokenAddress, Data: data}, isBSC)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("[ApproveERC20] gasPrice: %v, gasLimit %v\n", gasPriceBigInt.Uint64(), gasLimit)
+	txFee := gasLimit * gasPriceBigInt.Uint64()
+	log.Printf("%v gasPrice: %v, gasLimit %v, txFee %v\n", prefix, gasPriceBigInt.Uint64(), gasLimit, txFee)
 
-	auth, err := acc.NewTransactionOpts(tokenAddress, gasPriceBigInt.Uint64(), gasLimit, 0, data)
+	auth, err := acc.NewTransactionOpts(tokenAddress, gasPriceBigInt.Uint64(), gasLimit, 0, data, isBSC)
 	if err != nil {
 		return nil, err
 	}
@@ -291,12 +302,17 @@ func (acc EVMAccount) ApproveERC20(tokenAddress, approved common.Address, approv
 	}
 
 	txHash := tx.Hash()
+	log.Printf("%v TxHash: %v\n", prefix, txHash.String())
 	return &txHash, nil
 }
 
-func (acc EVMAccount) wait(tx common.Hash) error {
+func (acc EVMAccount) wait(tx common.Hash, isBSC bool) error {
+	evmClient := cfg.ethClient
+	if isBSC {
+		evmClient = cfg.bscClient
+	}
 	for range time.Tick(10 * time.Second) {
-		receipt, err := acc.evmConfig.ethClient.TransactionReceipt(context.Background(), tx)
+		receipt, err := evmClient.TransactionReceipt(context.Background(), tx)
 		if err == nil {
 			log.Printf("[EVM Status] TxHash %v: %v\n", tx.String(), receipt.Status)
 			if receipt.Status == 0 {
@@ -312,13 +328,18 @@ func (acc EVMAccount) wait(tx common.Hash) error {
 	return nil
 }
 
-func (acc EVMAccount) getGasLimitAndPrice(gasLimit, gasPrice uint64, callMsg ethereum.CallMsg) (*big.Int, uint64, error) {
+func (acc EVMAccount) getGasLimitAndPrice(gasLimit, gasPrice uint64, callMsg ethereum.CallMsg, isBSC bool) (*big.Int, uint64, error) {
+	evmClient := cfg.ethClient
+	if isBSC {
+		evmClient = cfg.bscClient
+	}
+
 	var err error
 
 	// calculate gas price if needed.
 	var gasPriceBigInt *big.Int
 	if gasPrice == 0 {
-		gasPriceBigInt, err = acc.evmConfig.ethClient.SuggestGasPrice(context.Background())
+		gasPriceBigInt, err = evmClient.SuggestGasPrice(context.Background())
 		if err != nil {
 			return nil, 0, err
 		}
@@ -328,7 +349,7 @@ func (acc EVMAccount) getGasLimitAndPrice(gasLimit, gasPrice uint64, callMsg eth
 
 	if gasLimit == 0 {
 		callMsg.From = acc.address
-		gasLimit, err = acc.evmConfig.ethClient.EstimateGas(context.Background(), callMsg)
+		gasLimit, err = evmClient.EstimateGas(context.Background(), callMsg)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -337,8 +358,13 @@ func (acc EVMAccount) getGasLimitAndPrice(gasLimit, gasPrice uint64, callMsg eth
 	return gasPriceBigInt, gasLimit, nil
 }
 
-func (acc EVMAccount) verifyProofAndParseReceipt(iReq *metadata.IssuingEVMRequest) (*types.Receipt, error) {
-	evmHeader, err := acc.evmConfig.ethClient.HeaderByHash(context.Background(), iReq.BlockHash)
+func (acc EVMAccount) verifyProofAndParseReceipt(iReq *metadata.IssuingEVMRequest, isBSC bool) (*types.Receipt, error) {
+	evmClient := cfg.ethClient
+	if isBSC {
+		evmClient = cfg.bscClient
+	}
+
+	evmHeader, err := evmClient.HeaderByHash(context.Background(), iReq.BlockHash)
 	if err != nil {
 		return nil, err
 	}
@@ -382,4 +408,46 @@ func (acc EVMAccount) verifyProofAndParseReceipt(iReq *metadata.IssuingEVMReques
 	}
 
 	return constructedReceipt, nil
+}
+
+func getDecimals(tokenAddress common.Address, isBSC bool) (uint64, error) {
+	evmClient := cfg.ethClient
+	if isBSC {
+		evmClient = cfg.bscClient
+	}
+
+	erc20Instance, err := erc20.NewErc20(tokenAddress, evmClient)
+	if err != nil {
+		return 0, err
+	}
+
+	decimals, err := erc20Instance.Decimals(&bind.CallOpts{})
+	if err != nil {
+		return 0, err
+	}
+
+	return decimals.Uint64(), nil
+}
+
+func getAllDecentralizedBridgeTokens() (incToPublic map[string]string, publicToInc map[string]string, err error) {
+	incToPublic = make(map[string]string)
+	publicToInc = make(map[string]string)
+
+	allTokens, err := cfg.incClient.GetBridgeTokens()
+	if err != nil {
+		return
+	}
+
+	for _, token := range allTokens {
+		if token.IsCentralized {
+			continue
+		}
+		incTokenID := token.TokenID.String()
+		publicTokenID := fmt.Sprintf("%x", token.ExternalTokenID)
+
+		incToPublic[incTokenID] = publicTokenID
+		publicToInc[publicTokenID] = incTokenID
+	}
+
+	return
 }
