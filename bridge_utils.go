@@ -139,12 +139,9 @@ func NewEVMAccount(hexPrivateKey string) (*EVMAccount, error) {
 
 // newTransactionOpts creates a new bind.TransactOpts for an EVMAccount.
 func (acc EVMAccount) newTransactionOpts(destAddr common.Address, gasPrice, gasLimit, amount uint64, data []byte, isBSC bool) (*bind.TransactOpts, error) {
-	evmClient := cfg.ethClient
-	if isBSC {
-		evmClient = cfg.bscClient
-	}
-
 	var err error
+
+	_, evmClient, _ := getEVMClientAndVaultAddress(isBSC)
 
 	// calculate gas price if needed.
 	var gasPriceBigInt *big.Int
@@ -191,12 +188,7 @@ func (acc EVMAccount) newTransactionOpts(destAddr common.Address, gasPrice, gasL
 
 // estimateDepositGas estimates the gas for depositing a token.
 func (acc EVMAccount) estimateDepositGas(tokenAddress common.Address, depositedAmount *big.Int, incAddress string, isBSC bool) (uint64, error) {
-	evmClient := cfg.ethClient
-	vaultAddress := cfg.ethVaultAddress
-	if isBSC {
-		evmClient = cfg.bscClient
-		vaultAddress = cfg.bscVaultAddress
-	}
+	_, evmClient, vaultAddress := getEVMClientAndVaultAddress(isBSC)
 
 	var gasLimit uint64
 	vaultABI, err := abi.JSON(strings.NewReader(vault.VaultABI))
@@ -242,12 +234,7 @@ func (acc EVMAccount) estimateDepositGas(tokenAddress common.Address, depositedA
 
 // estimateWithdrawalGas estimates the gas for withdrawing a token.
 func (acc EVMAccount) estimateWithdrawalGas(burnProof *incclient.BurnProof, isBSC bool) (uint64, error) {
-	evmClient := cfg.ethClient
-	vaultAddress := cfg.ethVaultAddress
-	if isBSC {
-		evmClient = cfg.bscClient
-		vaultAddress = cfg.bscVaultAddress
-	}
+	_, evmClient, vaultAddress := getEVMClientAndVaultAddress(isBSC)
 
 	vaultABI, err := abi.JSON(strings.NewReader(vault.VaultABI))
 	if err != nil {
@@ -283,10 +270,7 @@ func (acc EVMAccount) estimateWithdrawalGas(burnProof *incclient.BurnProof, isBS
 
 // getBalance returns the balance of a token.
 func (acc EVMAccount) getBalance(tokenAddress common.Address, isBSC bool) (*big.Int, *big.Float, error) {
-	evmClient := cfg.ethClient
-	if isBSC {
-		evmClient = cfg.bscClient
-	}
+	_, evmClient, _ := getEVMClientAndVaultAddress(isBSC)
 
 	decimals := uint64(nativeTokenDecimals)
 	var balance *big.Int
@@ -321,10 +305,7 @@ func (acc EVMAccount) getBalance(tokenAddress common.Address, isBSC bool) (*big.
 
 // getAllowance returns the allowance of an owner to a spender w.r.t to an ERC20 token.
 func (acc EVMAccount) getAllowance(tokenAddress, spender common.Address, isBSC bool) (uint64, error) {
-	evmClient := cfg.ethClient
-	if isBSC {
-		evmClient = cfg.bscClient
-	}
+	_, evmClient, _ := getEVMClientAndVaultAddress(isBSC)
 
 	erc20Instance, err := erc20.NewErc20(tokenAddress, evmClient)
 	if err != nil {
@@ -340,11 +321,7 @@ func (acc EVMAccount) getAllowance(tokenAddress, spender common.Address, isBSC b
 }
 
 func (acc EVMAccount) getGasLimitAndPrice(gasLimit, gasPrice uint64, callMsg ethereum.CallMsg, isBSC bool) (*big.Int, uint64, error) {
-	evmClient := cfg.ethClient
-	if isBSC {
-		evmClient = cfg.bscClient
-	}
-
+	_, evmClient, _ := getEVMClientAndVaultAddress(isBSC)
 	var err error
 
 	// calculate gas price if needed.
@@ -388,8 +365,8 @@ func (acc EVMAccount) checkSufficientBalance(tokenAddress common.Address, requir
 // checkAllowance checks if the allowance of the token address is sufficient w.r.t to the requiredAmount.
 // It also returns the synthesized allowance of the token.
 func (acc EVMAccount) checkAllowance(tokenAddress common.Address, requiredAmount float64, isBSC bool) (err error) {
-	prefix := "[CheckAllowanceERC20]"
 	isBSC, _, vaultAddress := getEVMClientAndVaultAddress(isBSC)
+	prefix := "[CheckAllowanceERC20]"
 	if isBSC {
 		prefix = "[CheckAllowanceBEP20]"
 	}
@@ -676,7 +653,7 @@ func (acc EVMAccount) DepositNative(incAddress string, depositedAmount float64, 
 		return nil, err
 	}
 	txHash := tx.Hash()
-	log.Printf("%v Deposited tx: %v\n", prefix, txHash.String())
+	log.Printf("%v Deposited Tx: %v\n", prefix, txHash.String())
 
 	if err := wait(txHash, isBSC); err != nil {
 		return nil, err
@@ -687,19 +664,10 @@ func (acc EVMAccount) DepositNative(incAddress string, depositedAmount float64, 
 
 // DepositToken shields an amount of ERC20/BEP20 to the Incognito network.
 func (acc EVMAccount) DepositToken(incAddress, tokenAddressStr string, depositedAmount float64, gasLimit, gasPrice uint64, isOnBSC ...bool) (*common.Hash, error) {
+	isBSC, evmClient, vaultAddress := getEVMClientAndVaultAddress(isOnBSC...)
 	prefix := "[DepositERC20]"
-	isBSC := false
-	if len(isOnBSC) != 0 && isOnBSC[0] {
-		isBSC = true
-		prefix = "[DepositBEP20]"
-	}
-
-	// load the vault address
-	vaultAddress := cfg.ethVaultAddress
-	evmClient := cfg.ethClient
 	if isBSC {
-		evmClient = cfg.bscClient
-		vaultAddress = cfg.bscVaultAddress
+		prefix = "[DepositBEP20]"
 	}
 
 	// load the vault instance
@@ -745,7 +713,7 @@ func (acc EVMAccount) DepositToken(incAddress, tokenAddressStr string, deposited
 		return nil, err
 	}
 	if askUser {
-		yesNoPrompt(fmt.Sprintf("%v DepositAmount: %v, GasPrice: %v gWei, DepositFee: %v. Do you want to continue?",
+		yesNoPrompt(fmt.Sprintf("%v DepositAmount: %v, GasPrice: %v gWei, TxFee: %v. Do you want to continue?",
 			prefix, depositedAmount, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee))
 	}
 
@@ -773,25 +741,10 @@ func (acc EVMAccount) DepositToken(incAddress, tokenAddressStr string, deposited
 func (acc EVMAccount) UnShield(incTxHash string, gasLimit, gasPrice uint64, isOnBSC ...bool) (*common.Hash, error) {
 	prefix := "[UnShield]"
 
-	isBSC := false
-	if len(isOnBSC) != 0 && isOnBSC[0] {
-		isBSC = true
-	}
-
-	evmClient := cfg.ethClient
-	vaultAddress := cfg.ethVaultAddress
-	if isBSC {
-		evmClient = cfg.bscClient
-		vaultAddress = cfg.bscVaultAddress
-	}
+	isBSC, evmClient, vaultAddress := getEVMClientAndVaultAddress(isOnBSC...)
 
 	// load the vault instance
 	v, err := vault.NewVault(vaultAddress, evmClient)
-	if err != nil {
-		return nil, err
-	}
-
-	balance, _, err := acc.getBalance(common.HexToAddress(nativeToken), isBSC)
 	if err != nil {
 		return nil, err
 	}
@@ -822,11 +775,14 @@ func (acc EVMAccount) UnShield(incTxHash string, gasLimit, gasPrice uint64, isOn
 			return nil, err
 		}
 	}
-
-	txFee := gasLimit * gasPriceBigInt.Uint64()
-	log.Printf("%v gasLimit %v, gasPrice %v, txFee %v\n", prefix, gasLimit, gasPriceBigInt.Uint64(), txFee)
-	if balance.Uint64() < txFee {
-		return nil, fmt.Errorf("%v balance insufficient, need %v, got %v", prefix, txFee, balance)
+	txFee, _ := getSynthesizedAmount(new(big.Int).Mul(new(big.Int).SetUint64(gasLimit), gasPriceBigInt), uint64(nativeTokenDecimals)).Float64()
+	_, err = acc.checkSufficientBalance(common.HexToAddress(nativeToken), txFee, isBSC)
+	if err != nil {
+		return nil, err
+	}
+	if askUser {
+		yesNoPrompt(fmt.Sprintf("%v GasPrice: %v gWei, TxFee: %v. Do you want to continue?",
+			prefix, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee))
 	}
 
 	auth, err := acc.newTransactionOpts(vaultAddress, gasPriceBigInt.Uint64(), gasLimit, 0, []byte{}, isBSC)
@@ -846,7 +802,7 @@ func (acc EVMAccount) UnShield(incTxHash string, gasLimit, gasPrice uint64, isOn
 	}
 
 	txHash := tx.Hash()
-	log.Printf("%v WithdrawTx: %v\n", prefix, txHash.String())
+	log.Printf("%v WithdrawalTx: %v\n", prefix, txHash.String())
 
 	if err := wait(txHash, isBSC); err != nil {
 		return nil, err
@@ -895,7 +851,7 @@ func (acc EVMAccount) ApproveERC20(tokenAddress, approved common.Address, approv
 	}
 	txFee := getSynthesizedAmount(
 		new(big.Int).Mul(new(big.Int).SetUint64(gasLimit), gasPriceBigInt),
-		tokenDecimals,
+		uint64(nativeTokenDecimals),
 	)
 	if askUser {
 		yesNoPrompt(fmt.Sprintf("%v Approve %v to spend %v of token %v. Are you sure?",

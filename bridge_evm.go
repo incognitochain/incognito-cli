@@ -7,6 +7,7 @@ import (
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -42,7 +43,13 @@ func shield(c *cli.Context) error {
 	tokenAddress := common.HexToAddress(tokenAddressStr)
 	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), isBSC)
 	if err != nil {
-		return err
+		if strings.Contains(err.Error(), "incTokenID not found") {
+			log.Printf("IncTokenID not found for %v, perhaps it doesn't exist in the Incognito network.\n", tokenAddress.String())
+			incTokenID = fmt.Sprintf("%x", iCommon.RandBytes(32))
+			yesNoPrompt(fmt.Sprintf("Newly generated incTokenID: %v. Do you want to continue with this token?", incTokenID))
+		} else {
+			return err
+		}
 	}
 
 	var tokenName, tokenSymbol string
@@ -110,7 +117,6 @@ func shield(c *cli.Context) error {
 			evmNetwork,
 			acc.address.String(), nativeTokenName, nativeBalance, tokenSymbol, evmTokenBalance)
 	}
-
 	log.Printf("[STEP 2] FINISHED!\n\n")
 
 	log.Println("[STEP 3] DEPOSIT PUBLIC TOKEN TO SC")
@@ -175,6 +181,13 @@ func retryShield(c *cli.Context) error {
 	tokenAddress := common.HexToAddress(tokenAddressStr)
 	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), isBSC)
 	if err != nil {
+		if strings.Contains(err.Error(), "incTokenID not found") {
+			log.Printf("IncTokenID not found for %v, perhaps it doesn't exist in the Incognito network.\n", tokenAddress.String())
+			incTokenID = fmt.Sprintf("%x", iCommon.RandBytes(32))
+			yesNoPrompt(fmt.Sprintf("Newly generated incTokenID: %v. Do you want to continue with this token?", incTokenID))
+		} else {
+			return err
+		}
 		return err
 	}
 
