@@ -13,14 +13,18 @@ import (
 	"time"
 )
 
-var network string
-var host string
-var clientVersion int
-var debug int
+var (
+	network       string
+	host          string
+	clientVersion int
+	debug         int
+	askUser       = true
+	isMainNet     = false
+)
 
 func initNetWork() error {
 	if debug != 0 {
-		incclient.Logger.IsEnable = true
+		incclient.Logger.IsEnable = false
 	}
 	if host != "" {
 		fmt.Printf("host: %v\n", host)
@@ -71,6 +75,19 @@ func initClient(rpcHost string, version int) error {
 
 	cfg.incClient = incClient
 	return nil
+}
+
+// checkSufficientIncBalance checks if the Incognito balance is not less than the requiredAmount.
+func checkSufficientIncBalance(privateKey, tokenIDStr string, requiredAmount uint64) (balance uint64, err error) {
+	balance, err = cfg.incClient.GetBalance(privateKey, tokenIDStr)
+	if err != nil {
+		return
+	}
+	if balance < requiredAmount {
+		err = fmt.Errorf("need at least %v of token %v to continue", requiredAmount, tokenIDStr)
+	}
+
+	return
 }
 
 // promptInput asks for input from the user and saves input to `response`.
@@ -129,8 +146,8 @@ func parseInput(text string) string {
 	if len(text) == 0 {
 		return text
 	}
-	if text[len(text) - 1] == 13 || text[len(text) - 1] == 10{
-		text = text[:len(text) - 1]
+	if text[len(text)-1] == 13 || text[len(text)-1] == 10 {
+		text = text[:len(text)-1]
 	}
 
 	return text

@@ -2,11 +2,10 @@ package main
 
 import (
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
+	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 	"sort"
-
-	"github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -138,7 +137,7 @@ func main() {
 			Flags: []cli.Flag{
 				defaultFlags[numShardsFlags],
 			},
-			Action:      genKeySet,
+			Action: genKeySet,
 		},
 		{
 			Name:    "submitkey",
@@ -250,7 +249,7 @@ func main() {
 		},
 	}
 
-	// pDEX command
+	// pDEX commands
 	pDEXCommands := []*cli.Command{
 		{
 			Name:  "pdecheckprice",
@@ -333,11 +332,50 @@ func main() {
 		},
 	}
 
+	// Bridge commands
+	bridgeCommands := []*cli.Command{
+		{
+			Name:  "shield",
+			Usage: "Shield an EVM token (ETH/BNB/ERC20/BEP20) token into the Incognito network.",
+			Description: "This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. Please note that" +
+				"this function requires users have some knowledge of how an EVM network operates. It will ask for users' EVM private key " +
+				"to proceed. Shielding is a complicated process, users MUST understand how the process works before using this function. " +
+				"We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.",
+			Category: bridgeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[shieldAmountFlag],
+				defaultFlags[evmFlag],
+				defaultFlags[tokenAddressFlag],
+				&cli.StringFlag{
+					Name:    addressFlag,
+					Aliases: aliases[addressFlag],
+					Usage:   "The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)",
+				},
+			},
+			Action: shield,
+		},
+		{
+			Name:        "retryshield",
+			Usage:       "Retry a shield from the given already-been-deposited-to-sc EVM transaction.",
+			Description: "This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.",
+			Category:    bridgeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[evmTxHash],
+				defaultFlags[evmFlag],
+				defaultFlags[tokenAddressFlag],
+			},
+			Action: retryShield,
+		},
+	}
+
 	app.Commands = make([]*cli.Command, 0)
 	app.Commands = append(app.Commands, accountCommands...)
 	app.Commands = append(app.Commands, committeeCommands...)
 	app.Commands = append(app.Commands, txCommands...)
 	app.Commands = append(app.Commands, pDEXCommands...)
+	app.Commands = append(app.Commands, bridgeCommands...)
 
 	for _, command := range app.Commands {
 		buildUsageTextFromCommand(command)

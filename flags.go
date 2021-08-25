@@ -16,8 +16,8 @@ var defaultFlags = map[string]cli.Flag{
 		Destination: &network,
 	},
 	hostFlag: &cli.StringFlag{
-		Name:        hostFlag,
-		Usage:       "Custom full-node host. This flag is combined with the `network` flag to initialize the environment" +
+		Name: hostFlag,
+		Usage: "Custom full-node host. This flag is combined with the `network` flag to initialize the environment" +
 			" in which the custom host points to.",
 		Value:       "",
 		Destination: &host,
@@ -29,9 +29,9 @@ var defaultFlags = map[string]cli.Flag{
 		Destination: &clientVersion,
 	},
 	debugFlag: &cli.IntFlag{
-		Name:  "debug",
-		Usage: "whether to enable the debug mode (0 - disabled, <> 0 - enabled)",
-		Value: 1,
+		Name:        "debug",
+		Usage:       "whether to enable the debug mode (0 - disabled, <> 0 - enabled)",
+		Value:       1,
 		Destination: &debug,
 	},
 	privateKeyFlag: &cli.StringFlag{
@@ -161,8 +161,29 @@ var defaultFlags = map[string]cli.Flag{
 		Value: common.PRVIDStr,
 	},
 	numShardsFlags: &cli.IntFlag{
-		Name:        numShardsFlags,
-		Usage:       "the number of shard",
-		Value:       8,
+		Name:  numShardsFlags,
+		Usage: "the number of shard",
+		Value: 8,
+	},
+	tokenAddressFlag: &cli.StringFlag{
+		Name:  tokenAddressFlag,
+		Usage: "ID of the token on ETH/BSC networks",
+		Value: nativeToken,
+	},
+	shieldAmountFlag: &cli.Float64Flag{
+		Name:     shieldAmountFlag,
+		Aliases:  aliases[shieldAmountFlag],
+		Usage:    "the shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01)",
+		Required: true,
+	},
+	evmFlag: &cli.StringFlag{
+		Name:  evmFlag,
+		Usage: "The EVM network (ETH/BSC)",
+		Value: "ETH",
+	},
+	evmTxHash: &cli.StringFlag{
+		Name:     evmTxHash,
+		Usage:    "the transaction hash on an EVM network (ETH/BSC)",
+		Required: true,
 	},
 }

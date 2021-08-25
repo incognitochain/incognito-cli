@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/camelcase"
-	"github.com/incognitochain/go-incognito-sdk-v2/common"
+	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
 	"strings"
@@ -15,6 +16,7 @@ const (
 	hostFlag          = "host"
 	clientVersionFlag = "clientVersion"
 	debugFlag         = "enableDebug"
+	yesToAllFlag      = "yesToAll"
 	privateKeyFlag    = "privateKey"
 	addressFlag       = "address"
 	otaKeyFlag        = "otaKey"
@@ -42,22 +44,28 @@ const (
 	tokenID2Flag            = "tokenID2"
 
 	numShardsFlags = "numShards"
+
+	tokenAddressFlag = "tokenAddress"
+	shieldAmountFlag = "shieldAmount"
+	evmFlag          = "evm"
+	evmTxHash        = "evmTxHash"
 )
 
 // aliases for defaultFlags
 var aliases = map[string][]string{
-	networkFlag:     {"net"},
-	debugFlag:       {"d"},
-	privateKeyFlag:  {"p"},
-	otaKeyFlag:      {"ota"},
-	readonlyKeyFlag: {"ro"},
-	addressFlag:     {"addr"},
-	tokenIDFlag:     {"id"},
-	tokenID1Flag:    {"id1"},
-	tokenID2Flag:    {"id2"},
-	amountFlag:      {"amt"},
-	versionFlag:     {"v"},
-	csvFileFlag:     {"csv"},
+	networkFlag:      {"net"},
+	debugFlag:        {"d"},
+	privateKeyFlag:   {"p"},
+	otaKeyFlag:       {"ota"},
+	readonlyKeyFlag:  {"ro"},
+	addressFlag:      {"addr"},
+	tokenIDFlag:      {"id"},
+	tokenID1Flag:     {"id1"},
+	tokenID2Flag:     {"id2"},
+	amountFlag:       {"amt"},
+	versionFlag:      {"v"},
+	csvFileFlag:      {"csv"},
+	shieldAmountFlag: {"amt"},
 }
 
 // category constants
@@ -66,6 +74,7 @@ const (
 	committeeCat   = "COMMITTEES"
 	transactionCat = "TRANSACTIONS"
 	pDEXCat        = "PDEX"
+	bridgeCat      = "BRIDGE"
 )
 
 var cfg *Config
@@ -155,8 +164,26 @@ func isValidTokenID(tokenIDStr string) bool {
 		return false
 	}
 
-	_, err := common.Hash{}.NewHashFromStr(tokenIDStr)
+	_, err := iCommon.Hash{}.NewHashFromStr(tokenIDStr)
 	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+// isValidTokenAddress checks if a string tokenAddress is valid or not.
+func isValidTokenAddress(tokenAddress string) bool {
+	if tokenAddress == "" {
+		return false
+	}
+
+	if tokenAddress == nativeToken {
+		return true
+	}
+
+	tmpTokenAddress := common.HexToAddress(tokenAddress)
+	if tmpTokenAddress.String() == nativeToken {
 		return false
 	}
 

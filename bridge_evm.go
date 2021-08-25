@@ -1,344 +1,207 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/incognitochain/go-incognito-sdk-v2/common/base58"
+	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
-	"github.com/incognitochain/go-incognito-sdk-v2/metadata"
-	"github.com/incognitochain/go-incognito-sdk-v2/transaction/tx_ver2"
-	"github.com/incognitochain/incognito-cli/bridge/evm/vault"
+	"github.com/urfave/cli/v2"
 	"log"
-	"math/big"
 	"time"
 )
 
-// DepositNative deposits an amount of ETH/BNB to the Incognito contract.
-func (acc EVMAccount) DepositNative(incAddress string, depositedAmount, gasLimit, gasPrice uint64, isOnBSC ...bool) (*common.Hash, error) {
-	prefix := "[DepositETH]"
-	evmClient := cfg.ethClient
-	vaultAddress := cfg.ethVaultAddress
-
-	isBSC := false
-	if len(isOnBSC) != 0 && isOnBSC[0] {
-		isBSC = true
-		prefix = "[DepositBNB]"
-		evmClient = cfg.bscClient
-		vaultAddress = cfg.bscVaultAddress
-	}
-
-	balance, err := acc.GetBalance(common.HexToAddress(nativeToken), isBSC)
+// shield deposits an EVM token (ETH/BNB/ERC20/BEP20) into the Incognito chain.
+func shield(c *cli.Context) error {
+	err := initNetWork()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	v, err := vault.NewVault(vaultAddress, evmClient)
-	if err != nil {
-		return nil, err
+	log.Println("[STEP 0] PREPARE DATA")
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
 	}
 
-	// calculate gas price
-	var gasPriceBigInt *big.Int
-	if gasPrice == 0 {
-		gasPriceBigInt, err = evmClient.SuggestGasPrice(context.Background())
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		gasPriceBigInt = new(big.Int).SetUint64(gasPrice)
+	incAddress := c.String(addressFlag)
+	if incAddress == "" {
+		incAddress = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
 	}
 
-	// estimate gasLimit
-	amountBigInt := new(big.Int).SetUint64(depositedAmount)
-	gasLimit, err = acc.EstimateDepositGas(common.HexToAddress(nativeToken), amountBigInt, incAddress, isBSC)
-	if err != nil {
-		return nil, err
+	evmNetwork := c.String(evmFlag)
+	if evmNetwork != "ETH" && evmNetwork != "BSC" {
+		return fmt.Errorf("%v is invalid", evmFlag)
 	}
-	txFee := gasLimit * gasPriceBigInt.Uint64()
-	log.Printf("%v gasLimit %v, gasPrice %v, txFee %v\n", prefix, gasLimit, gasPriceBigInt.Uint64(), txFee)
+	isBSC := evmNetwork == "BSC"
 
-	requiredAmount := depositedAmount + txFee
-	if balance <= requiredAmount {
-		return nil, fmt.Errorf("[DepositNative] balance insufficient, need %v, got %v", requiredAmount, balance)
+	shieldAmount := c.Float64(shieldAmountFlag)
+	tokenAddressStr := c.String(tokenAddressFlag)
+	if !isValidTokenAddress(tokenAddressStr) {
+		return fmt.Errorf("%v is invalid", tokenAddressFlag)
 	}
-
-	auth, err := acc.NewTransactionOpts(vaultAddress, gasPriceBigInt.Uint64(), gasLimit, amountBigInt.Uint64(), nil, isBSC)
-	if err != nil {
-		return nil, err
-	}
-
-	tx, err := v.Deposit(auth, incAddress)
-	if err != nil {
-		return nil, err
-	}
-	txHash := tx.Hash()
-	log.Printf("%v deposited tx: %v\n", prefix, txHash.String())
-
-	if err := acc.wait(txHash, isBSC); err != nil {
-		return nil, err
-	}
-
-	return &txHash, nil
-}
-
-// DepositToken shields an amount of ERC20/BEP20 to the Incognito network.
-func (acc EVMAccount) DepositToken(incAddress, tokenAddressStr string, depositedAmount, gasLimit, gasPrice uint64, isOnBSC ...bool) (*common.Hash, error) {
-	prefix := "[DepositERC20]"
-	isBSC := false
-	if len(isOnBSC) != 0 && isOnBSC[0] {
-		isBSC = true
-		prefix = "[DepositBEP20]"
-	}
-
-	// load the vault address
-	vaultAddress := cfg.ethVaultAddress
-	evmClient := cfg.ethClient
-	if isBSC {
-		evmClient = cfg.bscClient
-		vaultAddress = cfg.bscVaultAddress
-	}
-
-	// load the vault instance
-	v, err := vault.NewVault(vaultAddress, evmClient)
-	if err != nil {
-		return nil, err
-	}
-
 	tokenAddress := common.HexToAddress(tokenAddressStr)
-	balance, err := acc.GetBalance(common.HexToAddress(nativeToken), isBSC)
+	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), isBSC)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	tokenBalance, err := acc.GetBalance(tokenAddress, isBSC)
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("%v tokenBalance %v, depositingAmount %v\n", prefix, tokenBalance, depositedAmount)
-	if tokenBalance < depositedAmount {
-		return nil, fmt.Errorf("%v balance ERC20 insufficient, need %v, got %v", prefix, depositedAmount, balance)
-	}
-
-	// get the current ERC20 allowance
-	allowance, err := acc.GetAllowance(tokenAddress, vaultAddress, isBSC)
-	if err != nil {
-		return nil, err
-	}
-	if allowance < depositedAmount {
-		log.Printf("%v insufficient allowance: got %v, need %v\n", prefix, allowance, depositedAmount)
-		txHash, err := acc.ApproveERC20(tokenAddress, vaultAddress, depositedAmount, 0, isBSC)
-		if err != nil {
-			return nil, err
-		}
-
-		err = acc.wait(*txHash, isBSC)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// calculate gas price
-	var gasPriceBigInt *big.Int
-	if gasPrice == 0 {
-		gasPriceBigInt, err = evmClient.SuggestGasPrice(context.Background())
-		if err != nil {
-			return nil, fmt.Errorf("cannot get gasPriceBigInt price")
+	var tokenName, tokenSymbol string
+	if tokenAddress.String() == nativeToken {
+		tokenName = "Ethereum"
+		tokenSymbol = "ETH"
+		if isBSC {
+			tokenName = "Binance"
+			tokenSymbol = "BNB"
 		}
 	} else {
-		gasPriceBigInt = new(big.Int).SetUint64(gasPrice)
+		tokenInfo, err := getEVMTokenInfo(tokenAddress.String())
+		if err != nil {
+			return err
+		}
+		tokenName = tokenInfo.name
+		tokenSymbol = tokenInfo.symbol
+		if tokenInfo.network != evmNetwork {
+			return fmt.Errorf("expect token to be on `%` network, got `%v`", evmNetwork, tokenInfo.network)
+		}
 	}
+	log.Printf("Network: %v, TokenName: %v, TokenSymbol: %v, TokenAddress: %v, ShieldAmount: %v",
+		evmNetwork, tokenName, tokenSymbol, tokenAddress.String(), shieldAmount)
+	yesNoPrompt("Do you want to continue?")
+	log.Printf("[STEP 0] FINISHED!\n\n")
 
-	// estimate gasLimit
-	amountBigInt := new(big.Int).SetUint64(depositedAmount)
-	gasLimit, err = acc.EstimateDepositGas(tokenAddress, amountBigInt, incAddress, isBSC)
+	log.Println("[STEP 1] CHECK INCOGNITO BALANCE")
+	prvBalance, err := checkSufficientIncBalance(privateKey, iCommon.PRVIDStr, incclient.DefaultPRVFee)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	txFee := gasLimit * gasPriceBigInt.Uint64()
-	log.Printf("%v gasLimit %v, gasPrice %v, txFee %v\n", prefix, gasLimit, gasPriceBigInt.Uint64(), txFee)
-	if balance < txFee {
-		return nil, fmt.Errorf("%v balance insufficient, need %v, got %v", prefix, txFee, balance)
-	}
+	log.Printf("Current PRV balance: %v\n", prvBalance)
+	log.Printf("[STEP 1] FINISHED!\n\n")
 
-	auth, err := acc.NewTransactionOpts(vaultAddress, gasPriceBigInt.Uint64(), gasLimit, 0, nil, isBSC)
+	log.Printf("[STEP 2] IMPORT %v ACCOUNT\n", evmNetwork)
+
+	// Get EVM account
+	var privateEVMKey string
+	input, err := promptInput(fmt.Sprintf("Enter your %v private key", evmNetwork), &privateEVMKey, true)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	// create the depositing transaction
-	tx, err := v.DepositERC20(auth, tokenAddress, amountBigInt, incAddress)
+	privateEVMKey = string(input)
+	acc, err := NewEVMAccount(privateEVMKey)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	txHash := tx.Hash()
-	log.Printf("%v deposited tx: %v\n", prefix, txHash)
-
-	if err := acc.wait(txHash, isBSC); err != nil {
-		return nil, err
-	}
-
-	return &txHash, nil
-}
-
-// Shield shields an amount of ETH/ERC20 tokens to the Incognito network.
-// This function should be called after the DepositNative or DepositToken has finished.
-func (acc EVMAccount) Shield(privateKey, pTokenID string, ethTxHashStr string, isOnBSC ...bool) (string, error) {
-	prefix := "[Shield]"
-
-	isBSC := false
-	if len(isOnBSC) != 0 && isOnBSC[0] {
-		isBSC = true
-	}
-
-	evmClient := cfg.ethClient
-	if isBSC {
-		evmClient = cfg.bscClient
-	}
-
-	ethTxHash := common.HexToHash(ethTxHashStr)
-	receipt, err := evmClient.TransactionReceipt(context.Background(), ethTxHash)
+	evmTokenBalance, err := acc.checkSufficientBalance(tokenAddress, shieldAmount, isBSC)
 	if err != nil {
-		return "", err
+		return err
 	}
-	blockNumber := receipt.BlockNumber.Uint64()
-	log.Printf("%v shieldedBlock: %v\n", prefix, blockNumber)
-	log.Printf("%v Wait for 15 confirmations\n", prefix)
+	if tokenAddress.String() == nativeToken {
+		log.Printf("Your %v address: %v, %v: %v\n", evmNetwork, acc.address.String(), tokenName, evmTokenBalance)
+	} else {
+		nativeTokenName := "ETH"
+		if isBSC {
+			nativeTokenName = "BNB"
+		}
+		_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), isBSC)
+		if err != nil {
+			return err
+		}
+		nativeBalance, _ := tmpNativeBalance.Float64()
+		log.Printf("Your %v address: %v, %v: %v, %v: %v\n",
+			evmNetwork,
+			acc.address.String(), nativeTokenName, nativeBalance, tokenSymbol, evmTokenBalance)
+	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 120 * time.Second)
-	defer cancel()
+	log.Printf("[STEP 2] FINISHED!\n\n")
+
+	log.Println("[STEP 3] DEPOSIT PUBLIC TOKEN TO SC")
+	var evmHash *common.Hash
+	if tokenAddress.String() == nativeToken {
+		evmHash, err = acc.DepositNative(incAddress, shieldAmount, 0, 0, isBSC)
+	} else {
+		evmHash, err = acc.DepositToken(incAddress, tokenAddressStr, shieldAmount, 0, 0, isBSC)
+	}
+	if err != nil {
+		return err
+	}
+	log.Printf("[STEP 3] FINISHED!\n\n")
+
+	log.Println("[STEP 4] SHIELD TO INCOGNITO")
+	incTxHash, err := Shield(privateKey, incTokenID, evmHash.String(), isBSC)
+	if err != nil {
+		return err
+	}
+	log.Printf("[STEP 4] FINISHED!\n\n")
+
+	log.Println("[STEP 5] CHECK SHIELD STATUS")
 	for {
-		header, err := evmClient.HeaderByNumber(ctx, nil)
-		if err != nil {
-			return "", err
-		}
-
-		if header.Number.Uint64() > blockNumber+15 {
-			log.Println(prefix, "Enough confirmations!!")
+		status, err := cfg.incClient.CheckShieldStatus(incTxHash)
+		if err != nil || status <= 1 {
+			log.Printf("ShieldingStatus: %v\n", status)
+			time.Sleep(40 * time.Second)
+			continue
+		} else if status == 2 {
+			log.Println("Shielding SUCCEEDED!!")
 			break
+		} else {
+			panic("Shielding FAILED!!")
 		}
-		log.Printf("%v currentEVMBlock: %v\n", prefix, header.Number.Uint64())
-		time.Sleep(30 * time.Second)
 	}
-
-	depositProof, _, err := cfg.incClient.GetEVMDepositProof(ethTxHash.String(), isBSC)
-	if err != nil {
-		return "", err
-	}
-
-	encodedTx, incTxHash, err := cfg.incClient.CreateIssuingEVMRequestTransaction(privateKey, pTokenID, *depositProof, isBSC)
-	if err != nil {
-		return "", err
-	}
-
-	tx := new(tx_ver2.Tx)
-	rawTxData, _, err := base58.Base58Check{}.Decode(string(encodedTx))
-	if err != nil {
-		return "", err
-	}
-	err = json.Unmarshal(rawTxData, &tx)
-	if err != nil {
-		return "", err
-	}
-
-	md := tx.GetMetadata().(*metadata.IssuingEVMRequest)
-	_, err = acc.verifyProofAndParseReceipt(md, isBSC)
-	if err != nil {
-		return "", err
-	}
-	log.Println(prefix + " Verify proof locally SUCCEEDED!!!")
-
-	err = cfg.incClient.SendRawTx(encodedTx)
-	if err != nil {
-		return "", err
-	}
-	log.Println(prefix + " SendRawTx SUCCEEDED!!")
-
-	return incTxHash, nil
+	log.Printf("[STEP 5] FINISHED!\n\n")
+	return nil
 }
 
-// UnShield submits a burn proof of the given incTxHash to the smart contract to obtain back a public token.
-func (acc EVMAccount) UnShield(incTxHash string, gasLimit, gasPrice uint64, isOnBSC ...bool) (*common.Hash, error) {
-	prefix := "[UnShield]"
-
-	isBSC := false
-	if len(isOnBSC) != 0 && isOnBSC[0] {
-		isBSC = true
-	}
-
-	evmClient := cfg.ethClient
-	vaultAddress := cfg.ethVaultAddress
-	if isBSC {
-		evmClient = cfg.bscClient
-		vaultAddress = cfg.bscVaultAddress
-	}
-
-	// load the vault instance
-	v, err := vault.NewVault(vaultAddress, evmClient)
+// retryShield retries to shield a token with an already-deposited evm TxHash.
+func retryShield(c *cli.Context) error {
+	err := initNetWork()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	balance, err := acc.GetBalance(common.HexToAddress(nativeToken), isBSC)
-	if err != nil {
-		return nil, err
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
 	}
 
-	// retrieve the burn proof from the incTxHash
-	burnProofResult, err := cfg.incClient.GetBurnProof(incTxHash, isBSC)
-	if err != nil {
-		return nil, err
+	evmNetwork := c.String(evmFlag)
+	if evmNetwork != "ETH" && evmNetwork != "BSC" {
+		return fmt.Errorf("%v is invalid", evmFlag)
 	}
-	burnProof, err := incclient.DecodeBurnProof(burnProofResult)
+	isBSC := evmNetwork == "BSC"
+
+	tokenAddressStr := c.String(tokenAddressFlag)
+	if !isValidTokenAddress(tokenAddressStr) {
+		return fmt.Errorf("%v is invalid", tokenAddressFlag)
+	}
+	tokenAddress := common.HexToAddress(tokenAddressStr)
+	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), isBSC)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// calculate gas price
-	var gasPriceBigInt *big.Int
-	if gasPrice == 0 {
-		gasPriceBigInt, err = evmClient.SuggestGasPrice(context.Background())
-		if err != nil {
-			return nil, fmt.Errorf("cannot get gasPriceBigInt price")
+	evmTxHashStr := c.String(evmTxHash)
+	evmHash := common.HexToHash(evmTxHashStr)
+
+	log.Println("[STEP 1] SHIELD TO INCOGNITO")
+	incTxHash, err := Shield(privateKey, incTokenID, evmHash.String(), isBSC)
+	if err != nil {
+		return err
+	}
+	log.Printf("[STEP 1] FINISHED!\n\n")
+
+	log.Println("[STEP 2] CHECK SHIELD STATUS")
+	for {
+		status, err := cfg.incClient.CheckShieldStatus(incTxHash)
+		if err != nil || status <= 1 {
+			log.Printf("ShieldingStatus: %v\n", status)
+			time.Sleep(40 * time.Second)
+			continue
+		} else if status == 2 {
+			log.Println("Shielding SUCCEEDED!!")
+			break
+		} else {
+			panic("Shielding FAILED!!")
 		}
-	} else {
-		gasPriceBigInt = new(big.Int).SetUint64(gasPrice)
 	}
-	if gasLimit == 0 {
-		gasLimit, err = acc.EstimateWithdrawalGas(burnProof, isBSC)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	txFee := gasLimit * gasPriceBigInt.Uint64()
-	log.Printf("%v gasLimit %v, gasPrice %v, txFee %v\n", prefix, gasLimit, gasPriceBigInt.Uint64(), txFee)
-	if balance < txFee {
-		return nil, fmt.Errorf("%v balance insufficient, need %v, got %v", prefix, txFee, balance)
-	}
-
-	auth, err := acc.NewTransactionOpts(vaultAddress, gasPriceBigInt.Uint64(), gasLimit, 0, []byte{}, isBSC)
-	tx, err := v.Withdraw(auth,
-		burnProof.Instruction,
-		burnProof.Heights[0],
-		burnProof.InstPaths[0],
-		burnProof.InstPathIsLefts[0],
-		burnProof.InstRoots[0],
-		burnProof.BlkData[0],
-		burnProof.SigIndices[0],
-		burnProof.SigVs[0],
-		burnProof.SigRs[0],
-		burnProof.SigSs[0])
-	if err != nil {
-		return nil, err
-	}
-
-	txHash := tx.Hash()
-	log.Printf("%v WithdrawTx: %v\n", prefix, txHash.String())
-
-	if err := acc.wait(txHash, isBSC); err != nil {
-		return nil, err
-	}
-	return &txHash, nil
+	log.Printf("[STEP 2] FINISHED!\n\n")
+	return nil
 }

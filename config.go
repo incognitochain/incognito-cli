@@ -91,6 +91,7 @@ func NewMainNetConfig(incClient *incclient.IncClient) error {
 			return err
 		}
 	}
+	isMainNet = true
 
 	ethClient, err := ethclient.Dial(incclient.MainNetETHHost)
 	if err != nil {
@@ -153,4 +154,3 @@ func NewLocalConfig(incClient *incclient.IncClient) error {
 	cfg = NewConfig(incClient, ethClient, bscClient, incclient.LocalETHContractAddressStr, incclient.LocalETHContractAddressStr)
 	return nil
 }
-

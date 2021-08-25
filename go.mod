@@ -11,6 +11,7 @@ require (
 	github.com/incognitochain/go-incognito-sdk-v2 v0.0.0-20210823152937-c6a70cc99822
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/urfave/cli/v2 v2.3.0
+	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 )
