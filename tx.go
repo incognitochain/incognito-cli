@@ -49,12 +49,12 @@ func send(c *cli.Context) error {
 
 	var txHash string
 	if tokenIDStr == common.PRVIDStr {
-		txHash, err = client.CreateAndSendRawTransaction(privateKey,
+		txHash, err = cfg.incClient.CreateAndSendRawTransaction(privateKey,
 			[]string{address},
 			[]uint64{amount},
 			int8(version), nil)
 	} else {
-		txHash, err = client.CreateAndSendRawTokenTransaction(privateKey,
+		txHash, err = cfg.incClient.CreateAndSendRawTokenTransaction(privateKey,
 			[]string{address},
 			[]uint64{amount},
 			tokenIDStr,
@@ -94,9 +94,9 @@ func checkReceiver(c *cli.Context) error {
 	var received bool
 	var res map[string]uint64
 	if readonlyKey == "" {
-		received, res, err = client.GetReceivingInfo(txHash, otaKey)
+		received, res, err = cfg.incClient.GetReceivingInfo(txHash, otaKey)
 	} else {
-		received, res, err = client.GetReceivingInfo(txHash, otaKey, readonlyKey)
+		received, res, err = cfg.incClient.GetReceivingInfo(txHash, otaKey, readonlyKey)
 	}
 
 	if err != nil {

@@ -2,11 +2,10 @@ package main
 
 import (
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
+	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 	"sort"
-
-	"github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -138,7 +137,7 @@ func main() {
 			Flags: []cli.Flag{
 				defaultFlags[numShardsFlags],
 			},
-			Action:      genKeySet,
+			Action: genKeySet,
 		},
 		{
 			Name:    "submitkey",
@@ -250,7 +249,7 @@ func main() {
 		},
 	}
 
-	// pDEX command
+	// pDEX commands
 	pDEXCommands := []*cli.Command{
 		{
 			Name:  "pdecheckprice",
@@ -333,11 +332,75 @@ func main() {
 		},
 	}
 
+	// Bridge commands
+	bridgeCommands := []*cli.Command{
+		{
+			Name:        "shield",
+			Usage:       "Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.",
+			Description: shieldMessage,
+			Category:    bridgeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[shieldAmountFlag],
+				defaultFlags[evmFlag],
+				defaultFlags[tokenAddressFlag],
+				&cli.StringFlag{
+					Name:    addressFlag,
+					Aliases: aliases[addressFlag],
+					Usage:   "The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)",
+				},
+			},
+			Action: shield,
+		},
+		{
+			Name:        "retryshield",
+			Usage:       "Retry a shield from the given already-been-deposited-to-sc EVM transaction.",
+			Description: "This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.",
+			Category:    bridgeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[evmTxHash],
+				defaultFlags[evmFlag],
+				defaultFlags[tokenAddressFlag],
+			},
+			Action: retryShield,
+		},
+		{
+			Name:        "unshield",
+			Usage:       "Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.",
+			Description: unShieldMessage,
+			Category:    bridgeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				&cli.StringFlag{
+					Name:     tokenIDFlag,
+					Aliases:  aliases[tokenIDFlag],
+					Usage:    "the Incognito tokenID of the un-shielding asset",
+					Required: true,
+				},
+				defaultFlags[amountFlag],
+			},
+			Action: unShield,
+		},
+		{
+			Name:        "retryunshield",
+			Usage:       "Retry an un-shielding request from the given already-been-burned Incognito transaction.",
+			Description: "This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.",
+			Category:    bridgeCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+				defaultFlags[evmFlag],
+			},
+			Action: retryUnShield,
+		},
+	}
+
 	app.Commands = make([]*cli.Command, 0)
 	app.Commands = append(app.Commands, accountCommands...)
 	app.Commands = append(app.Commands, committeeCommands...)
 	app.Commands = append(app.Commands, txCommands...)
 	app.Commands = append(app.Commands, pDEXCommands...)
+	app.Commands = append(app.Commands, bridgeCommands...)
 
 	for _, command := range app.Commands {
 		buildUsageTextFromCommand(command)

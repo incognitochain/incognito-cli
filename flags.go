@@ -11,13 +11,14 @@ var defaultFlags = map[string]cli.Flag{
 	networkFlag: &cli.StringFlag{
 		Name:        networkFlag,
 		Aliases:     aliases[networkFlag],
-		Usage:       "network environment (mainnet, testnet, testnet1, devnet, local, custom)",
+		Usage:       "network environment (mainnet, testnet, testnet1, devnet, local)",
 		Value:       "mainnet",
 		Destination: &network,
 	},
 	hostFlag: &cli.StringFlag{
-		Name:        hostFlag,
-		Usage:       "custom full-node host",
+		Name: hostFlag,
+		Usage: "Custom full-node host. This flag is combined with the `network` flag to initialize the environment" +
+			" in which the custom host points to.",
 		Value:       "",
 		Destination: &host,
 	},
@@ -28,15 +29,16 @@ var defaultFlags = map[string]cli.Flag{
 		Destination: &clientVersion,
 	},
 	debugFlag: &cli.IntFlag{
-		Name:  "debug",
-		Usage: "whether to enable the debug mode (0 - disabled, <> 0 - enabled)",
-		Value: 1,
+		Name:        "debug",
+		Usage:       "whether to enable the debug mode (0 - disabled, <> 0 - enabled)",
+		Value:       1,
 		Destination: &debug,
 	},
+
 	privateKeyFlag: &cli.StringFlag{
 		Name:     privateKeyFlag,
 		Aliases:  aliases[privateKeyFlag],
-		Usage:    "a base58-encoded private key",
+		Usage:    "a base58-encoded Incognito private key",
 		Required: true,
 	},
 	addressFlag: &cli.StringFlag{
@@ -57,15 +59,17 @@ var defaultFlags = map[string]cli.Flag{
 		Usage:   "a base58-encoded read-only key",
 		Value:   "",
 	},
+
 	tokenIDFlag: &cli.StringFlag{
-		Name:  tokenIDFlag,
-		Usage: "ID of the token",
-		Value: common.PRVIDStr,
+		Name:    tokenIDFlag,
+		Aliases: aliases[tokenIDFlag],
+		Usage:   "the Incognito ID of the token",
+		Value:   common.PRVIDStr,
 	},
 	amountFlag: &cli.Uint64Flag{
 		Name:     amountFlag,
 		Aliases:  aliases[amountFlag],
-		Usage:    "the amount of the action",
+		Usage:    "the Incognito amount of the action",
 		Required: true,
 	},
 	feeFlag: &cli.Uint64Flag{
@@ -116,9 +120,10 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	txHashFlag: &cli.StringFlag{
 		Name:     txHashFlag,
-		Usage:    "the transaction hash",
+		Usage:    "an Incognito transaction hash",
 		Required: true,
 	},
+
 	tokenIDToSellFlag: &cli.StringFlag{
 		Name:     tokenIDToSellFlag,
 		Usage:    "ID of the token to sell",
@@ -160,8 +165,35 @@ var defaultFlags = map[string]cli.Flag{
 		Value: common.PRVIDStr,
 	},
 	numShardsFlags: &cli.IntFlag{
-		Name:        numShardsFlags,
-		Usage:       "the number of shard",
-		Value:       8,
+		Name:  numShardsFlags,
+		Usage: "the number of shard",
+		Value: 8,
+	},
+
+	evmAddressFlag: &cli.StringFlag{
+		Name:  evmAddressFlag,
+		Usage: "a hex-encoded address on ETH/BSC networks",
+		Value: "",
+	},
+	tokenAddressFlag: &cli.StringFlag{
+		Name:  tokenAddressFlag,
+		Usage: "ID of the token on ETH/BSC networks",
+		Value: nativeToken,
+	},
+	shieldAmountFlag: &cli.Float64Flag{
+		Name:     shieldAmountFlag,
+		Aliases:  aliases[shieldAmountFlag],
+		Usage:    "the shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01)",
+		Required: true,
+	},
+	evmFlag: &cli.StringFlag{
+		Name:  evmFlag,
+		Usage: "The EVM network (ETH or BSC)",
+		Value: "ETH",
+	},
+	evmTxHash: &cli.StringFlag{
+		Name:     evmTxHash,
+		Usage:    "the transaction hash on an EVM network (ETH/BSC)",
+		Required: true,
 	},
 }

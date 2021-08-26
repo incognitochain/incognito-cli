@@ -27,7 +27,7 @@ func checkBalance(c *cli.Context) error {
 		return fmt.Errorf("tokenID is invalid")
 	}
 
-	balance, err := client.GetBalance(privateKey, tokenIDStr)
+	balance, err := cfg.incClient.GetBalance(privateKey, tokenIDStr)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func consolidateUTXOs(c *cli.Context) error {
 
 	fmt.Printf("CONSOLIDATING tokenID %v, version %v, numThreads %v, enableLog %v\n", tokenIDStr, version, numThreads, enableLog)
 
-	txList, err := client.Consolidate(privateKey, tokenIDStr, int8(version), numThreads)
+	txList, err := cfg.incClient.Consolidate(privateKey, tokenIDStr, int8(version), numThreads)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func checkUTXOs(c *cli.Context) error {
 		return fmt.Errorf("tokenID is invalid")
 	}
 
-	unSpentCoins, idxList, err := client.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
+	unSpentCoins, idxList, err := cfg.incClient.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func getOutCoins(c *cli.Context) error {
 	outCoinKey.SetOTAKey(otaKey)
 	outCoinKey.SetReadonlyKey(readonlyKey)
 
-	outCoins, idxList, err := client.GetOutputCoins(outCoinKey, tokenIDStr, 0)
+	outCoins, idxList, err := cfg.incClient.GetOutputCoins(outCoinKey, tokenIDStr, 0)
 	if err != nil {
 		return err
 	}
@@ -221,7 +221,7 @@ func getHistory(c *cli.Context) error {
 		}
 	}
 
-	err := initClient("https://beta-fullnode.incognito.org/fullnode", incclient.MainNetETHHost, 1)
+	err := initClient("https://beta-fullnode.incognito.org/fullnode", 1)
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func getHistory(c *cli.Context) error {
 
 	csvFile := c.String("csvFile")
 
-	historyProcessor := incclient.NewTxHistoryProcessor(client, numThreads)
+	historyProcessor := incclient.NewTxHistoryProcessor(cfg.incClient, numThreads)
 
 	h, err := historyProcessor.GetTokenHistory(privateKey, tokenIDStr)
 	if err != nil {
@@ -321,9 +321,9 @@ func submitKey(c *cli.Context) error {
 	if accessToken != "" {
 		fromHeight := c.Uint64("fromHeight")
 		isReset := c.Bool("isReset")
-		err = client.AuthorizedSubmitKey(otaKey, accessToken, fromHeight, isReset)
+		err = cfg.incClient.AuthorizedSubmitKey(otaKey, accessToken, fromHeight, isReset)
 	} else {
-		err = client.SubmitKey(otaKey)
+		err = cfg.incClient.SubmitKey(otaKey)
 	}
 
 	if err != nil {
