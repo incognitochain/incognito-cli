@@ -7,6 +7,7 @@ import (
 	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
+	"regexp"
 	"strings"
 )
 
@@ -45,6 +46,7 @@ const (
 
 	numShardsFlags = "numShards"
 
+	evmAddressFlag   = "evmAddress"
 	tokenAddressFlag = "tokenAddress"
 	shieldAmountFlag = "shieldAmount"
 	evmFlag          = "evm"
@@ -172,9 +174,10 @@ func isValidTokenID(tokenIDStr string) bool {
 	return true
 }
 
-// isValidTokenAddress checks if a string tokenAddress is valid or not.
-func isValidTokenAddress(tokenAddress string) bool {
-	if tokenAddress == "" {
+// isValidEVMAddress checks if a string tokenAddress is valid or not.
+func isValidEVMAddress(tokenAddress string) bool {
+	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+	if !re.MatchString(tokenAddress) {
 		return false
 	}
 

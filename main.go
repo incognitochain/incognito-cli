@@ -335,13 +335,10 @@ func main() {
 	// Bridge commands
 	bridgeCommands := []*cli.Command{
 		{
-			Name:  "shield",
-			Usage: "Shield an EVM token (ETH/BNB/ERC20/BEP20) token into the Incognito network.",
-			Description: "This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. Please note that" +
-				"this function requires users have some knowledge of how an EVM network operates. It will ask for users' EVM private key " +
-				"to proceed. Shielding is a complicated process, users MUST understand how the process works before using this function. " +
-				"We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.",
-			Category: bridgeCat,
+			Name:        "shield",
+			Usage:       "Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.",
+			Description: shieldMessage,
+			Category:    bridgeCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[shieldAmountFlag],
@@ -367,6 +364,34 @@ func main() {
 				defaultFlags[tokenAddressFlag],
 			},
 			Action: retryShield,
+		},
+		{
+			Name:        "unshield",
+			Usage:       "Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.",
+			Description: unShieldMessage,
+			Category:    bridgeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				&cli.StringFlag{
+					Name:     tokenIDFlag,
+					Aliases:  aliases[tokenIDFlag],
+					Usage:    "the Incognito tokenID of the un-shielding asset",
+					Required: true,
+				},
+				defaultFlags[amountFlag],
+			},
+			Action: unShield,
+		},
+		{
+			Name:        "retryunshield",
+			Usage:       "Retry an un-shielding request from the given already-been-burned Incognito transaction.",
+			Description: "This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.",
+			Category:    bridgeCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+				defaultFlags[evmFlag],
+			},
+			Action: retryUnShield,
 		},
 	}
 

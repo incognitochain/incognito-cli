@@ -34,10 +34,11 @@ var defaultFlags = map[string]cli.Flag{
 		Value:       1,
 		Destination: &debug,
 	},
+
 	privateKeyFlag: &cli.StringFlag{
 		Name:     privateKeyFlag,
 		Aliases:  aliases[privateKeyFlag],
-		Usage:    "a base58-encoded private key",
+		Usage:    "a base58-encoded Incognito private key",
 		Required: true,
 	},
 	addressFlag: &cli.StringFlag{
@@ -58,15 +59,17 @@ var defaultFlags = map[string]cli.Flag{
 		Usage:   "a base58-encoded read-only key",
 		Value:   "",
 	},
+
 	tokenIDFlag: &cli.StringFlag{
-		Name:  tokenIDFlag,
-		Usage: "ID of the token",
-		Value: common.PRVIDStr,
+		Name:    tokenIDFlag,
+		Aliases: aliases[tokenIDFlag],
+		Usage:   "the Incognito ID of the token",
+		Value:   common.PRVIDStr,
 	},
 	amountFlag: &cli.Uint64Flag{
 		Name:     amountFlag,
 		Aliases:  aliases[amountFlag],
-		Usage:    "the amount of the action",
+		Usage:    "the Incognito amount of the action",
 		Required: true,
 	},
 	feeFlag: &cli.Uint64Flag{
@@ -117,9 +120,10 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	txHashFlag: &cli.StringFlag{
 		Name:     txHashFlag,
-		Usage:    "the transaction hash",
+		Usage:    "an Incognito transaction hash",
 		Required: true,
 	},
+
 	tokenIDToSellFlag: &cli.StringFlag{
 		Name:     tokenIDToSellFlag,
 		Usage:    "ID of the token to sell",
@@ -165,6 +169,12 @@ var defaultFlags = map[string]cli.Flag{
 		Usage: "the number of shard",
 		Value: 8,
 	},
+
+	evmAddressFlag: &cli.StringFlag{
+		Name:  evmAddressFlag,
+		Usage: "a hex-encoded address on ETH/BSC networks",
+		Value: "",
+	},
 	tokenAddressFlag: &cli.StringFlag{
 		Name:  tokenAddressFlag,
 		Usage: "ID of the token on ETH/BSC networks",
@@ -178,7 +188,7 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	evmFlag: &cli.StringFlag{
 		Name:  evmFlag,
-		Usage: "The EVM network (ETH/BSC)",
+		Usage: "The EVM network (ETH or BSC)",
 		Value: "ETH",
 	},
 	evmTxHash: &cli.StringFlag{

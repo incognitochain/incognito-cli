@@ -513,6 +513,20 @@ func getSynthesizedAmount(amount *big.Int, decimals uint64) *big.Float {
 		new(big.Float).SetInt(new(big.Int).Exp(new(big.Int).SetUint64(10), new(big.Int).SetUint64(decimals), nil)))
 }
 
+func getEVMClientAndVaultAddress(isOnBSC ...bool) (isBSC bool, evmClient *ethclient.Client, vaultAddress common.Address) {
+	evmClient = cfg.ethClient
+	vaultAddress = cfg.ethVaultAddress
+	isBSC = false
+	if len(isOnBSC) != 0 && isOnBSC[0] {
+		isBSC = true
+
+		evmClient = cfg.bscClient
+		vaultAddress = cfg.bscVaultAddress
+	}
+
+	return
+}
+
 func getAllDecentralizedBridgeTokens() (incToPublic map[string]string, publicToInc map[string]string, err error) {
 	incToPublic = make(map[string]string)
 	publicToInc = make(map[string]string)
@@ -536,20 +550,6 @@ func getAllDecentralizedBridgeTokens() (incToPublic map[string]string, publicToI
 	return
 }
 
-func getEVMClientAndVaultAddress(isOnBSC ...bool) (isBSC bool, evmClient *ethclient.Client, vaultAddress common.Address) {
-	evmClient = cfg.ethClient
-	vaultAddress = cfg.ethVaultAddress
-	isBSC = false
-	if len(isOnBSC) != 0 && isOnBSC[0] {
-		isBSC = true
-
-		evmClient = cfg.bscClient
-		vaultAddress = cfg.bscVaultAddress
-	}
-
-	return
-}
-
 func getIncTokenIDFromEVMTokenID(evmTokenID string, isBSC bool) (string, error) {
 	evmTokenID = strings.Replace(evmTokenID, "0x", "", -1)
 	evmTokenID = strings.Replace(evmTokenID, "0X", "", -1)
@@ -568,6 +568,28 @@ func getIncTokenIDFromEVMTokenID(evmTokenID string, isBSC bool) (string, error) 
 	}
 
 	return "", fmt.Errorf("incTokenID not found for evmTokenID %v", evmTokenID)
+}
+
+func getEVMTokenIDIncTokenID(incTokenIDStr string) (string, bool, error) {
+	incTokenIDStr = strings.Replace(incTokenIDStr, "0x", "", -1)
+	incTokenIDStr = strings.Replace(incTokenIDStr, "0X", "", -1)
+
+	incTokenIDStr = strings.ToLower(incTokenIDStr)
+
+	incToPublic, _, err := getAllDecentralizedBridgeTokens()
+	if err != nil {
+		return "", false, err
+	}
+
+	if evmTokenIDStr, ok := incToPublic[incTokenIDStr]; ok {
+		if len(evmTokenIDStr) == 46 && strings.Contains(evmTokenIDStr, "425343") {
+			return evmTokenIDStr[6:], true, nil
+		} else if len(evmTokenIDStr) == 40 {
+			return evmTokenIDStr, false, nil
+		}
+	}
+
+	return "", false, fmt.Errorf("evmToken not found for incTokenIDStr %v", incTokenIDStr)
 }
 
 // estimateGasPrice returns the estimated gas price on the EVM network.
@@ -737,6 +759,73 @@ func (acc EVMAccount) DepositToken(incAddress, tokenAddressStr string, deposited
 	return &txHash, nil
 }
 
+// ApproveERC20 approves the Incognito Vault to spend an ERC20/BEP20 token of an account.
+func (acc EVMAccount) ApproveERC20(tokenAddress, approved common.Address, approvedAmount float64, gasPrice uint64, isBSC bool) (*common.Hash, error) {
+	prefix := "[ApproveERC20]"
+	isBSC, evmClient, _ := getEVMClientAndVaultAddress(isBSC)
+	if isBSC {
+		prefix = "[ApproveBEP20]"
+	}
+
+	erc20Token, err := erc20.NewErc20(tokenAddress, evmClient)
+	if err != nil {
+		return nil, err
+	}
+	tokenDecimals, err := getDecimals(tokenAddress, isBSC)
+	if err != nil {
+		return nil, err
+	}
+
+	// load the ERC20 ABI
+	erc20ABI, err := abi.JSON(strings.NewReader(erc20.Erc20ABI))
+	if err != nil {
+		return nil, err
+	}
+
+	// estimate the gas limit
+	approvedAmountBigInt := new(big.Int).SetUint64(uint64(approvedAmount * math.Pow10(int(tokenDecimals))))
+	data, err := erc20ABI.Pack(
+		"approve",
+		approved,
+		approvedAmountBigInt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// estimate the gas limit and gas price
+	gasPriceBigInt, gasLimit, err := acc.getGasLimitAndPrice(0, gasPrice, ethereum.CallMsg{To: &tokenAddress, Data: data}, isBSC)
+	if err != nil {
+		return nil, err
+	}
+	txFee := getSynthesizedAmount(
+		new(big.Int).Mul(new(big.Int).SetUint64(gasLimit), gasPriceBigInt),
+		uint64(nativeTokenDecimals),
+	)
+	if askUser {
+		yesNoPrompt(fmt.Sprintf("%v Approve %v to spend %v of token %v. Are you sure?",
+			prefix, approved, approvedAmount, tokenAddress.String()))
+		yesNoPrompt(fmt.Sprintf("%v GasPrice: %v gWei, TxFee: %v. Do you want to continue?",
+			prefix, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee.String()))
+	} else {
+		log.Printf("%v GasPrice: %v, GasLimit %v, TxFee %v\n", prefix, gasPriceBigInt.Uint64(), gasLimit, txFee.String())
+	}
+
+	auth, err := acc.newTransactionOpts(tokenAddress, gasPriceBigInt.Uint64(), gasLimit, 0, data, isBSC)
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := erc20Token.Approve(auth, approved, approvedAmountBigInt)
+	if err != nil {
+		return nil, err
+	}
+
+	txHash := tx.Hash()
+	log.Printf("%v TxHash: %v\n", prefix, txHash.String())
+	return &txHash, nil
+}
+
 // UnShield submits a burn proof of the given incTxHash to the smart contract to obtain back a public token.
 func (acc EVMAccount) UnShield(incTxHash string, gasLimit, gasPrice uint64, isOnBSC ...bool) (*common.Hash, error) {
 	prefix := "[UnShield]"
@@ -807,73 +896,6 @@ func (acc EVMAccount) UnShield(incTxHash string, gasLimit, gasPrice uint64, isOn
 	if err := wait(txHash, isBSC); err != nil {
 		return nil, err
 	}
-	return &txHash, nil
-}
-
-// ApproveERC20 approves the Incognito Vault to spend an ERC20/BEP20 token of an account.
-func (acc EVMAccount) ApproveERC20(tokenAddress, approved common.Address, approvedAmount float64, gasPrice uint64, isBSC bool) (*common.Hash, error) {
-	prefix := "[ApproveERC20]"
-	isBSC, evmClient, _ := getEVMClientAndVaultAddress(isBSC)
-	if isBSC {
-		prefix = "[ApproveBEP20]"
-	}
-
-	erc20Token, err := erc20.NewErc20(tokenAddress, evmClient)
-	if err != nil {
-		return nil, err
-	}
-	tokenDecimals, err := getDecimals(tokenAddress, isBSC)
-	if err != nil {
-		return nil, err
-	}
-
-	// load the ERC20 ABI
-	erc20ABI, err := abi.JSON(strings.NewReader(erc20.Erc20ABI))
-	if err != nil {
-		return nil, err
-	}
-
-	// estimate the gas limit
-	approvedAmountBigInt := new(big.Int).SetUint64(uint64(approvedAmount * math.Pow10(int(tokenDecimals))))
-	data, err := erc20ABI.Pack(
-		"approve",
-		approved,
-		approvedAmountBigInt,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// estimate the gas limit and gas price
-	gasPriceBigInt, gasLimit, err := acc.getGasLimitAndPrice(0, gasPrice, ethereum.CallMsg{To: &tokenAddress, Data: data}, isBSC)
-	if err != nil {
-		return nil, err
-	}
-	txFee := getSynthesizedAmount(
-		new(big.Int).Mul(new(big.Int).SetUint64(gasLimit), gasPriceBigInt),
-		uint64(nativeTokenDecimals),
-	)
-	if askUser {
-		yesNoPrompt(fmt.Sprintf("%v Approve %v to spend %v of token %v. Are you sure?",
-			prefix, approved, approvedAmount, tokenAddress.String()))
-		yesNoPrompt(fmt.Sprintf("%v GasPrice: %v gWei, TxFee: %v. Do you want to continue?",
-			prefix, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee.String()))
-	} else {
-		log.Printf("%v GasPrice: %v, GasLimit %v, TxFee %v\n", prefix, gasPriceBigInt.Uint64(), gasLimit, txFee.String())
-	}
-
-	auth, err := acc.newTransactionOpts(tokenAddress, gasPriceBigInt.Uint64(), gasLimit, 0, data, isBSC)
-	if err != nil {
-		return nil, err
-	}
-
-	tx, err := erc20Token.Approve(auth, approved, approvedAmountBigInt)
-	if err != nil {
-		return nil, err
-	}
-
-	txHash := tx.Hash()
-	log.Printf("%v TxHash: %v\n", prefix, txHash.String())
 	return &txHash, nil
 }
 
