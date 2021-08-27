@@ -55,7 +55,6 @@ COMMANDS:
    help, h  Shows a list of commands or help for one command
    ACCOUNTS:
      balance                  Check the balance of an account for a tokenID.
-     balanceall               Return the non-zero balances of an account for all tokenIDs.
      consolidate, csl         Consolidate UTXOs of an account.
      generateaccount, genacc  Generate a new Incognito account.
      history, hst             Retrieve the history of an account.
@@ -99,7 +98,6 @@ COPYRIGHT:
 <!-- commands -->
 * [`ACCOUNTS`](#accounts)
   * [`balance`](#balance)
-  * [`balanceall`](#balanceall)
   * [`consolidate`](#consolidate)
   * [`generateaccount`](#generateaccount)
   * [`history`](#history)
@@ -146,29 +144,6 @@ CATEGORY:
 OPTIONS:
    --privateKey value, -p value  a base58-encoded Incognito private key
    --tokenID value, --id value   the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   
-```
-
-### balanceall
-This function returns the non-zero balances of an account for all tokenIDs. Due to the large number of tokens on the network, this function requires a long amount of time to proceed.
-```shell
-$ incognito-cli help balanceall
-NAME:
-   incognito-cli balanceall - Return the non-zero balances of an account for all tokenIDs.
-
-USAGE:
-   balanceall --privateKey PRIVATE_KEY
-
-   OPTIONAL flags are denoted by a [] bracket.
-
-CATEGORY:
-   ACCOUNTS
-
-DESCRIPTION:
-   This function returns the non-zero balances of an account for all tokenIDs. Due to the large number of tokens on the network, this function requires a long amount of time to proceed.
-
-OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
    
 ```
 

@@ -59,17 +59,17 @@ func main() {
 			},
 			Action: checkBalance,
 		},
-		{
-			Name:  "balanceall",
-			Usage: "Return the non-zero balances of an account for all tokenIDs.",
-			Description: "This function returns the non-zero balances of an account for all tokenIDs. Due to the large number of " +
-				"tokens on the network, this function requires a long amount of time to proceed.",
-			Category: accountCat,
-			Flags: []cli.Flag{
-				defaultFlags[privateKeyFlag],
-			},
-			Action: checkBalanceAll,
-		},
+		//{
+		//	Name:  "balanceall",
+		//	Usage: "Return the non-zero balances of an account for all tokenIDs.",
+		//	Description: "This function returns the non-zero balances of an account for all tokenIDs. Due to the large number of " +
+		//		"tokens on the network, this function requires a long amount of time to proceed.",
+		//	Category: accountCat,
+		//	Flags: []cli.Flag{
+		//		defaultFlags[privateKeyFlag],
+		//	},
+		//	Action: checkBalanceAll,
+		//},
 		{
 			Name:     "outcoin",
 			Usage:    "Print the output coins of an account.",
