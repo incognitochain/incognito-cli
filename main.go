@@ -51,22 +51,24 @@ func main() {
 		},
 		{
 			Name:     "balance",
-			Usage:    "Check the balance of an account.",
+			Usage:    "Check the balance of an account for a tokenID.",
 			Category: accountCat,
 			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     privateKeyFlag,
-					Aliases:  aliases[privateKeyFlag],
-					Usage:    "a base58-encoded private key",
-					Required: true,
-				},
-				&cli.StringFlag{
-					Name:  tokenIDFlag,
-					Usage: "ID of the token",
-					Value: common.PRVIDStr,
-				},
+				defaultFlags[privateKeyFlag],
+				defaultFlags[tokenIDFlag],
 			},
 			Action: checkBalance,
+		},
+		{
+			Name:  "balanceall",
+			Usage: "Return the non-zero balances of an account for all tokenIDs.",
+			Description: "This function returns the non-zero balances of an account for all tokenIDs. Due to the large number of " +
+				"tokens on the network, this function requires a long amount of time to proceed.",
+			Category: accountCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+			},
+			Action: checkBalanceAll,
 		},
 		{
 			Name:     "outcoin",

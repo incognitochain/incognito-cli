@@ -24,7 +24,7 @@ var (
 
 func initNetWork() error {
 	if debug != 0 {
-		incclient.Logger.IsEnable = false
+		incclient.Logger.IsEnable = true
 	}
 	if host != "" {
 		fmt.Printf("host: %v\n", host)

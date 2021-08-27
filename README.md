@@ -54,7 +54,8 @@ AUTHOR:
 COMMANDS:
    help, h  Shows a list of commands or help for one command
    ACCOUNTS:
-     balance                  Check the balance of an account.
+     balance                  Check the balance of an account for a tokenID.
+     balanceall               Return the non-zero balances of an account for all tokenIDs.
      consolidate, csl         Consolidate UTXOs of an account.
      generateaccount, genacc  Generate a new Incognito account.
      history, hst             Retrieve the history of an account.
@@ -85,7 +86,7 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    --clientVersion value         version of the incclient (default: 2)
-   --debug value                 whether to enable the debug mode (0 - disabled, <> 0 - enabled) (default: 1)
+   --debug value                 whether to enable the debug mode (0 - disabled, <> 0 - enabled) (default: 0)
    --host network                Custom full-node host. This flag is combined with the network flag to initialize the environment in which the custom host points to.
    --network value, --net value  network environment (mainnet, testnet, testnet1, devnet, local) (default: "mainnet")
    --help, -h                    show help (default: false)
@@ -98,6 +99,7 @@ COPYRIGHT:
 <!-- commands -->
 * [`ACCOUNTS`](#accounts)
   * [`balance`](#balance)
+  * [`balanceall`](#balanceall)
   * [`consolidate`](#consolidate)
   * [`generateaccount`](#generateaccount)
   * [`history`](#history)
@@ -127,11 +129,11 @@ COPYRIGHT:
   * [`send`](#send)
 ## ACCOUNTS
 ### balance
-Check the balance of an account.
+Check the balance of an account for a tokenID.
 ```shell
 $ incognito-cli help balance
 NAME:
-   incognito-cli balance - Check the balance of an account.
+   incognito-cli balance - Check the balance of an account for a tokenID.
 
 USAGE:
    balance --privateKey PRIVATE_KEY [--tokenID TOKEN_ID]
@@ -142,8 +144,31 @@ CATEGORY:
    ACCOUNTS
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded private key
-   --tokenID value               ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --privateKey value, -p value  a base58-encoded Incognito private key
+   --tokenID value, --id value   the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   
+```
+
+### balanceall
+This function returns the non-zero balances of an account for all tokenIDs. Due to the large number of tokens on the network, this function requires a long amount of time to proceed.
+```shell
+$ incognito-cli help balanceall
+NAME:
+   incognito-cli balanceall - Return the non-zero balances of an account for all tokenIDs.
+
+USAGE:
+   balanceall --privateKey PRIVATE_KEY
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   ACCOUNTS
+
+DESCRIPTION:
+   This function returns the non-zero balances of an account for all tokenIDs. Due to the large number of tokens on the network, this function requires a long amount of time to proceed.
+
+OPTIONS:
+   --privateKey value, -p value  a base58-encoded Incognito private key
    
 ```
 
@@ -370,13 +395,10 @@ OPTIONS:
 ### shield
 This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
 1. Deposit the EVM asset into the corresponding smart contract.
-
-   1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
-
+1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
 2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
 
 Note that shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
-
 DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
 ```shell
 $ incognito-cli help shield
@@ -416,7 +438,6 @@ This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incog
 3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
 
 Please be aware that un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. Otherwise, use the un-shielding function from the Incognito app. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
-
 DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS.
 ```shell
 $ incognito-cli help unshield
