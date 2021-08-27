@@ -12,10 +12,11 @@ func main() {
 	app := &cli.App{
 		Name:    "incognito-cli",
 		Usage:   "A simple CLI application for the Incognito network",
-		Version: "v0.0.2",
+		Version: "v0.0.3",
 		Description: "A simple CLI application for the Incognito network. With this tool, you can run some basic functions" +
 			" on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens," +
-			" consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, etc.",
+			" consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding " +
+			"ETH/BNB/ERC20/BEP20, etc.",
 		Authors: []*cli.Author{
 			{
 				Name: "Incognito Devs Team",
@@ -29,7 +30,6 @@ func main() {
 	app.Flags = []cli.Flag{
 		defaultFlags[networkFlag],
 		defaultFlags[hostFlag],
-		defaultFlags[clientVersionFlag],
 		defaultFlags[debugFlag],
 	}
 
@@ -134,12 +134,24 @@ func main() {
 			Name:        "generateaccount",
 			Aliases:     []string{"genacc"},
 			Usage:       "Generate a new Incognito account.",
-			Description: "This function helps generate a new mnemonic phrase and its Incognito account.",
+			Description: "This function helps generate a new mnemonic phrase and its Incognito accounts.",
 			Category:    accountCat,
 			Flags: []cli.Flag{
-				defaultFlags[numShardsFlags],
+				defaultFlags[numShardsFlag],
 			},
 			Action: genKeySet,
+		},
+		{
+			Name:        "importeaccount",
+			Aliases:     []string{"import"},
+			Usage:       "Import a mnemonic of 12 words.",
+			Description: "This function helps generate Incognito accounts given a mnemonic.",
+			Category:    accountCat,
+			Flags: []cli.Flag{
+				defaultFlags[mnemonicFlag],
+				defaultFlags[numShardsFlag],
+			},
+			Action: importMnemonic,
 		},
 		{
 			Name:    "submitkey",

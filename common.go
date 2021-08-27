@@ -44,7 +44,8 @@ const (
 	tokenID1Flag            = "tokenID1"
 	tokenID2Flag            = "tokenID2"
 
-	numShardsFlags = "numShards"
+	mnemonicFlag  = "mnemonic"
+	numShardsFlag = "numShards"
 
 	evmAddressFlag   = "evmAddress"
 	tokenAddressFlag = "tokenAddress"

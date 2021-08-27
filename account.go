@@ -9,6 +9,7 @@ import (
 	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
+	"strings"
 )
 
 func checkBalance(c *cli.Context) error {
@@ -308,24 +309,68 @@ func genKeySet(c *cli.Context) error {
 		return err
 	}
 
-	numShards := c.Int(numShardsFlags)
+	numShards := c.Int(numShardsFlag)
 	if numShards == 0 {
-		return fmt.Errorf("%v is invalid", numShardsFlags)
+		return fmt.Errorf("%v is invalid", numShardsFlag)
 	}
 	common.MaxShardNumber = numShards
 
-	privateKey := w.Base58CheckSerialize(wallet.PrivateKeyType)
-	info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
+	numAccounts := 5
+	fmt.Printf("mnemonic: %v\n", mnemonic)
+	for i := 0; i < numAccounts; i++ {
+		childKey, err := w.DeriveChild(uint32(i))
+		if err != nil {
+			return err
+		}
+		privateKey := childKey.Base58CheckSerialize(wallet.PrivateKeyType)
+		info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
+		if err != nil {
+			return err
+		}
+
+		jsb, err := json.MarshalIndent(info, "", "\t")
+		if err != nil {
+			return fmt.Errorf("marshalling key info error: %v", err)
+		}
+		fmt.Println(string(jsb))
+	}
+
+	return nil
+}
+
+func importMnemonic(c *cli.Context) error {
+	mnemonic := c.String(mnemonicFlag)
+	mnemonic = strings.Replace(mnemonic, "-", " ", -1)
+	w, err := wallet.NewMasterKeyFromMnemonic(mnemonic)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("mnemonic: %v\n", mnemonic)
-	jsb, err := json.MarshalIndent(info, "", "\t")
-	if err != nil {
-		return fmt.Errorf("marshalling key info error: %v", err)
+	numShards := c.Int(numShardsFlag)
+	if numShards == 0 {
+		return fmt.Errorf("%v is invalid", numShardsFlag)
 	}
-	fmt.Println(string(jsb))
+	common.MaxShardNumber = numShards
+
+	numAccounts := 5
+	fmt.Printf("mnemonic: %v\n", mnemonic)
+	for i := 0; i < numAccounts; i++ {
+		childKey, err := w.DeriveChild(uint32(i))
+		if err != nil {
+			return err
+		}
+		privateKey := childKey.Base58CheckSerialize(wallet.PrivateKeyType)
+		info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
+		if err != nil {
+			return err
+		}
+
+		jsb, err := json.MarshalIndent(info, "", "\t")
+		if err != nil {
+			return fmt.Errorf("marshalling key info error: %v", err)
+		}
+		fmt.Println(string(jsb))
+	}
 
 	return nil
 }

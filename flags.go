@@ -164,8 +164,14 @@ var defaultFlags = map[string]cli.Flag{
 		Usage: "ID of the second token",
 		Value: common.PRVIDStr,
 	},
-	numShardsFlags: &cli.IntFlag{
-		Name:  numShardsFlags,
+	mnemonicFlag: &cli.StringFlag{
+		Name:     mnemonicFlag,
+		Aliases:  []string{"m"},
+		Usage:    "a 12-word mnemonic phrase, words are separated by a \"-\" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).",
+		Required: true,
+	},
+	numShardsFlag: &cli.IntFlag{
+		Name:  numShardsFlag,
 		Usage: "the number of shard",
 		Value: 8,
 	},
