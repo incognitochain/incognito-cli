@@ -36,6 +36,30 @@ func checkBalance(c *cli.Context) error {
 	return nil
 }
 
+func checkBalanceAll(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String("privateKey")
+	if privateKey == "" {
+		return fmt.Errorf("private key is invalid")
+	}
+
+	balances, err := cfg.incClient.GetBalanceAll(privateKey)
+	if err != nil {
+		return err
+	}
+	jsb, err := json.MarshalIndent(balances, "", "\t")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsb))
+
+	return nil
+}
+
 func keyInfo(c *cli.Context) error {
 	privateKey := c.String("privateKey")
 	if privateKey == "" {
