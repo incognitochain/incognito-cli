@@ -80,7 +80,7 @@ const (
 	committeeCat   = "COMMITTEES"
 	transactionCat = "TRANSACTIONS"
 	pDEXCat        = "PDEX"
-	evmBridgeCat   = "EVM BRIDGE"
+	evmBridgeCat   = "EVMBRIDGE"
 	portalCat   = "PORTAL"
 )
 

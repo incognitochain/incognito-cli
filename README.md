@@ -66,7 +66,7 @@ COMMANDS:
    COMMITTEES:
      checkrewards    Get all rewards of a payment address.
      withdrawreward  Withdraw the reward of a privateKey w.r.t to a tokenID.
-   EVM BRIDGE:
+   EVMBRIDGE:
      evmretryshield    Retry a shield from the given already-been-deposited-to-sc EVM transaction.
      evmretryunshield  Retry an un-shielding request from the given already-been-burned Incognito transaction.
      evmshield         Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.
@@ -112,7 +112,7 @@ COPYRIGHT:
 * [`COMMITTEES`](#committees)
   * [`checkrewards`](#checkrewards)
   * [`withdrawreward`](#withdrawreward)
-* [`EVM BRIDGE`](#evm bridge)
+* [`EVMBRIDGE`](#evmbridge)
   * [`evmretryshield`](#evmretryshield)
   * [`evmretryunshield`](#evmretryunshield)
   * [`evmshield`](#evmshield)
@@ -391,7 +391,7 @@ OPTIONS:
    
 ```
 
-## EVM BRIDGE
+## EVMBRIDGE
 ### evmretryshield
 This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.
 ```shell
@@ -405,7 +405,7 @@ USAGE:
    OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
-   EVM BRIDGE
+   EVMBRIDGE
 
 DESCRIPTION:
    This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.
@@ -431,7 +431,7 @@ USAGE:
    OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
-   EVM BRIDGE
+   EVMBRIDGE
 
 DESCRIPTION:
    This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
@@ -461,7 +461,7 @@ USAGE:
    OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
-   EVM BRIDGE
+   EVMBRIDGE
 
 DESCRIPTION:
    This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
@@ -500,7 +500,7 @@ USAGE:
    OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
-   EVM BRIDGE
+   EVMBRIDGE
 
 DESCRIPTION:
    This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
@@ -704,6 +704,7 @@ OPTIONS:
 ### portalunshieldstatus
 This function helps retrieve the status of a portal un-shielding request.
 Status should be understood as: 0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.
+If you encounter an error saying "unexpected end of JSON input", it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 ```shell
 $ incognito-cli help portalunshieldstatus
 NAME:
@@ -720,6 +721,7 @@ CATEGORY:
 DESCRIPTION:
    This function helps retrieve the status of a portal un-shielding request.
    Status should be understood as: 0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.
+   If you encounter an error saying "unexpected end of JSON input", it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 
 OPTIONS:
    --txHash value  an Incognito transaction hash
