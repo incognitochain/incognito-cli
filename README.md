@@ -43,10 +43,10 @@ USAGE:
    incognito-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   v0.0.2
+   v0.0.3
 
 DESCRIPTION:
-   A simple CLI application for the Incognito network. With this tool, you can run some basic functions on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens, consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, etc.
+   A simple CLI application for the Incognito network. With this tool, you can run some basic functions on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens, consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding ETH/BNB/ERC20/BEP20, etc.
 
 AUTHOR:
    Incognito Devs Team
@@ -58,18 +58,19 @@ COMMANDS:
      consolidate, csl         Consolidate UTXOs of an account.
      generateaccount, genacc  Generate a new Incognito account.
      history, hst             Retrieve the history of an account.
+     importeaccount, import   Import a mnemonic of 12 words.
      keyinfo                  Print all related-keys of a private key.
      outcoin                  Print the output coins of an account.
      submitkey, sub           Submit an ota key to the full-node.
      utxo                     Print the UTXOs of an account.
-   BRIDGE:
-     retryshield    Retry a shield from the given already-been-deposited-to-sc EVM transaction.
-     retryunshield  Retry an un-shielding request from the given already-been-burned Incognito transaction.
-     shield         Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.
-     unshield       Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.
    COMMITTEES:
      checkrewards    Get all rewards of a payment address.
      withdrawreward  Withdraw the reward of a privateKey w.r.t to a tokenID.
+   EVM BRIDGE:
+     evmretryshield    Retry a shield from the given already-been-deposited-to-sc EVM transaction.
+     evmretryunshield  Retry an un-shielding request from the given already-been-burned Incognito transaction.
+     evmshield         Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.
+     evmunshield       Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.
    PDEX:
      pdecheckprice   Check the price between two tokenIDs
      pdecontribute   Create a pDEX contributing transaction
@@ -77,6 +78,9 @@ COMMANDS:
      pdetrade        Create a trade transaction
      pdetradestatus  Get the status of a trade
      pdewithdraw     Create a pDEX withdrawal transaction
+   PORTAL:
+     portalunshield        Withdraw portal tokens (BTC) from the Incognito network.
+     portalunshieldstatus  Get the status of a portal un-shielding request.
    TRANSACTIONS:
      checkreceiver  Check if an OTA key is a receiver of a transaction.
      convert        Convert UTXOs of an account w.r.t a tokenID.
@@ -84,7 +88,6 @@ COMMANDS:
      send           Send an amount of PRV or token from one wallet to another wallet.
 
 GLOBAL OPTIONS:
-   --clientVersion value         version of the incclient (default: 2)
    --debug value                 whether to enable the debug mode (0 - disabled, <> 0 - enabled) (default: 0)
    --host network                Custom full-node host. This flag is combined with the network flag to initialize the environment in which the custom host points to.
    --network value, --net value  network environment (mainnet, testnet, testnet1, devnet, local) (default: "mainnet")
@@ -101,18 +104,19 @@ COPYRIGHT:
   * [`consolidate`](#consolidate)
   * [`generateaccount`](#generateaccount)
   * [`history`](#history)
+  * [`importeaccount`](#importeaccount)
   * [`keyinfo`](#keyinfo)
   * [`outcoin`](#outcoin)
   * [`submitkey`](#submitkey)
   * [`utxo`](#utxo)
-* [`BRIDGE`](#bridge)
-  * [`retryshield`](#retryshield)
-  * [`retryunshield`](#retryunshield)
-  * [`shield`](#shield)
-  * [`unshield`](#unshield)
 * [`COMMITTEES`](#committees)
   * [`checkrewards`](#checkrewards)
   * [`withdrawreward`](#withdrawreward)
+* [`EVM BRIDGE`](#evm bridge)
+  * [`evmretryshield`](#evmretryshield)
+  * [`evmretryunshield`](#evmretryunshield)
+  * [`evmshield`](#evmshield)
+  * [`evmunshield`](#evmunshield)
 * [`PDEX`](#pdex)
   * [`pdecheckprice`](#pdecheckprice)
   * [`pdecontribute`](#pdecontribute)
@@ -120,6 +124,9 @@ COPYRIGHT:
   * [`pdetrade`](#pdetrade)
   * [`pdetradestatus`](#pdetradestatus)
   * [`pdewithdraw`](#pdewithdraw)
+* [`PORTAL`](#portal)
+  * [`portalunshield`](#portalunshield)
+  * [`portalunshieldstatus`](#portalunshieldstatus)
 * [`TRANSACTIONS`](#transactions)
   * [`checkreceiver`](#checkreceiver)
   * [`convert`](#convert)
@@ -176,7 +183,7 @@ OPTIONS:
 ```
 
 ### generateaccount
-This function helps generate a new mnemonic phrase and its Incognito account.
+This function helps generate a new mnemonic phrase and its Incognito accounts.
 ```shell
 $ incognito-cli help generateaccount
 NAME:
@@ -191,7 +198,7 @@ CATEGORY:
    ACCOUNTS
 
 DESCRIPTION:
-   This function helps generate a new mnemonic phrase and its Incognito account.
+   This function helps generate a new mnemonic phrase and its Incognito accounts.
 
 OPTIONS:
    --numShards value  the number of shard (default: 8)
@@ -223,6 +230,30 @@ OPTIONS:
    --enableLog                   enable log for this action (default: false)
    --logFile value               location of the log file (default: "os.Stdout")
    --csvFile value, --csv value  the csv file location to store the history
+   
+```
+
+### importeaccount
+This function helps generate Incognito accounts given a mnemonic.
+```shell
+$ incognito-cli help importeaccount
+NAME:
+   incognito-cli importeaccount - Import a mnemonic of 12 words.
+
+USAGE:
+   importeaccount --mnemonic MNEMONIC [--numShards NUM_SHARDS]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   ACCOUNTS
+
+DESCRIPTION:
+   This function helps generate Incognito accounts given a mnemonic.
+
+OPTIONS:
+   --mnemonic value, -m value  a 12-word mnemonic phrase, words are separated by a "-" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).
+   --numShards value           the number of shard (default: 8)
    
 ```
 
@@ -316,133 +347,6 @@ OPTIONS:
    
 ```
 
-## BRIDGE
-### retryshield
-This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.
-```shell
-$ incognito-cli help retryshield
-NAME:
-   incognito-cli retryshield - Retry a shield from the given already-been-deposited-to-sc EVM transaction.
-
-USAGE:
-   retryshield --privateKey PRIVATE_KEY --evmTxHash EVM_TX_HASH [--evm EVM] [--tokenAddress TOKEN_ADDRESS]
-
-   OPTIONAL flags are denoted by a [] bracket.
-
-CATEGORY:
-   BRIDGE
-
-DESCRIPTION:
-   This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.
-
-OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --evmTxHash value             the transaction hash on an EVM network (ETH/BSC)
-   --evm value                   The EVM network (ETH or BSC) (default: "ETH")
-   --tokenAddress value          ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
-   
-```
-
-### retryunshield
-This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
-```shell
-$ incognito-cli help retryunshield
-NAME:
-   incognito-cli retryunshield - Retry an un-shielding request from the given already-been-burned Incognito transaction.
-
-USAGE:
-   retryunshield --txHash TX_HASH [--evm EVM]
-
-   OPTIONAL flags are denoted by a [] bracket.
-
-CATEGORY:
-   BRIDGE
-
-DESCRIPTION:
-   This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
-
-OPTIONS:
-   --txHash value  an Incognito transaction hash
-   --evm value     The EVM network (ETH or BSC) (default: "ETH")
-   
-```
-
-### shield
-This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
-1. Deposit the EVM asset into the corresponding smart contract.
-1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
-2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
-
-Note that shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
-DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
-```shell
-$ incognito-cli help shield
-NAME:
-   incognito-cli shield - Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.
-
-USAGE:
-   shield --privateKey PRIVATE_KEY --shieldAmount SHIELD_AMOUNT [--evm EVM] [--tokenAddress TOKEN_ADDRESS] [--address ADDRESS]
-
-   OPTIONAL flags are denoted by a [] bracket.
-
-CATEGORY:
-   BRIDGE
-
-DESCRIPTION:
-   This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
-      1. Deposit the EVM asset into the corresponding smart contract.
-        1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
-      2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
-   
-   Note that shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
-   DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
-
-OPTIONS:
-   --privateKey value, -p value       a base58-encoded Incognito private key
-   --shieldAmount value, --amt value  the shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
-   --evm value                        The EVM network (ETH or BSC) (default: "ETH")
-   --tokenAddress value               ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
-   --address value, --addr value      The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
-   
-```
-
-### unshield
-This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
-1. Users burn the token inside the Incognito chain.
-2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
-3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
-
-Please be aware that un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. Otherwise, use the un-shielding function from the Incognito app. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
-DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS.
-```shell
-$ incognito-cli help unshield
-NAME:
-   incognito-cli unshield - Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.
-
-USAGE:
-   unshield --privateKey PRIVATE_KEY --tokenID TOKEN_ID --amount AMOUNT
-
-   OPTIONAL flags are denoted by a [] bracket.
-
-CATEGORY:
-   BRIDGE
-
-DESCRIPTION:
-   This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
-      1. Users burn the token inside the Incognito chain.
-      2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
-      3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
-   
-   Please be aware that un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. Otherwise, use the un-shielding function from the Incognito app. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
-   DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS.
-
-OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --tokenID value, --id value   the Incognito tokenID of the un-shielding asset
-   --amount value, --amt value   the Incognito amount of the action (default: 0)
-   
-```
-
 ## COMMITTEES
 ### checkrewards
 Get all rewards of a payment address.
@@ -484,6 +388,133 @@ OPTIONS:
    --address value, --addr value  the payment address of a candidate (default: the payment address of the privateKey)
    --tokenID value, --id value    the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --version value, -v value      version of the transaction (1 or 2) (default: 2)
+   
+```
+
+## EVM BRIDGE
+### evmretryshield
+This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.
+```shell
+$ incognito-cli help evmretryshield
+NAME:
+   incognito-cli evmretryshield - Retry a shield from the given already-been-deposited-to-sc EVM transaction.
+
+USAGE:
+   evmretryshield --privateKey PRIVATE_KEY --evmTxHash EVM_TX_HASH [--evm EVM] [--tokenAddress TOKEN_ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   EVM BRIDGE
+
+DESCRIPTION:
+   This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.
+
+OPTIONS:
+   --privateKey value, -p value  a base58-encoded Incognito private key
+   --evmTxHash value             the transaction hash on an EVM network (ETH/BSC)
+   --evm value                   The EVM network (ETH or BSC) (default: "ETH")
+   --tokenAddress value          ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   
+```
+
+### evmretryunshield
+This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
+```shell
+$ incognito-cli help evmretryunshield
+NAME:
+   incognito-cli evmretryunshield - Retry an un-shielding request from the given already-been-burned Incognito transaction.
+
+USAGE:
+   evmretryunshield --txHash TX_HASH [--evm EVM]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   EVM BRIDGE
+
+DESCRIPTION:
+   This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
+
+OPTIONS:
+   --txHash value  an Incognito transaction hash
+   --evm value     The EVM network (ETH or BSC) (default: "ETH")
+   
+```
+
+### evmshield
+This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+1. Deposit the EVM asset into the corresponding smart contract.
+1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
+2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
+
+Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
+```shell
+$ incognito-cli help evmshield
+NAME:
+   incognito-cli evmshield - Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.
+
+USAGE:
+   evmshield --privateKey PRIVATE_KEY --shieldAmount SHIELD_AMOUNT [--evm EVM] [--tokenAddress TOKEN_ADDRESS] [--address ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   EVM BRIDGE
+
+DESCRIPTION:
+   This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+      1. Deposit the EVM asset into the corresponding smart contract.
+        1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
+      2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
+   
+   Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+   DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
+
+OPTIONS:
+   --privateKey value, -p value       a base58-encoded Incognito private key
+   --shieldAmount value, --amt value  the shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
+   --evm value                        The EVM network (ETH or BSC) (default: "ETH")
+   --tokenAddress value               ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   --address value, --addr value      The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
+   
+```
+
+### evmunshield
+This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
+1. Users burn the token inside the Incognito chain.
+2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
+3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
+
+Please be aware that EVM un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. Otherwise, use the un-shielding function from the Incognito app. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS.
+```shell
+$ incognito-cli help evmunshield
+NAME:
+   incognito-cli evmunshield - Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.
+
+USAGE:
+   evmunshield --privateKey PRIVATE_KEY --tokenID TOKEN_ID --amount AMOUNT
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   EVM BRIDGE
+
+DESCRIPTION:
+   This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
+      1. Users burn the token inside the Incognito chain.
+      2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
+      3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
+   
+   Please be aware that EVM un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. Otherwise, use the un-shielding function from the Incognito app. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+   DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS.
+
+OPTIONS:
+   --privateKey value, -p value  a base58-encoded Incognito private key
+   --tokenID value, --id value   the Incognito tokenID of the un-shielding asset
+   --amount value, --amt value   the Incognito amount of the action (default: 0)
    
 ```
 
@@ -640,6 +671,58 @@ OPTIONS:
    --tokenID1 value              ID of the first token
    --tokenID2 value              ID of the second token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --version value, -v value     version of the transaction (1 or 2) (default: 2)
+   
+```
+
+## PORTAL
+### portalunshield
+This function helps withdraw portal tokens (BTC) out of the Incognito network.
+```shell
+$ incognito-cli help portalunshield
+NAME:
+   incognito-cli portalunshield - Withdraw portal tokens (BTC) from the Incognito network.
+
+USAGE:
+   portalunshield --privateKey PRIVATE_KEY --remoteAddress REMOTE_ADDRESS --amount AMOUNT [--tokenID TOKEN_ID]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   PORTAL
+
+DESCRIPTION:
+   This function helps withdraw portal tokens (BTC) out of the Incognito network.
+
+OPTIONS:
+   --privateKey value, -p value          a base58-encoded Incognito private key
+   --remoteAddress value, --rAddr value  A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.
+   --amount value, --amt value           the Incognito amount of the action (default: 0)
+   --tokenID value, --id value           the Incognito tokenID of the un-shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   
+```
+
+### portalunshieldstatus
+This function helps retrieve the status of a portal un-shielding request.
+Status should be understood as: 0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.
+```shell
+$ incognito-cli help portalunshieldstatus
+NAME:
+   incognito-cli portalunshieldstatus - Get the status of a portal un-shielding request.
+
+USAGE:
+   portalunshieldstatus --txHash TX_HASH
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   PORTAL
+
+DESCRIPTION:
+   This function helps retrieve the status of a portal un-shielding request.
+   Status should be understood as: 0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.
+
+OPTIONS:
+   --txHash value  an Incognito transaction hash
    
 ```
 
