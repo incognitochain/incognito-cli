@@ -439,7 +439,9 @@ func main() {
 			Usage:       "Get the status of a portal un-shielding request.",
 			Description: "This function helps retrieve the status of a portal un-shielding request.\n" +
 				"Status should be understood as: " +
-				"0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.",
+				"0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.\n" +
+				"If you encounter an error saying \"unexpected end of JSON input\", it might be because the request hasn't reached the " +
+				"beacon chain yet. Please try again a few minutes later.",
 			Category:    portalCat,
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],

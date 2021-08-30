@@ -52,7 +52,8 @@ func portalUnShield(c *cli.Context) error {
 	}
 
 	fmt.Printf("TxHash: %v\n", txHash)
-	fmt.Println("Please wait for ~30 minutes for the fund to be released!!")
+	fmt.Println("Please wait for ~ 30-60 minutes for the fund to be released!!")
+	fmt.Println("Use command `portalunshieldstatus` to check the status of the request.")
 
 	return nil
 }
