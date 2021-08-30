@@ -52,23 +52,26 @@ const (
 	shieldAmountFlag = "shieldAmount"
 	evmFlag          = "evm"
 	evmTxHash        = "evmTxHash"
+
+	remoteAddressFlag = "remoteAddress"
 )
 
 // aliases for defaultFlags
 var aliases = map[string][]string{
-	networkFlag:      {"net"},
-	debugFlag:        {"d"},
-	privateKeyFlag:   {"p"},
-	otaKeyFlag:       {"ota"},
-	readonlyKeyFlag:  {"ro"},
-	addressFlag:      {"addr"},
-	tokenIDFlag:      {"id"},
-	tokenID1Flag:     {"id1"},
-	tokenID2Flag:     {"id2"},
-	amountFlag:       {"amt"},
-	versionFlag:      {"v"},
-	csvFileFlag:      {"csv"},
-	shieldAmountFlag: {"amt"},
+	networkFlag:       {"net"},
+	debugFlag:         {"d"},
+	privateKeyFlag:    {"p"},
+	otaKeyFlag:        {"ota"},
+	readonlyKeyFlag:   {"ro"},
+	addressFlag:       {"addr"},
+	tokenIDFlag:       {"id"},
+	tokenID1Flag:      {"id1"},
+	tokenID2Flag:      {"id2"},
+	amountFlag:        {"amt"},
+	versionFlag:       {"v"},
+	csvFileFlag:       {"csv"},
+	shieldAmountFlag:  {"amt"},
+	remoteAddressFlag: {"rAddr"},
 }
 
 // category constants
@@ -77,7 +80,8 @@ const (
 	committeeCat   = "COMMITTEES"
 	transactionCat = "TRANSACTIONS"
 	pDEXCat        = "PDEX"
-	bridgeCat      = "BRIDGE"
+	evmBridgeCat   = "EVM BRIDGE"
+	portalCat   = "PORTAL"
 )
 
 var cfg *Config

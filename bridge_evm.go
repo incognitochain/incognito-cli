@@ -19,7 +19,7 @@ var shieldMessage = "This function helps shield an EVM (ETH/BNB/ERC20/BEP20) tok
 	"actual deposit. For this operation, a prompt will be displayed to ask for user's approval.\n" +
 	"\t 2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. " +
 	"This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.\n\n" +
-	"Note that shielding is a complicated process, users MUST understand how the process works before using this function. " +
+	"Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. " +
 	"We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.\n" +
 	"DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS."
 
@@ -31,7 +31,7 @@ var unShieldMessage = "This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20)
 	"\t 3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the " +
 	"corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, " +
 	"it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).\n\n" +
-	"Please be aware that un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the " +
+	"Please be aware that EVM un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the " +
 	"Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. " +
 	"Otherwise, use the un-shielding function from the Incognito app. " +
 	"We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.\n" +

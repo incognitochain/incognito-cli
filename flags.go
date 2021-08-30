@@ -202,4 +202,10 @@ var defaultFlags = map[string]cli.Flag{
 		Usage:    "the transaction hash on an EVM network (ETH/BSC)",
 		Required: true,
 	},
+	remoteAddressFlag: &cli.StringFlag{
+		Name:  remoteAddressFlag,
+		Aliases: aliases[remoteAddressFlag],
+		Usage: "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
+		Value: "",
+	},
 }
