@@ -347,12 +347,12 @@ func main() {
 	}
 
 	// Bridge commands
-	bridgeCommands := []*cli.Command{
+	evmBridgeCommands := []*cli.Command{
 		{
-			Name:        "shield",
+			Name:        "evmshield",
 			Usage:       "Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.",
 			Description: shieldMessage,
-			Category:    bridgeCat,
+			Category:    evmBridgeCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[shieldAmountFlag],
@@ -367,10 +367,10 @@ func main() {
 			Action: shield,
 		},
 		{
-			Name:        "retryshield",
+			Name:        "evmretryshield",
 			Usage:       "Retry a shield from the given already-been-deposited-to-sc EVM transaction.",
 			Description: "This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.",
-			Category:    bridgeCat,
+			Category:    evmBridgeCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[evmTxHash],
@@ -380,10 +380,10 @@ func main() {
 			Action: retryShield,
 		},
 		{
-			Name:        "unshield",
+			Name:        "evmunshield",
 			Usage:       "Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.",
 			Description: unShieldMessage,
-			Category:    bridgeCat,
+			Category:    evmBridgeCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				&cli.StringFlag{
@@ -397,10 +397,10 @@ func main() {
 			Action: unShield,
 		},
 		{
-			Name:        "retryunshield",
+			Name:        "evmretryunshield",
 			Usage:       "Retry an un-shielding request from the given already-been-burned Incognito transaction.",
 			Description: "This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.",
-			Category:    bridgeCat,
+			Category:    evmBridgeCat,
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],
 				defaultFlags[evmFlag],
@@ -409,12 +409,52 @@ func main() {
 		},
 	}
 
+	// portal commands
+	portalCommands := []*cli.Command{
+		{
+			Name:        "portalunshield",
+			Usage:       "Withdraw portal tokens (BTC) from the Incognito network.",
+			Description: "This function helps withdraw portal tokens (BTC) out of the Incognito network.",
+			Category:    portalCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				&cli.StringFlag{
+					Name:     remoteAddressFlag,
+					Aliases:  aliases[remoteAddressFlag],
+					Usage:    "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
+					Required: true,
+				},
+				defaultFlags[amountFlag],
+				&cli.StringFlag{
+					Name:    tokenIDFlag,
+					Aliases: aliases[tokenIDFlag],
+					Usage:   "the Incognito tokenID of the un-shielding asset",
+					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
+				},
+			},
+			Action: portalUnShield,
+		},
+		{
+			Name:        "portalunshieldstatus",
+			Usage:       "Get the status of a portal un-shielding request.",
+			Description: "This function helps retrieve the status of a portal un-shielding request.\n" +
+				"Status should be understood as: " +
+				"0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.",
+			Category:    portalCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: getPortalUnShieldStatus,
+		},
+	}
+
 	app.Commands = make([]*cli.Command, 0)
 	app.Commands = append(app.Commands, accountCommands...)
 	app.Commands = append(app.Commands, committeeCommands...)
 	app.Commands = append(app.Commands, txCommands...)
 	app.Commands = append(app.Commands, pDEXCommands...)
-	app.Commands = append(app.Commands, bridgeCommands...)
+	app.Commands = append(app.Commands, evmBridgeCommands...)
+	app.Commands = append(app.Commands, portalCommands...)
 
 	for _, command := range app.Commands {
 		buildUsageTextFromCommand(command)
