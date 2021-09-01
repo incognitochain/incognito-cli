@@ -16,10 +16,10 @@ import (
 var (
 	network       string
 	host          string
-	clientVersion int
 	debug         int
 	askUser       = true
 	isMainNet     = false
+	clientVersion = 2
 )
 
 func initNetWork() error {
@@ -27,7 +27,7 @@ func initNetWork() error {
 		incclient.Logger.IsEnable = true
 	}
 	if host != "" {
-		fmt.Printf("host: %v\n", host)
+		fmt.Printf("host: %v, version: %v\n", host, clientVersion)
 		return initClient(host, clientVersion)
 	}
 	switch network {
