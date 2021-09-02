@@ -104,8 +104,6 @@ func main() {
 				defaultFlags[tokenIDFlag],
 				defaultFlags[versionFlag],
 				defaultFlags[numThreadsFlag],
-				defaultFlags[enableLogFlag],
-				defaultFlags[logFileFlag],
 			},
 			Action: consolidateUTXOs,
 		},

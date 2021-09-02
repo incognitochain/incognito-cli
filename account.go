@@ -18,14 +18,14 @@ func checkBalance(c *cli.Context) error {
 		return err
 	}
 
-	privateKey := c.String("privateKey")
+	privateKey := c.String(privateKeyFlag)
 	if privateKey == "" {
-		return fmt.Errorf("private key is invalid")
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
 	}
 
-	tokenIDStr := c.String("tokenID")
+	tokenIDStr := c.String(tokenIDFlag)
 	if tokenIDStr == "" {
-		return fmt.Errorf("tokenID is invalid")
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
 
 	balance, err := cfg.incClient.GetBalance(privateKey, tokenIDStr)
@@ -62,9 +62,9 @@ func checkBalance(c *cli.Context) error {
 //}
 
 func keyInfo(c *cli.Context) error {
-	privateKey := c.String("privateKey")
+	privateKey := c.String(privateKeyFlag)
 	if privateKey == "" {
-		return fmt.Errorf("private key is invalid")
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
 	}
 
 	info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
@@ -82,42 +82,32 @@ func keyInfo(c *cli.Context) error {
 }
 
 func consolidateUTXOs(c *cli.Context) error {
-	enableLog := c.Bool("enableLog")
-	if enableLog {
-		logFile := c.String("logFile")
-		if logFile == "" || logFile == "os.Stdout" {
-			incclient.Logger = incclient.NewLogger(true)
-		} else {
-			incclient.Logger = incclient.NewLogger(true, logFile)
-		}
-	}
-
 	err := initNetWork()
 	if err != nil {
 		return err
 	}
 
-	privateKey := c.String("privateKey")
+	privateKey := c.String(privateKeyFlag)
 	if privateKey == "" {
-		return fmt.Errorf("private key is invalid")
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
 	}
 
-	tokenIDStr := c.String("tokenID")
+	tokenIDStr := c.String(tokenIDFlag)
 	if tokenIDStr == "" {
-		return fmt.Errorf("tokenID is invalid")
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
 
-	version := c.Int("version")
+	version := c.Int(versionFlag)
 	if version < 1 || version > 2 {
-		return fmt.Errorf("version is invalid")
+		return fmt.Errorf("%v is invalid", versionFlag)
 	}
 
-	numThreads := c.Int("numThreads")
+	numThreads := c.Int(numThreadsFlag)
 	if numThreads == 0 {
-		return fmt.Errorf("numThreads in invalid")
+		return fmt.Errorf("%v in invalid", numThreadsFlag)
 	}
 
-	fmt.Printf("CONSOLIDATING tokenID %v, version %v, numThreads %v, enableLog %v\n", tokenIDStr, version, numThreads, enableLog)
+	fmt.Printf("CONSOLIDATING tokenID %v, version %v, numThreads %v\n", tokenIDStr, version, numThreads)
 
 	txList, err := cfg.incClient.Consolidate(privateKey, tokenIDStr, int8(version), numThreads)
 	if err != nil {
@@ -135,14 +125,14 @@ func checkUTXOs(c *cli.Context) error {
 		return err
 	}
 
-	privateKey := c.String("privateKey")
+	privateKey := c.String(privateKeyFlag)
 	if privateKey == "" {
-		return fmt.Errorf("private key is invalid")
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
 	}
 
-	tokenIDStr := c.String("tokenID")
+	tokenIDStr := c.String(tokenIDFlag)
 	if tokenIDStr == "" {
-		return fmt.Errorf("tokenID is invalid")
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
 
 	unSpentCoins, idxList, err := cfg.incClient.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
@@ -236,71 +226,62 @@ func getOutCoins(c *cli.Context) error {
 }
 
 func getHistory(c *cli.Context) error {
-	enableLog := c.Bool("enableLog")
-	if enableLog {
-		logFile := c.String("logFile")
-		if logFile == "" || logFile == "os.Stdout" {
-			incclient.Logger = incclient.NewLogger(true)
-		} else {
-			incclient.Logger = incclient.NewLogger(true, logFile)
-		}
-	}
-
-	err := initClient("https://beta-fullnode.incognito.org/fullnode", 1)
-	if err != nil {
-		return err
-	}
-
-	privateKey := c.String("privateKey")
-	if privateKey == "" {
-		return fmt.Errorf("private key is invalid")
-	}
-
-	tokenIDStr := c.String("tokenID")
-	if tokenIDStr == "" {
-		return fmt.Errorf("tokenID is invalid")
-	}
-
-	numThreads := c.Int("numThreads")
-	if numThreads == 0 {
-		return fmt.Errorf("numThreads in invalid")
-	}
-
-	csvFile := c.String("csvFile")
-
-	historyProcessor := incclient.NewTxHistoryProcessor(cfg.incClient, numThreads)
-
-	h, err := historyProcessor.GetTokenHistory(privateKey, tokenIDStr)
-	if err != nil {
-		return err
-	}
-
-	if len(csvFile) > 0 {
-		err = incclient.SaveTxHistory(h, csvFile)
-		if err != nil {
-			return err
-		}
-	} else {
-		totalIn := uint64(0)
-		fmt.Printf("#TxIns %v\n", len(h.TxInList))
-		for _, txIn := range h.TxInList {
-			totalIn += txIn.GetAmount()
-			fmt.Println(txIn.String())
-		}
-		fmt.Printf("END TxIns\n\n")
-
-		totalOut := uint64(0)
-		fmt.Printf("#TxOuts %v\n", len(h.TxOutList))
-		for _, txOut := range h.TxOutList {
-			totalOut += txOut.GetAmount()
-			fmt.Println(txOut.String())
-		}
-		fmt.Printf("END TxOuts\n")
-
-		fmt.Printf("TotalIn: %v, TotalOut: %v\n", totalIn, totalOut)
-	}
-
-	return nil
+	return fmt.Errorf("getting history hasn't been supported for Privacy V2")
+	//err := initClient("https://beta-fullnode.incognito.org/fullnode", 1)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//privateKey := c.String("privateKey")
+	//if privateKey == "" {
+	//	return fmt.Errorf("private key is invalid")
+	//}
+	//
+	//tokenIDStr := c.String("tokenID")
+	//if tokenIDStr == "" {
+	//	return fmt.Errorf("tokenID is invalid")
+	//}
+	//
+	//numThreads := c.Int("numThreads")
+	//if numThreads == 0 {
+	//	return fmt.Errorf("numThreads in invalid")
+	//}
+	//
+	//csvFile := c.String("csvFile")
+	//
+	//historyProcessor := incclient.NewTxHistoryProcessor(cfg.incClient, numThreads)
+	//
+	//h, err := historyProcessor.GetTokenHistory(privateKey, tokenIDStr)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//if len(csvFile) > 0 {
+	//	err = incclient.SaveTxHistory(h, csvFile)
+	//	if err != nil {
+	//		return err
+	//	}
+	//} else {
+	//	totalIn := uint64(0)
+	//	fmt.Printf("#TxIns %v\n", len(h.TxInList))
+	//	for _, txIn := range h.TxInList {
+	//		totalIn += txIn.GetAmount()
+	//		fmt.Println(txIn.String())
+	//	}
+	//	fmt.Printf("END TxIns\n\n")
+	//
+	//	totalOut := uint64(0)
+	//	fmt.Printf("#TxOuts %v\n", len(h.TxOutList))
+	//	for _, txOut := range h.TxOutList {
+	//		totalOut += txOut.GetAmount()
+	//		fmt.Println(txOut.String())
+	//	}
+	//	fmt.Printf("END TxOuts\n")
+	//
+	//	fmt.Printf("TotalIn: %v, TotalOut: %v\n", totalIn, totalOut)
+	//}
+	//
+	//return nil
 }
 
 func genKeySet(c *cli.Context) error {
@@ -381,15 +362,15 @@ func submitKey(c *cli.Context) error {
 		return err
 	}
 
-	otaKey := c.String("otaKey")
+	otaKey := c.String(otaKeyFlag)
 	if otaKey == "" {
-		return fmt.Errorf("ota key is invalid")
+		return fmt.Errorf("%v is invalid", otaKeyFlag)
 	}
 
-	accessToken := c.String("accessToken")
+	accessToken := c.String(accessTokenFlag)
 	if accessToken != "" {
-		fromHeight := c.Uint64("fromHeight")
-		isReset := c.Bool("isReset")
+		fromHeight := c.Uint64(fromHeightFlag)
+		isReset := c.Bool(isResetFlag)
 		err = cfg.incClient.AuthorizedSubmitKey(otaKey, accessToken, fromHeight, isReset)
 	} else {
 		err = cfg.incClient.SubmitKey(otaKey)
