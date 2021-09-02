@@ -162,7 +162,7 @@ NAME:
    incognito-cli consolidate - Consolidate UTXOs of an account.
 
 USAGE:
-   consolidate --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--version VERSION] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE]
+   consolidate --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--version VERSION] [--numThreads NUM_THREADS]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -177,8 +177,6 @@ OPTIONS:
    --tokenID value, --id value   the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --version value, -v value     version of the transaction (1 or 2) (default: 2)
    --numThreads value            number of threads used in this action (default: 4)
-   --enableLog                   enable log for this action (default: false)
-   --logFile value               location of the log file (default: "os.Stdout")
    
 ```
 
