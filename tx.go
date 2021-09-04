@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
-	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 )
 
 // send creates and sends a transaction from one wallet to another w.r.t a tokenID.
 func send(c *cli.Context) error {
-	incclient.Logger.IsEnable = true
 	err := initNetWork()
 	if err != nil {
 		return err
