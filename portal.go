@@ -36,6 +36,14 @@ func getPortalDepositAddress(c *cli.Context) error {
 
 // portalShield deposits a portal token (e.g, BTC) into the Incognito chain.
 func portalShield(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+	if cfg.btcClient == nil {
+		return fmt.Errorf("portal shielding is not supported by this CLI configuration")
+	}
+
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)

@@ -127,7 +127,7 @@ func BuildMerkleProof(txHashes []*chainhash.Hash, targetedTxHash *chainhash.Hash
 // BuildProof constructs the proof for a BTC transaction hash.
 func (b *BTCClient) BuildProof(txHashStr string, blkHeight uint64) (string, error) {
 	if b.isNil() {
-		return "", errBTCClientNotInitialized
+		return "", ErrBTCClientNotInitialized
 	}
 	var blkHash *chainhash.Hash
 	var msgBlk *wire.MsgBlock
