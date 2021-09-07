@@ -22,6 +22,7 @@ type Config struct {
 func NewConfig(
 	incClient *incclient.IncClient,
 	ethClient, bscClient *ethclient.Client,
+	btcClient *portal.BTCClient,
 	ethVaultAddressStr, bscVaultAddressStr string,
 ) *Config {
 	ethVaultAddress := common.HexToAddress(ethVaultAddressStr)
@@ -30,6 +31,7 @@ func NewConfig(
 		incClient:       incClient,
 		ethClient:       ethClient,
 		bscClient:       bscClient,
+		btcClient:       btcClient,
 		ethVaultAddress: ethVaultAddress,
 		bscVaultAddress: bscVaultAddress,
 	}
@@ -55,7 +57,12 @@ func NewTestNetConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, incclient.TestNetETHContractAddressStr, incclient.TestNetBSCContractAddressStr)
+	btcClient, err := portal.NewBTCTestNetClient()
+	if err != nil {
+		return err
+	}
+
+	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.TestNetETHContractAddressStr, incclient.TestNetBSCContractAddressStr)
 
 	return nil
 }
@@ -80,7 +87,12 @@ func NewTestNet1Config(incClient *incclient.IncClient) error {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, incclient.TestNet1ETHContractAddressStr, incclient.TestNet1BSCContractAddressStr)
+	btcClient, err := portal.NewBTCTestNetClient()
+	if err != nil {
+		return err
+	}
+
+	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.TestNet1ETHContractAddressStr, incclient.TestNet1BSCContractAddressStr)
 	return nil
 }
 
@@ -105,7 +117,12 @@ func NewMainNetConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, incclient.MainNetETHContractAddressStr, incclient.MainNetBSCContractAddressStr)
+	btcClient, err := portal.NewBTCMainNetClient()
+	if err != nil {
+		return err
+	}
+
+	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.MainNetETHContractAddressStr, incclient.MainNetBSCContractAddressStr)
 	return nil
 }
 
@@ -129,7 +146,12 @@ func NewDevNetConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, incclient.DevNetETHContractAddressStr, incclient.DevNetBSCContractAddressStr)
+	btcClient, err := portal.NewBTCTestNetClient()
+	if err != nil {
+		return err
+	}
+
+	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.DevNetETHContractAddressStr, incclient.DevNetBSCContractAddressStr)
 	return nil
 }
 
@@ -153,6 +175,11 @@ func NewLocalConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, incclient.LocalETHContractAddressStr, incclient.LocalETHContractAddressStr)
+	btcClient, err := portal.NewBTCTestNetClient()
+	if err != nil {
+		return err
+	}
+
+	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.LocalETHContractAddressStr, incclient.LocalETHContractAddressStr)
 	return nil
 }

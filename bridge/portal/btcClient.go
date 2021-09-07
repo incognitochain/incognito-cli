@@ -8,13 +8,38 @@ import (
 )
 
 var (
-	errBTCClientNotInitialized = fmt.Errorf("the btcClient has not been initialized")
+	// ErrBTCClientNotInitialized is thrown when trying to call a non-initialized BTCClient.
+	ErrBTCClientNotInitialized = fmt.Errorf("the btcClient has not been initialized")
 )
 
 // BTCClient implements a wrapped Go client for retrieving information of the BTC network.
 type BTCClient struct {
 	rpcClient         *rpcclient.Client
 	cypherBlockClient *gobcy.API
+}
+
+// NewBTCMainNetClient returns a BTC main-net client.
+func NewBTCMainNetClient() (*BTCClient, error) {
+	b := new(BTCClient)
+	b.cypherBlockClient = &gobcy.API{
+		Token: "57e940af4af84c69a74732d2f93dbc19",
+		Coin:  "btc",
+		Chain: "main",
+	}
+
+	return b, nil
+}
+
+// NewBTCTestNetClient returns a BTC test-net client.
+func NewBTCTestNetClient() (*BTCClient, error) {
+	b := new(BTCClient)
+	b.cypherBlockClient = &gobcy.API{
+		Token: "57e940af4af84c69a74732d2f93dbc19",
+		Coin:  "btc",
+		Chain: "test3",
+	}
+
+	return b, nil
 }
 
 func (b *BTCClient) isNil() bool {
@@ -25,7 +50,7 @@ func (b *BTCClient) isNil() bool {
 // the transaction was included.
 func (b *BTCClient) IsConfirmedTx(txHashStr string) (bool, uint64, error) {
 	if b.isNil() {
-		return false, 0, errBTCClientNotInitialized
+		return false, 0, ErrBTCClientNotInitialized
 	}
 
 	if b.rpcClient != nil {
