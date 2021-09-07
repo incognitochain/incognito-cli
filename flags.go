@@ -120,6 +120,7 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	txHashFlag: &cli.StringFlag{
 		Name:     txHashFlag,
+		Aliases:  aliases[txHashFlag],
 		Usage:    "an Incognito transaction hash",
 		Required: true,
 	},
@@ -199,13 +200,20 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	evmTxHash: &cli.StringFlag{
 		Name:     evmTxHash,
+		Aliases:  aliases[evmTxHash],
 		Usage:    "the transaction hash on an EVM network (ETH/BSC)",
 		Required: true,
 	},
 	remoteAddressFlag: &cli.StringFlag{
-		Name:  remoteAddressFlag,
+		Name:    remoteAddressFlag,
 		Aliases: aliases[remoteAddressFlag],
-		Usage: "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
-		Value: "",
+		Usage:   "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
+		Value:   "",
+	},
+	portalTxHashFlag: &cli.StringFlag{
+		Name:     portalTxHashFlag,
+		Aliases:  aliases[portalTxHashFlag],
+		Usage:    "the portal shielding transaction hash (e.g, the BTC shielding transaction hash)",
+		Required: true,
 	},
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/incognito-cli/bridge/portal"
 )
 
 // Config represents the config of an environment of the CLI tool.
@@ -11,6 +12,7 @@ type Config struct {
 	incClient *incclient.IncClient
 	ethClient *ethclient.Client
 	bscClient *ethclient.Client
+	btcClient *portal.BTCClient
 
 	ethVaultAddress common.Address
 	bscVaultAddress common.Address

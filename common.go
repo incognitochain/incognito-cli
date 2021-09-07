@@ -54,6 +54,8 @@ const (
 	evmTxHash        = "evmTxHash"
 
 	remoteAddressFlag = "remoteAddress"
+
+	portalTxHashFlag = "portalTxHash"
 )
 
 // aliases for defaultFlags
@@ -72,6 +74,9 @@ var aliases = map[string][]string{
 	csvFileFlag:       {"csv"},
 	shieldAmountFlag:  {"amt"},
 	remoteAddressFlag: {"rAddr"},
+	txHashFlag:        {"iTxID"},
+	evmTxHash:         {"eTxID"},
+	portalTxHashFlag:  {"pTxID"},
 }
 
 // category constants
@@ -81,7 +86,7 @@ const (
 	transactionCat = "TRANSACTIONS"
 	pDEXCat        = "PDEX"
 	evmBridgeCat   = "EVMBRIDGE"
-	portalCat   = "PORTAL"
+	portalCat      = "PORTAL"
 )
 
 var cfg *Config

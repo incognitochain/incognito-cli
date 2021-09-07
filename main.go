@@ -410,6 +410,44 @@ func main() {
 	// portal commands
 	portalCommands := []*cli.Command{
 		{
+			Name:        "generatedepositaddress",
+			Usage:       "Generate a portal shielding address.",
+			Description: "This function helps generate the portal shielding address for a payment address and a tokenID.",
+			Category:    portalCat,
+			Flags: []cli.Flag{
+				defaultFlags[addressFlag],
+				&cli.StringFlag{
+					Name:    tokenIDFlag,
+					Aliases: aliases[tokenIDFlag],
+					Usage:   "the Incognito tokenID of the shielding asset",
+					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
+				},
+			},
+			Action: getPortalDepositAddress,
+		},
+		{
+			Name:        "portalshield",
+			Usage:       "Shield a portal token (e.g, BTC) into the Incognito network.",
+			Description: shieldMessage,
+			Category:    portalCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[portalTxHashFlag],
+				&cli.StringFlag{
+					Name:    tokenIDFlag,
+					Aliases: aliases[tokenIDFlag],
+					Usage:   "the Incognito tokenID of the shielding asset",
+					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
+				},
+				&cli.StringFlag{
+					Name:    addressFlag,
+					Aliases: aliases[addressFlag],
+					Usage:   "The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)",
+				},
+			},
+			Action: portalShield,
+		},
+		{
 			Name:        "portalunshield",
 			Usage:       "Withdraw portal tokens (BTC) from the Incognito network.",
 			Description: "This function helps withdraw portal tokens (BTC) out of the Incognito network.",
@@ -433,14 +471,14 @@ func main() {
 			Action: portalUnShield,
 		},
 		{
-			Name:        "portalunshieldstatus",
-			Usage:       "Get the status of a portal un-shielding request.",
+			Name:  "portalunshieldstatus",
+			Usage: "Get the status of a portal un-shielding request.",
 			Description: "This function helps retrieve the status of a portal un-shielding request.\n" +
 				"Status should be understood as: " +
 				"0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.\n" +
 				"If you encounter an error saying \"unexpected end of JSON input\", it might be because the request hasn't reached the " +
 				"beacon chain yet. Please try again a few minutes later.",
-			Category:    portalCat,
+			Category: portalCat,
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],
 			},
