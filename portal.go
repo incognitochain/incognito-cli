@@ -70,7 +70,7 @@ func portalShield(c *cli.Context) error {
 		return err
 	}
 	if !isConfirmed {
-		return fmt.Errorf("tx %v has does not have enough 6 confirmations", portalTxHashStr)
+		return fmt.Errorf("tx %v does not have enough 6 confirmations", portalTxHashStr)
 	}
 
 	// generate the shielding proof.

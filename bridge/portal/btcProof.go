@@ -177,6 +177,11 @@ func (b *BTCClient) BuildProof(txHashStr string, blkHeight uint64) (string, erro
 			return "", err
 		}
 
+		blkHash, err = chainhash.NewHashFromStr(block.Hash)
+		if err != nil {
+			return "", err
+		}
+
 		txIDs := block.TXids
 		for i := 0; i < len(txIDs); i++ {
 			tmpTxHash, err := chainhash.NewHashFromStr(txIDs[i])
