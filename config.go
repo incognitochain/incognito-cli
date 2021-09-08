@@ -126,35 +126,6 @@ func NewMainNetConfig(incClient *incclient.IncClient) error {
 	return nil
 }
 
-// NewDevNetConfig creates a new dev-net Config.
-func NewDevNetConfig(incClient *incclient.IncClient) error {
-	var err error
-	if incClient == nil {
-		incClient, err = incclient.NewDevNetClient()
-		if err != nil {
-			return err
-		}
-	}
-
-	ethClient, err := ethclient.Dial(incclient.DevNetETHHost)
-	if err != nil {
-		return err
-	}
-
-	bscClient, err := ethclient.Dial(incclient.DevNetBSCHost)
-	if err != nil {
-		return err
-	}
-
-	btcClient, err := portal.NewBTCTestNetClient()
-	if err != nil {
-		return err
-	}
-
-	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.DevNetETHContractAddressStr, incclient.DevNetBSCContractAddressStr)
-	return nil
-}
-
 // NewLocalConfig creates a new local Config.
 func NewLocalConfig(incClient *incclient.IncClient) error {
 	var err error

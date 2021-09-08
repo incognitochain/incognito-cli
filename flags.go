@@ -11,7 +11,7 @@ var defaultFlags = map[string]cli.Flag{
 	networkFlag: &cli.StringFlag{
 		Name:        networkFlag,
 		Aliases:     aliases[networkFlag],
-		Usage:       "network environment (mainnet, testnet, testnet1, devnet, local)",
+		Usage:       "network environment (mainnet, testnet, testnet1, local)",
 		Value:       "mainnet",
 		Destination: &network,
 	},
