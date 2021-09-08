@@ -79,6 +79,9 @@ COMMANDS:
      pdetradestatus  Get the status of a trade
      pdewithdraw     Create a pDEX withdrawal transaction
    PORTAL:
+     portalshield          Shield a portal token (e.g, BTC) into the Incognito network.
+     portalshieldaddress   Generate a portal shielding address.
+     portalshieldstatus    Get the status of a portal shielding request.
      portalunshield        Withdraw portal tokens (BTC) from the Incognito network.
      portalunshieldstatus  Get the status of a portal un-shielding request.
    TRANSACTIONS:
@@ -90,7 +93,7 @@ COMMANDS:
 GLOBAL OPTIONS:
    --debug value                 whether to enable the debug mode (0 - disabled, <> 0 - enabled) (default: 0)
    --host network                Custom full-node host. This flag is combined with the network flag to initialize the environment in which the custom host points to.
-   --network value, --net value  network environment (mainnet, testnet, testnet1, devnet, local) (default: "mainnet")
+   --network value, --net value  network environment (mainnet, testnet, testnet1, local) (default: "mainnet")
    --help, -h                    show help (default: false)
    --version, -v                 print the version (default: false)
 
@@ -125,6 +128,9 @@ COPYRIGHT:
   * [`pdetradestatus`](#pdetradestatus)
   * [`pdewithdraw`](#pdewithdraw)
 * [`PORTAL`](#portal)
+  * [`portalshield`](#portalshield)
+  * [`portalshieldaddress`](#portalshieldaddress)
+  * [`portalshieldstatus`](#portalshieldstatus)
   * [`portalunshield`](#portalunshield)
   * [`portalunshieldstatus`](#portalunshieldstatus)
 * [`TRANSACTIONS`](#transactions)
@@ -409,10 +415,10 @@ DESCRIPTION:
    This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --evmTxHash value             the transaction hash on an EVM network (ETH/BSC)
-   --evm value                   The EVM network (ETH or BSC) (default: "ETH")
-   --tokenAddress value          ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   --privateKey value, -p value      a base58-encoded Incognito private key
+   --evmTxHash value, --eTxID value  the transaction hash on an EVM network (ETH/BSC)
+   --evm value                       The EVM network (ETH or BSC) (default: "ETH")
+   --tokenAddress value              ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    
 ```
 
@@ -435,8 +441,8 @@ DESCRIPTION:
    This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
 
 OPTIONS:
-   --txHash value  an Incognito transaction hash
-   --evm value     The EVM network (ETH or BSC) (default: "ETH")
+   --txHash value, --iTxID value  an Incognito transaction hash
+   --evm value                    The EVM network (ETH or BSC) (default: "ETH")
    
 ```
 
@@ -641,7 +647,7 @@ DESCRIPTION:
    This function returns the status of a trade (1: successful, 2: failed). If a `not found` error occurs, it means that the trade has not been acknowledged by the beacon chain. Just wait and check again later.
 
 OPTIONS:
-   --txHash value  an Incognito transaction hash
+   --txHash value, --iTxID value  an Incognito transaction hash
    
 ```
 
@@ -673,6 +679,95 @@ OPTIONS:
 ```
 
 ## PORTAL
+### portalshield
+This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+1. Deposit the EVM asset into the corresponding smart contract.
+1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
+2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
+
+Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
+```shell
+$ incognito-cli help portalshield
+NAME:
+   incognito-cli portalshield - Shield a portal token (e.g, BTC) into the Incognito network.
+
+USAGE:
+   portalshield --privateKey PRIVATE_KEY --portalTxHash PORTAL_TX_HASH [--tokenID TOKEN_ID] [--address ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   PORTAL
+
+DESCRIPTION:
+   This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+      1. Deposit the EVM asset into the corresponding smart contract.
+        1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
+      2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
+   
+   Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+   DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
+
+OPTIONS:
+   --privateKey value, -p value         a base58-encoded Incognito private key
+   --portalTxHash value, --pTxID value  the portal shielding transaction hash (e.g, the BTC shielding transaction hash)
+   --tokenID value, --id value          the Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   --address value, --addr value        The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
+   
+```
+
+### portalshieldaddress
+This function helps generate the portal shielding address for a payment address and a tokenID.
+```shell
+$ incognito-cli help portalshieldaddress
+NAME:
+   incognito-cli portalshieldaddress - Generate a portal shielding address.
+
+USAGE:
+   portalshieldaddress --address ADDRESS [--tokenID TOKEN_ID]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   PORTAL
+
+DESCRIPTION:
+   This function helps generate the portal shielding address for a payment address and a tokenID.
+
+OPTIONS:
+   --address value, --addr value  a base58-encoded payment address
+   --tokenID value, --id value    the Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   
+```
+
+### portalshieldstatus
+This function helps retrieve the status of a portal un-shielding request.
+Status should be understood as: 0 - rejected; 1 - accepted.
+If you encounter an error, it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
+```shell
+$ incognito-cli help portalshieldstatus
+NAME:
+   incognito-cli portalshieldstatus - Get the status of a portal shielding request.
+
+USAGE:
+   portalshieldstatus --txHash TX_HASH
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   PORTAL
+
+DESCRIPTION:
+   This function helps retrieve the status of a portal un-shielding request.
+   Status should be understood as: 0 - rejected; 1 - accepted.
+   If you encounter an error, it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
+
+OPTIONS:
+   --txHash value, --iTxID value  an Incognito transaction hash
+   
+```
+
 ### portalunshield
 This function helps withdraw portal tokens (BTC) out of the Incognito network.
 ```shell
@@ -722,7 +817,7 @@ DESCRIPTION:
    If you encounter an error saying "unexpected end of JSON input", it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 
 OPTIONS:
-   --txHash value  an Incognito transaction hash
+   --txHash value, --iTxID value  an Incognito transaction hash
    
 ```
 
@@ -746,7 +841,7 @@ DESCRIPTION:
    This function checks if an OTA key is a receiver of a transaction. If so, it will try to decrypt the received outputs and return the receiving info.
 
 OPTIONS:
-   --txHash value                   an Incognito transaction hash
+   --txHash value, --iTxID value    an Incognito transaction hash
    --otaKey value, --ota value      a base58-encoded ota key
    --readonlyKey value, --ro value  a base58-encoded read-only key
    

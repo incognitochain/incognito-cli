@@ -88,6 +88,31 @@ func portalShield(c *cli.Context) error {
 	return nil
 }
 
+// getPortalShieldStatus returns the status of a portal shielding request.
+func getPortalShieldStatus(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	txHash := c.String(txHashFlag)
+	if txHash == "" {
+		return fmt.Errorf("%v is invalid", txHashFlag)
+	}
+
+	status, err := cfg.incClient.GetPortalShieldingRequestStatus(txHash)
+	if err != nil {
+		return err
+	}
+	jsb, err := json.MarshalIndent(status, "", "\t")
+	if err != nil {
+		return err
+	}
+	log.Println(string(jsb))
+
+	return nil
+}
+
 // portalUnShield creates and sends a port un-shielding transaction.
 func portalUnShield(c *cli.Context) error {
 	err := initNetWork()

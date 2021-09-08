@@ -448,6 +448,20 @@ func main() {
 			Action: portalShield,
 		},
 		{
+			Name:  "portalshieldstatus",
+			Usage: "Get the status of a portal shielding request.",
+			Description: "This function helps retrieve the status of a portal un-shielding request.\n" +
+				"Status should be understood as: " +
+				"0 - rejected; 1 - accepted.\n" +
+				"If you encounter an error, it might be because the request hasn't reached the " +
+				"beacon chain yet. Please try again a few minutes later.",
+			Category: portalCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: getPortalShieldStatus,
+		},
+		{
 			Name:        "portalunshield",
 			Usage:       "Withdraw portal tokens (BTC) from the Incognito network.",
 			Description: "This function helps withdraw portal tokens (BTC) out of the Incognito network.",
