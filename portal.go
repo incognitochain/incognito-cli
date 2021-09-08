@@ -25,7 +25,7 @@ func getPortalDepositAddress(c *cli.Context) error {
 		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
 
-	shieldAddress, err := cfg.incClient.GeneratePortalShieldingAddressFromRPC(address, tokenIDStr)
+	shieldAddress, err := cfg.incClient.GeneratePortalShieldingAddress(address, tokenIDStr)
 	if err != nil {
 		return err
 	}

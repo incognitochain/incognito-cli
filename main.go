@@ -410,7 +410,7 @@ func main() {
 	// portal commands
 	portalCommands := []*cli.Command{
 		{
-			Name:        "generatedepositaddress",
+			Name:        "portalshieldaddress",
 			Usage:       "Generate a portal shielding address.",
 			Description: "This function helps generate the portal shielding address for a payment address and a tokenID.",
 			Category:    portalCat,
