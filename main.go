@@ -450,7 +450,7 @@ func main() {
 		{
 			Name:  "portalshieldstatus",
 			Usage: "Get the status of a portal shielding request.",
-			Description: "This function helps retrieve the status of a portal un-shielding request.\n" +
+			Description: "This function helps retrieve the status of a portal shielding request.\n" +
 				"Status should be understood as: " +
 				"0 - rejected; 1 - accepted.\n" +
 				"If you encounter an error, it might be because the request hasn't reached the " +

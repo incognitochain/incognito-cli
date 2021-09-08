@@ -742,7 +742,7 @@ OPTIONS:
 ```
 
 ### portalshieldstatus
-This function helps retrieve the status of a portal un-shielding request.
+This function helps retrieve the status of a portal shielding request.
 Status should be understood as: 0 - rejected; 1 - accepted.
 If you encounter an error, it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 ```shell
@@ -759,7 +759,7 @@ CATEGORY:
    PORTAL
 
 DESCRIPTION:
-   This function helps retrieve the status of a portal un-shielding request.
+   This function helps retrieve the status of a portal shielding request.
    Status should be understood as: 0 - rejected; 1 - accepted.
    If you encounter an error, it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 
