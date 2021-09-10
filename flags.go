@@ -11,7 +11,7 @@ var defaultFlags = map[string]cli.Flag{
 	networkFlag: &cli.StringFlag{
 		Name:        networkFlag,
 		Aliases:     aliases[networkFlag],
-		Usage:       "network environment (mainnet, testnet, testnet1, devnet, local)",
+		Usage:       "network environment (mainnet, testnet, testnet1, local)",
 		Value:       "mainnet",
 		Destination: &network,
 	},
@@ -120,6 +120,7 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	txHashFlag: &cli.StringFlag{
 		Name:     txHashFlag,
+		Aliases:  aliases[txHashFlag],
 		Usage:    "an Incognito transaction hash",
 		Required: true,
 	},
@@ -194,18 +195,19 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	evmFlag: &cli.StringFlag{
 		Name:  evmFlag,
-		Usage: "The EVM network (ETH or BSC)",
+		Usage: "the EVM network (ETH or BSC)",
 		Value: "ETH",
 	},
-	evmTxHash: &cli.StringFlag{
-		Name:     evmTxHash,
-		Usage:    "the transaction hash on an EVM network (ETH/BSC)",
+	externalTxIDFlag: &cli.StringFlag{
+		Name:     externalTxIDFlag,
+		Aliases:  aliases[externalTxIDFlag],
+		Usage:    "the external transaction hash",
 		Required: true,
 	},
-	remoteAddressFlag: &cli.StringFlag{
-		Name:  remoteAddressFlag,
-		Aliases: aliases[remoteAddressFlag],
-		Usage: "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
-		Value: "",
+	externalAddressFlag: &cli.StringFlag{
+		Name:    externalAddressFlag,
+		Aliases: aliases[externalAddressFlag],
+		Usage:   "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
+		Value:   "",
 	},
 }

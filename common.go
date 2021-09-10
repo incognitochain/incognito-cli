@@ -47,31 +47,32 @@ const (
 	mnemonicFlag  = "mnemonic"
 	numShardsFlag = "numShards"
 
-	evmAddressFlag   = "evmAddress"
-	tokenAddressFlag = "tokenAddress"
-	shieldAmountFlag = "shieldAmount"
-	evmFlag          = "evm"
-	evmTxHash        = "evmTxHash"
-
-	remoteAddressFlag = "remoteAddress"
+	evmAddressFlag      = "evmAddress"
+	tokenAddressFlag    = "externalTokenAddress"
+	shieldAmountFlag    = "shieldAmount"
+	evmFlag             = "evm"
+	externalTxIDFlag    = "externalTxHash"
+	externalAddressFlag = "externalAddress"
 )
 
 // aliases for defaultFlags
 var aliases = map[string][]string{
-	networkFlag:       {"net"},
-	debugFlag:         {"d"},
-	privateKeyFlag:    {"p"},
-	otaKeyFlag:        {"ota"},
-	readonlyKeyFlag:   {"ro"},
-	addressFlag:       {"addr"},
-	tokenIDFlag:       {"id"},
-	tokenID1Flag:      {"id1"},
-	tokenID2Flag:      {"id2"},
-	amountFlag:        {"amt"},
-	versionFlag:       {"v"},
-	csvFileFlag:       {"csv"},
-	shieldAmountFlag:  {"amt"},
-	remoteAddressFlag: {"rAddr"},
+	networkFlag:         {"net"},
+	debugFlag:           {"d"},
+	privateKeyFlag:      {"p"},
+	otaKeyFlag:          {"ota"},
+	readonlyKeyFlag:     {"ro"},
+	addressFlag:         {"addr"},
+	tokenIDFlag:         {"id"},
+	tokenID1Flag:        {"id1"},
+	tokenID2Flag:        {"id2"},
+	amountFlag:          {"amt"},
+	versionFlag:         {"v"},
+	csvFileFlag:         {"csv"},
+	shieldAmountFlag:    {"amt"},
+	externalAddressFlag: {"eAddr"},
+	txHashFlag:          {"iTxID"},
+	externalTxIDFlag:    {"eTxID"},
 }
 
 // category constants
@@ -81,7 +82,7 @@ const (
 	transactionCat = "TRANSACTIONS"
 	pDEXCat        = "PDEX"
 	evmBridgeCat   = "EVMBRIDGE"
-	portalCat   = "PORTAL"
+	portalCat      = "PORTAL"
 )
 
 var cfg *Config

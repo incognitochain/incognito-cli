@@ -37,8 +37,6 @@ func initNetWork() error {
 		return NewTestNetConfig(nil)
 	case "testnet1":
 		return NewTestNet1Config(nil)
-	case "devnet":
-		return NewDevNetConfig(nil)
 	case "local":
 		return NewLocalConfig(nil)
 	}
@@ -55,9 +53,6 @@ func initClient(rpcHost string, version int) error {
 	case "testnet1":
 		ethNode = incclient.TestNet1ETHHost
 		err = NewTestNet1Config(nil)
-	case "devnet":
-		ethNode = incclient.DevNetETHHost
-		err = NewDevNetConfig(nil)
 	case "local":
 		ethNode = incclient.LocalETHHost
 		err = NewLocalConfig(nil)
@@ -68,7 +63,7 @@ func initClient(rpcHost string, version int) error {
 		return err
 	}
 
-	incClient, err := incclient.NewIncClientWithCache(rpcHost, ethNode, version)
+	incClient, err := incclient.NewIncClientWithCache(rpcHost, ethNode, version, network)
 	if err != nil {
 		return err
 	}
