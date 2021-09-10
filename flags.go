@@ -195,25 +195,19 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	evmFlag: &cli.StringFlag{
 		Name:  evmFlag,
-		Usage: "The EVM network (ETH or BSC)",
+		Usage: "the EVM network (ETH or BSC)",
 		Value: "ETH",
 	},
-	evmTxHash: &cli.StringFlag{
-		Name:     evmTxHash,
-		Aliases:  aliases[evmTxHash],
-		Usage:    "the transaction hash on an EVM network (ETH/BSC)",
+	externalTxIDFlag: &cli.StringFlag{
+		Name:     externalTxIDFlag,
+		Aliases:  aliases[externalTxIDFlag],
+		Usage:    "the external transaction hash",
 		Required: true,
 	},
-	remoteAddressFlag: &cli.StringFlag{
-		Name:    remoteAddressFlag,
-		Aliases: aliases[remoteAddressFlag],
+	externalAddressFlag: &cli.StringFlag{
+		Name:    externalAddressFlag,
+		Aliases: aliases[externalAddressFlag],
 		Usage:   "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
 		Value:   "",
-	},
-	portalTxHashFlag: &cli.StringFlag{
-		Name:     portalTxHashFlag,
-		Aliases:  aliases[portalTxHashFlag],
-		Usage:    "the portal shielding transaction hash (e.g, the BTC shielding transaction hash)",
-		Required: true,
 	},
 }

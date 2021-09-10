@@ -57,7 +57,7 @@ func portalShield(c *cli.Context) error {
 		return fmt.Errorf("%v is invalid", addressFlag)
 	}
 
-	portalTxHashStr := c.String(portalTxHashFlag)
+	portalTxHashStr := c.String(externalTxIDFlag)
 
 	tokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenIDStr) {
@@ -135,9 +135,9 @@ func portalUnShield(c *cli.Context) error {
 		return fmt.Errorf("%v cannot be zero", amountFlag)
 	}
 
-	remoteAddress := c.String(remoteAddressFlag)
+	remoteAddress := c.String(externalAddressFlag)
 	if remoteAddress == "" {
-		return fmt.Errorf("%v is invalid", remoteAddressFlag)
+		return fmt.Errorf("%v is invalid", externalAddressFlag)
 	}
 
 	// create a transaction to burn the Incognito token.

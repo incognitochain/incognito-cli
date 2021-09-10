@@ -221,7 +221,7 @@ func retryShield(c *cli.Context) error {
 		return err
 	}
 
-	evmTxHashStr := c.String(evmTxHash)
+	evmTxHashStr := c.String(externalTxIDFlag)
 	evmHash := common.HexToHash(evmTxHashStr)
 
 	log.Println("[STEP 1] SHIELD TO INCOGNITO")
