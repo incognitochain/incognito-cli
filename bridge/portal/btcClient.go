@@ -22,7 +22,6 @@ type BTCClient struct {
 func NewBTCMainNetClient() (*BTCClient, error) {
 	b := new(BTCClient)
 	b.cypherBlockClient = &gobcy.API{
-		Token: "57e940af4af84c69a74732d2f93dbc19",
 		Coin:  "btc",
 		Chain: "main",
 	}
@@ -34,7 +33,6 @@ func NewBTCMainNetClient() (*BTCClient, error) {
 func NewBTCTestNetClient() (*BTCClient, error) {
 	b := new(BTCClient)
 	b.cypherBlockClient = &gobcy.API{
-		Token: "57e940af4af84c69a74732d2f93dbc19",
 		Coin:  "btc",
 		Chain: "test3",
 	}
