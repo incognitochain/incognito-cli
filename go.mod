@@ -9,7 +9,7 @@ require (
 	github.com/fatih/camelcase v1.0.0
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/incognitochain/bridge-eth v0.0.0-20210429050541-edfe3725b21a
-	github.com/incognitochain/go-incognito-sdk-v2 v0.0.0-20210910032920-018086d6da28
+	github.com/incognitochain/go-incognito-sdk-v2 v0.0.0-20210916003402-ec373d2f3cd7
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
