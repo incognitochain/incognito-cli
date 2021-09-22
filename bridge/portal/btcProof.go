@@ -52,6 +52,23 @@ func buildMerkleTreeStoreFromTxHashes(txHashes []*chainhash.Hash) []*chainhash.H
 	return merkelTrees
 }
 
+// verifyMerkleProof checks if a MerkleProof has been properly constructed.
+func verifyMerkleProof(
+	merkleRoot *chainhash.Hash,
+	merkleProofs []*MerkleProof,
+	txHash *chainhash.Hash,
+) bool {
+	curHash := txHash
+	for _, mklProof := range merkleProofs {
+		if mklProof.IsLeft {
+			curHash = HashMerkleBranches(mklProof.ProofHash, curHash)
+		} else {
+			curHash = HashMerkleBranches(curHash, mklProof.ProofHash)
+		}
+	}
+	return curHash.String() == merkleRoot.String()
+}
+
 // BuildMerkleProof returns a list of MerkleProof of a transaction hash.
 func BuildMerkleProof(txHashes []*chainhash.Hash, targetedTxHash *chainhash.Hash) []*MerkleProof {
 	merkleTree := buildMerkleTreeStoreFromTxHashes(txHashes)
@@ -130,6 +147,7 @@ func (b *BTCClient) BuildProof(txHashStr string, blkHeight uint64) (string, erro
 		return "", ErrBTCClientNotInitialized
 	}
 	var blkHash *chainhash.Hash
+	var merkleRoot *chainhash.Hash
 	var msgBlk *wire.MsgBlock
 	var msgTx *wire.MsgTx
 	var err error
@@ -165,14 +183,35 @@ func (b *BTCClient) BuildProof(txHashStr string, blkHeight uint64) (string, erro
 		msgTx = tx.MsgTx()
 	} else if b.cypherBlockClient != nil {
 		var block gobcy.Block
-		block, err = b.cypherBlockClient.GetBlock(
-			int(blkHeight),
-			"",
-			map[string]string{
-				"txstart": "0",
-				"limit":   "500",
-			},
-		)
+
+		cur := 0
+		for {
+			block, err = b.cypherBlockClient.GetBlock(
+				int(blkHeight),
+				"",
+				map[string]string{
+					"txstart": fmt.Sprintf("%d", cur),
+					"limit":   fmt.Sprintf("%d", cur+500),
+				},
+			)
+
+			txIDs := block.TXids
+			for i := 0; i < len(txIDs); i++ {
+				tmpTxHash, err := chainhash.NewHashFromStr(txIDs[i])
+				if err != nil {
+					return "", err
+				}
+				txHashes = append(txHashes, tmpTxHash)
+			}
+
+			if len(txHashes) == block.NumTX {
+				fmt.Println("numTxs", len(txHashes))
+				break
+			} else {
+				cur += 500
+			}
+		}
+
 		if err != nil {
 			return "", err
 		}
@@ -182,16 +221,12 @@ func (b *BTCClient) BuildProof(txHashStr string, blkHeight uint64) (string, erro
 			return "", err
 		}
 
-		txIDs := block.TXids
-		for i := 0; i < len(txIDs); i++ {
-			tmpTxHash, err := chainhash.NewHashFromStr(txIDs[i])
-			if err != nil {
-				return "", err
-			}
-			txHashes = append(txHashes, tmpTxHash)
+		msgTx, err = b.BuildMsgTxFromCypher(txHashStr)
+		if err != nil {
+			return "", err
 		}
 
-		msgTx, err = b.BuildMsgTxFromCypher(txHashStr)
+		merkleRoot, err = chainhash.NewHashFromStr(block.MerkleRoot)
 		if err != nil {
 			return "", err
 		}
@@ -199,6 +234,12 @@ func (b *BTCClient) BuildProof(txHashStr string, blkHeight uint64) (string, erro
 
 	// build the Merkle proof for the transaction.
 	merkleProofs := BuildMerkleProof(txHashes, txHash)
+	if merkleRoot != nil {
+		valid := verifyMerkleProof(merkleRoot, merkleProofs, txHash)
+		if !valid {
+			return "", fmt.Errorf("invalid merkleProofs")
+		}
+	}
 	btcProof := BTCProof{
 		MerkleProofs: merkleProofs,
 		BTCTx:        msgTx,
