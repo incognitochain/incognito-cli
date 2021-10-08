@@ -2,8 +2,76 @@ package main
 
 import (
 	"fmt"
+	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 )
+
+// stake creates a staking transaction.
+func stake(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+	canAddr := c.String(candidateAddressFlag)
+	if canAddr == "" {
+		canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+	}
+	if !isValidAddress(canAddr) {
+		return fmt.Errorf("%v is invalid", candidateAddressFlag)
+	}
+	rewardAddr := c.String(rewardReceiverFlag)
+	if rewardAddr == "" {
+		rewardAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+	}
+	if !isValidAddress(rewardAddr) {
+		return fmt.Errorf("%v is invalid", rewardReceiverFlag)
+	}
+	reStake := c.Int(autoReStakeFlag)
+	autoReStake := reStake != 0
+	miningKey := incclient.PrivateKeyToMiningKey(privateKey)
+
+	txHash, err := cfg.incClient.CreateAndSendShardStakingTransaction(privateKey, miningKey, canAddr, rewardAddr, autoReStake)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("txHash: %v\n", txHash)
+
+	return nil
+}
+
+// unStake creates an un-staking transaction.
+func unStake(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+	canAddr := c.String(candidateAddressFlag)
+	if canAddr == "" {
+		canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+	}
+	if !isValidAddress(canAddr) {
+		return fmt.Errorf("%v is invalid", candidateAddressFlag)
+	}
+	miningKey := incclient.PrivateKeyToMiningKey(privateKey)
+
+	txHash, err := cfg.incClient.CreateAndSendUnStakingTransaction(privateKey, miningKey, canAddr)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("txHash: %v\n", txHash)
+
+	return nil
+}
 
 // checkRewards gets all rewards of a payment address.
 func checkRewards(c *cli.Context) error {

@@ -17,6 +17,7 @@ var (
 	network       string
 	host          string
 	debug         int
+	cache		  int
 	askUser       = true
 	isMainNet     = false
 	clientVersion = 2
@@ -64,6 +65,9 @@ func initClient(rpcHost string, version int) error {
 	}
 
 	incClient, err := incclient.NewIncClientWithCache(rpcHost, ethNode, version, network)
+	if cache == 0 {
+		incClient, err = incclient.NewIncClient(rpcHost, ethNode, version, network)
+	}
 	if err != nil {
 		return err
 	}
