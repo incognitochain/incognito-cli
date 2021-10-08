@@ -64,7 +64,7 @@ const (
 var aliases = map[string][]string{
 	networkFlag:          {"net"},
 	debugFlag:            {"d"},
-	privateKeyFlag:       {"p"},
+	privateKeyFlag:       {"p", "prvKey"},
 	otaKeyFlag:           {"ota"},
 	readonlyKeyFlag:      {"ro"},
 	addressFlag:          {"addr"},
