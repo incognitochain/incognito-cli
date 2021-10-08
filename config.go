@@ -41,7 +41,11 @@ func NewConfig(
 func NewTestNetConfig(incClient *incclient.IncClient) error {
 	var err error
 	if incClient == nil {
-		incClient, err = incclient.NewTestNetClientWithCache()
+		if cache == 0 {
+			incClient, err = incclient.NewTestNetClient()
+		} else {
+			incClient, err = incclient.NewTestNetClientWithCache()
+		}
 		if err != nil {
 			return err
 		}
@@ -71,7 +75,11 @@ func NewTestNetConfig(incClient *incclient.IncClient) error {
 func NewTestNet1Config(incClient *incclient.IncClient) error {
 	var err error
 	if incClient == nil {
-		incClient, err = incclient.NewTestNet1ClientWithCache()
+		if cache == 0 {
+			incClient, err = incclient.NewTestNet1Client()
+		} else {
+			incClient, err = incclient.NewTestNet1ClientWithCache()
+		}
 		if err != nil {
 			return err
 		}
@@ -100,7 +108,11 @@ func NewTestNet1Config(incClient *incclient.IncClient) error {
 func NewMainNetConfig(incClient *incclient.IncClient) error {
 	var err error
 	if incClient == nil {
-		incClient, err = incclient.NewMainNetClientWithCache()
+		if cache == 0 {
+			incClient, err = incclient.NewMainNetClient()
+		} else {
+			incClient, err = incclient.NewMainNetClientWithCache()
+		}
 		if err != nil {
 			return err
 		}
@@ -130,7 +142,11 @@ func NewMainNetConfig(incClient *incclient.IncClient) error {
 func NewLocalConfig(incClient *incclient.IncClient) error {
 	var err error
 	if incClient == nil {
-		incClient, err = incclient.NewLocalClientWithCache()
+		if cache == 0 {
+			incClient, err = incclient.NewLocalClient("")
+		} else {
+			incClient, err = incclient.NewLocalClientWithCache()
+		}
 		if err != nil {
 			return err
 		}

@@ -65,6 +65,8 @@ COMMANDS:
      utxo                     Print the UTXOs of an account.
    COMMITTEES:
      checkrewards    Get all rewards of a payment address.
+     stake           Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
+     unstake         Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).
      withdrawreward  Withdraw the reward of a privateKey w.r.t to a tokenID.
    EVMBRIDGE:
      evmretryshield    Retry a shield from the given already-been-deposited-to-sc EVM transaction.
@@ -72,12 +74,12 @@ COMMANDS:
      evmshield         Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.
      evmunshield       Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.
    PDEX:
-     pdecheckprice   Check the price between two tokenIDs
-     pdecontribute   Create a pDEX contributing transaction
-     pdeshare        Retrieve the share amount of a pDEX pair
-     pdetrade        Create a trade transaction
-     pdetradestatus  Get the status of a trade
-     pdewithdraw     Create a pDEX withdrawal transaction
+     pdecheckprice   Check the price between two tokenIDs.
+     pdecontribute   Create a pDEX contributing transaction.
+     pdeshare        Retrieve the share amount of a pDEX pai.r
+     pdetrade        Create a trade transaction.
+     pdetradestatus  Get the status of a trade.
+     pdewithdraw     Create a pDEX withdrawal transaction.
    PORTAL:
      portalshield          Shield a portal token (e.g, BTC) into the Incognito network.
      portalshieldaddress   Generate a portal shielding address.
@@ -91,11 +93,12 @@ COMMANDS:
      send           Send an amount of PRV or token from one wallet to another wallet.
 
 GLOBAL OPTIONS:
-   --debug value                 whether to enable the debug mode (0 - disabled, <> 0 - enabled) (default: 0)
-   --host network                Custom full-node host. This flag is combined with the network flag to initialize the environment in which the custom host points to.
-   --network value, --net value  network environment (mainnet, testnet, testnet1, local) (default: "mainnet")
-   --help, -h                    show help (default: false)
-   --version, -v                 print the version (default: false)
+   --debug value, -d value                     Whether to enable the debug mode (0 - disabled, <> 0 - enabled) (default: 0)
+   --host network                              Custom full-node host. This flag is combined with the network flag to initialize the environment in which the custom host points to.
+   --network value, --net value                Network environment (mainnet, testnet, testnet1, local) (default: "mainnet")
+   --utxoCache value, -c value, --cache value  Whether to use the UTXO cache (0 - disabled, <> 0 - enabled). See https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/utxo_cache.md for more information. (default: 0)
+   --help, -h                                  show help (default: false)
+   --version, -v                               print the version (default: false)
 
 COPYRIGHT:
    This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any commercial usages should be acknowledged by the Incognito Devs Team.
@@ -114,6 +117,8 @@ COPYRIGHT:
   * [`utxo`](#utxo)
 * [`COMMITTEES`](#committees)
   * [`checkrewards`](#checkrewards)
+  * [`stake`](#stake)
+  * [`unstake`](#unstake)
   * [`withdrawreward`](#withdrawreward)
 * [`EVMBRIDGE`](#evmbridge)
   * [`evmretryshield`](#evmretryshield)
@@ -155,8 +160,8 @@ CATEGORY:
    ACCOUNTS
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --tokenID value, --id value   the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --privateKey value, -p value  A base58-encoded Incognito private key
+   --tokenID value, --id value   The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    
 ```
 
@@ -179,10 +184,10 @@ DESCRIPTION:
    This function helps consolidate UTXOs of an account. It consolidates a version of UTXOs at a time, users need to specify which version they need to consolidate. Please note that this process is time-consuming and requires a considerable amount of CPU.
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --tokenID value, --id value   the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --version value, -v value     version of the transaction (1 or 2) (default: 2)
-   --numThreads value            number of threads used in this action (default: 4)
+   --privateKey value, -p value  A base58-encoded Incognito private key
+   --tokenID value, --id value   The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --version value, -v value     Version of the transaction (1 or 2) (default: 2)
+   --numThreads value            Number of threads used in this action (default: 4)
    
 ```
 
@@ -205,7 +210,7 @@ DESCRIPTION:
    This function helps generate a new mnemonic phrase and its Incognito accounts.
 
 OPTIONS:
-   --numShards value  the number of shard (default: 8)
+   --numShards value  The number of shard (default: 8)
    
 ```
 
@@ -228,12 +233,12 @@ DESCRIPTION:
    This function helps retrieve the history of an account w.r.t a tokenID. Please note that this process is time-consuming and requires a considerable amount of CPU.
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
+   --privateKey value, -p value  A base58-encoded Incognito private key
    --tokenID value               ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --numThreads value            number of threads used in this action (default: 4)
-   --enableLog                   enable log for this action (default: false)
-   --logFile value               location of the log file (default: "os.Stdout")
-   --csvFile value, --csv value  the csv file location to store the history
+   --numThreads value            Number of threads used in this action (default: 4)
+   --enableLog                   Enable log for this action (default: false)
+   --logFile value               Location of the log file (default: "os.Stdout")
+   --csvFile value, --csv value  The csv file location to store the history
    
 ```
 
@@ -256,8 +261,8 @@ DESCRIPTION:
    This function helps generate Incognito accounts given a mnemonic.
 
 OPTIONS:
-   --mnemonic value, -m value  a 12-word mnemonic phrase, words are separated by a "-" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).
-   --numShards value           the number of shard (default: 8)
+   --mnemonic value, -m value  A 12-word mnemonic phrase, words are separated by a "-" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).
+   --numShards value           The number of shard (default: 8)
    
 ```
 
@@ -297,10 +302,10 @@ CATEGORY:
    ACCOUNTS
 
 OPTIONS:
-   --address value, --addr value    a base58-encoded payment address
-   --otaKey value, --ota value      a base58-encoded ota key
-   --readonlyKey value, --ro value  a base58-encoded read-only key
-   --tokenID value, --id value      the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --address value, --addr value    A base58-encoded payment address
+   --otaKey value, --ota value      A base58-encoded ota key
+   --readonlyKey value, --ro value  A base58-encoded read-only key
+   --tokenID value, --id value      The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    
 ```
 
@@ -323,10 +328,10 @@ DESCRIPTION:
    This function submits an otaKey to the full-node to use the full-node's cache. If an access token is provided, it will submit the ota key in an authorized manner. See https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/submit_key.md for more details.
 
 OPTIONS:
-   --otaKey value, --ota value  a base58-encoded ota key
-   --accessToken value          a 64-character long hex-encoded authorized access token
-   --fromHeight value           the beacon height at which the full-node will sync from (default: 0)
-   --isReset                    whether the full-node should reset the cache for this ota key (default: false)
+   --otaKey value, --ota value  A base58-encoded ota key
+   --accessToken value          A 64-character long hex-encoded authorized access token
+   --fromHeight value           The beacon height at which the full-node will sync from (default: 0)
+   --isReset                    Whether the full-node should reset the cache for this ota key (default: false)
    
 ```
 
@@ -346,8 +351,8 @@ CATEGORY:
    ACCOUNTS
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --tokenID value, --id value   the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --privateKey value, -p value  A base58-encoded Incognito private key
+   --tokenID value, --id value   The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    
 ```
 
@@ -368,7 +373,51 @@ CATEGORY:
    COMMITTEES
 
 OPTIONS:
-   --address value, --addr value  a base58-encoded payment address
+   --address value, --addr value  A base58-encoded payment address
+   
+```
+
+### stake
+Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
+```shell
+$ incognito-cli help stake
+NAME:
+   incognito-cli stake - Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
+
+USAGE:
+   stake --privateKey PRIVATE_KEY [--candidateAddress CANDIDATE_ADDRESS] [--rewardAddress REWARD_ADDRESS] [--autoReStake AUTO_RE_STAKE]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   COMMITTEES
+
+OPTIONS:
+   --privateKey value, -p value               A base58-encoded Incognito private key
+   --candidateAddress value, --canAddr value  The Incognito payment address of the committee candidate (default: the payment address of the privateKey)
+   --rewardAddress value, --rwdAddr value     The Incognito payment address of the reward receiver (default: the payment address of the privateKey)
+   --autoReStake value                        Whether or not to automatically re-stake (0 - false, <> 0 - true) (default: 1)
+   
+```
+
+### unstake
+Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).
+```shell
+$ incognito-cli help unstake
+NAME:
+   incognito-cli unstake - Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).
+
+USAGE:
+   unstake --privateKey PRIVATE_KEY [--candidateAddress CANDIDATE_ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   COMMITTEES
+
+OPTIONS:
+   --privateKey value, -p value               A base58-encoded Incognito private key
+   --candidateAddress value, --canAddr value  The Incognito payment address of the committee candidate (default: the payment address of the privateKey)
    
 ```
 
@@ -388,10 +437,10 @@ CATEGORY:
    COMMITTEES
 
 OPTIONS:
-   --privateKey value, -p value   a base58-encoded Incognito private key
+   --privateKey value, -p value   A base58-encoded Incognito private key
    --address value, --addr value  the payment address of a candidate (default: the payment address of the privateKey)
-   --tokenID value, --id value    the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --version value, -v value      version of the transaction (1 or 2) (default: 2)
+   --tokenID value, --id value    The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --version value, -v value      Version of the transaction (1 or 2) (default: 2)
    
 ```
 
@@ -415,9 +464,9 @@ DESCRIPTION:
    This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.
 
 OPTIONS:
-   --privateKey value, -p value           a base58-encoded Incognito private key
-   --externalTxHash value, --eTxID value  the external transaction hash
-   --evm value                            the EVM network (ETH or BSC) (default: "ETH")
+   --privateKey value, -p value           A base58-encoded Incognito private key
+   --externalTxHash value, --eTxID value  The external transaction hash
+   --evm value                            The EVM network (ETH or BSC) (default: "ETH")
    --externalTokenAddress value           ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    
 ```
@@ -441,8 +490,8 @@ DESCRIPTION:
    This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
 
 OPTIONS:
-   --txHash value, --iTxID value  an Incognito transaction hash
-   --evm value                    the EVM network (ETH or BSC) (default: "ETH")
+   --txHash value, --iTxID value  An Incognito transaction hash
+   --evm value                    The EVM network (ETH or BSC) (default: "ETH")
    
 ```
 
@@ -477,9 +526,9 @@ DESCRIPTION:
    DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
 
 OPTIONS:
-   --privateKey value, -p value       a base58-encoded Incognito private key
-   --shieldAmount value, --amt value  the shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
-   --evm value                        the EVM network (ETH or BSC) (default: "ETH")
+   --privateKey value, -p value       A base58-encoded Incognito private key
+   --shieldAmount value, --amt value  The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
+   --evm value                        The EVM network (ETH or BSC) (default: "ETH")
    --externalTokenAddress value       ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    --address value, --addr value      The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
    
@@ -516,9 +565,9 @@ DESCRIPTION:
    DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS.
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --tokenID value, --id value   the Incognito tokenID of the un-shielding asset
-   --amount value, --amt value   the Incognito amount of the action (default: 0)
+   --privateKey value, -p value  A base58-encoded Incognito private key
+   --tokenID value, --id value   The Incognito tokenID of the un-shielding asset
+   --amount value, --amt value   The Incognito amount of the action (default: 0)
    
 ```
 
@@ -528,7 +577,7 @@ This function checks the price of a pair of tokenIds. It must be supplied with t
 ```shell
 $ incognito-cli help pdecheckprice
 NAME:
-   incognito-cli pdecheckprice - Check the price between two tokenIDs
+   incognito-cli pdecheckprice - Check the price between two tokenIDs.
 
 USAGE:
    pdecheckprice --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT
@@ -544,7 +593,7 @@ DESCRIPTION:
 OPTIONS:
    --sellTokenID value    ID of the token to sell
    --buyTokenID value     ID of the token to buy
-   --sellingAmount value  the amount of sellTokenID wished to sell (default: 0)
+   --sellingAmount value  The amount of sellTokenID wished to sell (default: 0)
    
 ```
 
@@ -553,7 +602,7 @@ This function creates a pDEX contributing transaction. See more about this trans
 ```shell
 $ incognito-cli help pdecontribute
 NAME:
-   incognito-cli pdecontribute - Create a pDEX contributing transaction
+   incognito-cli pdecontribute - Create a pDEX contributing transaction.
 
 USAGE:
    pdecontribute --privateKey PRIVATE_KEY --pairId PAIR_ID [--tokenID TOKEN_ID] --amount AMOUNT [--version VERSION]
@@ -567,11 +616,11 @@ DESCRIPTION:
    This function creates a pDEX contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --pairId value                the ID of the contributing pair (see https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md)
-   --tokenID value, --id value   the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --amount value, --amt value   the Incognito amount of the action (default: 0)
-   --version value, -v value     version of the transaction (1 or 2) (default: 2)
+   --privateKey value, -p value  A base58-encoded Incognito private key
+   --pairId value                The ID of the contributing pair (see https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md)
+   --tokenID value, --id value   The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --amount value, --amt value   The Incognito amount of the action (default: 0)
+   --version value, -v value     Version of the transaction (1 or 2) (default: 2)
    
 ```
 
@@ -580,7 +629,7 @@ This function returns the share amount of a user within a pDEX pair.
 ```shell
 $ incognito-cli help pdeshare
 NAME:
-   incognito-cli pdeshare - Retrieve the share amount of a pDEX pair
+   incognito-cli pdeshare - Retrieve the share amount of a pDEX pai.r
 
 USAGE:
    pdeshare --address ADDRESS --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2]
@@ -594,7 +643,7 @@ DESCRIPTION:
    This function returns the share amount of a user within a pDEX pair.
 
 OPTIONS:
-   --address value, --addr value  a base58-encoded payment address
+   --address value, --addr value  A base58-encoded payment address
    --tokenID1 value               ID of the first token
    --tokenID2 value               ID of the second token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    
@@ -605,7 +654,7 @@ This function creates a trade transaction on the pDEX.
 ```shell
 $ incognito-cli help pdetrade
 NAME:
-   incognito-cli pdetrade - Create a trade transaction
+   incognito-cli pdetrade - Create a trade transaction.
 
 USAGE:
    pdetrade --privateKey PRIVATE_KEY --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT [--minAcceptAmount MIN_ACCEPT_AMOUNT] [--tradingFee TRADING_FEE]
@@ -619,12 +668,12 @@ DESCRIPTION:
    This function creates a trade transaction on the pDEX.
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
+   --privateKey value, -p value  A base58-encoded Incognito private key
    --sellTokenID value           ID of the token to sell
    --buyTokenID value            ID of the token to buy
-   --sellingAmount value         the amount of sellTokenID wished to sell (default: 0)
-   --minAcceptAmount value       the minimum acceptable amount of buyTokenID wished to receive (default: 0)
-   --tradingFee value            the trading fee (measured in nano PRV) (default: 0)
+   --sellingAmount value         The amount of sellTokenID wished to sell (default: 0)
+   --minAcceptAmount value       The minimum acceptable amount of buyTokenID wished to receive (default: 0)
+   --tradingFee value            The trading fee (measured in nano PRV) (default: 0)
    
 ```
 
@@ -633,7 +682,7 @@ This function returns the status of a trade (1: successful, 2: failed). If a `no
 ```shell
 $ incognito-cli help pdetradestatus
 NAME:
-   incognito-cli pdetradestatus - Get the status of a trade
+   incognito-cli pdetradestatus - Get the status of a trade.
 
 USAGE:
    pdetradestatus --txHash TX_HASH
@@ -647,7 +696,7 @@ DESCRIPTION:
    This function returns the status of a trade (1: successful, 2: failed). If a `not found` error occurs, it means that the trade has not been acknowledged by the beacon chain. Just wait and check again later.
 
 OPTIONS:
-   --txHash value, --iTxID value  an Incognito transaction hash
+   --txHash value, --iTxID value  An Incognito transaction hash
    
 ```
 
@@ -656,7 +705,7 @@ This function creates a transaction withdrawing an amount of `shared` from the p
 ```shell
 $ incognito-cli help pdewithdraw
 NAME:
-   incognito-cli pdewithdraw - Create a pDEX withdrawal transaction
+   incognito-cli pdewithdraw - Create a pDEX withdrawal transaction.
 
 USAGE:
    pdewithdraw --privateKey PRIVATE_KEY --amount AMOUNT --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2] [--version VERSION]
@@ -670,11 +719,11 @@ DESCRIPTION:
    This function creates a transaction withdrawing an amount of `shared` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --amount value, --amt value   the Incognito amount of the action (default: 0)
+   --privateKey value, -p value  A base58-encoded Incognito private key
+   --amount value, --amt value   The Incognito amount of the action (default: 0)
    --tokenID1 value              ID of the first token
    --tokenID2 value              ID of the second token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --version value, -v value     version of the transaction (1 or 2) (default: 2)
+   --version value, -v value     Version of the transaction (1 or 2) (default: 2)
    
 ```
 
@@ -698,9 +747,9 @@ DESCRIPTION:
    This function helps shield a portal token into the Incognito network after the fund has been transferred to the depositing address (generated by `portalshieldaddress`).
 
 OPTIONS:
-   --privateKey value, -p value           a base58-encoded Incognito private key
-   --externalTxHash value, --eTxID value  the external transaction hash
-   --tokenID value, --id value            the Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   --privateKey value, -p value           A base58-encoded Incognito private key
+   --externalTxHash value, --eTxID value  The external transaction hash
+   --tokenID value, --id value            The Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
    --address value, --addr value          The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
    
 ```
@@ -724,8 +773,8 @@ DESCRIPTION:
    This function helps generate the portal shielding address for a payment address and a tokenID.
 
 OPTIONS:
-   --address value, --addr value  a base58-encoded payment address
-   --tokenID value, --id value    the Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   --address value, --addr value  A base58-encoded payment address
+   --tokenID value, --id value    The Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
    
 ```
 
@@ -752,7 +801,7 @@ DESCRIPTION:
    If you encounter an error, it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 
 OPTIONS:
-   --txHash value, --iTxID value  an Incognito transaction hash
+   --txHash value, --iTxID value  An Incognito transaction hash
    
 ```
 
@@ -775,10 +824,10 @@ DESCRIPTION:
    This function helps withdraw portal tokens (BTC) out of the Incognito network.
 
 OPTIONS:
-   --privateKey value, -p value            a base58-encoded Incognito private key
+   --privateKey value, -p value            A base58-encoded Incognito private key
    --externalAddress value, --eAddr value  A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.
-   --amount value, --amt value             the Incognito amount of the action (default: 0)
-   --tokenID value, --id value             the Incognito tokenID of the un-shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   --amount value, --amt value             The Incognito amount of the action (default: 0)
+   --tokenID value, --id value             The Incognito tokenID of the un-shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
    
 ```
 
@@ -805,7 +854,7 @@ DESCRIPTION:
    If you encounter an error saying "unexpected end of JSON input", it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 
 OPTIONS:
-   --txHash value, --iTxID value  an Incognito transaction hash
+   --txHash value, --iTxID value  An Incognito transaction hash
    
 ```
 
@@ -829,9 +878,9 @@ DESCRIPTION:
    This function checks if an OTA key is a receiver of a transaction. If so, it will try to decrypt the received outputs and return the receiving info.
 
 OPTIONS:
-   --txHash value, --iTxID value    an Incognito transaction hash
-   --otaKey value, --ota value      a base58-encoded ota key
-   --readonlyKey value, --ro value  a base58-encoded read-only key
+   --txHash value, --iTxID value    An Incognito transaction hash
+   --otaKey value, --ota value      A base58-encoded ota key
+   --readonlyKey value, --ro value  A base58-encoded read-only key
    
 ```
 
@@ -854,11 +903,11 @@ DESCRIPTION:
    This function helps convert UTXOs v1 of a user to UTXO v2 w.r.t a tokenID. Please note that this process is time-consuming and requires a considerable amount of CPU.
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --tokenID value, --id value   the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --numThreads value            number of threads used in this action (default: 4)
-   --enableLog                   enable log for this action (default: false)
-   --logFile value               location of the log file (default: "os.Stdout")
+   --privateKey value, -p value  A base58-encoded Incognito private key
+   --tokenID value, --id value   The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --numThreads value            Number of threads used in this action (default: 4)
+   --enableLog                   Enable log for this action (default: false)
+   --logFile value               Location of the log file (default: "os.Stdout")
    
 ```
 
@@ -881,9 +930,9 @@ DESCRIPTION:
    This function helps convert UTXOs v1 of a user to UTXO v2 for all assets. It will automatically check for all UTXOs v1 of all tokens and convert them. Please note that this process is time-consuming and requires a considerable amount of CPU.
 
 OPTIONS:
-   --privateKey value, -p value  a base58-encoded Incognito private key
-   --numThreads value            number of threads used in this action (default: 4)
-   --logFile value               location of the log file (default: "os.Stdout")
+   --privateKey value, -p value  A base58-encoded Incognito private key
+   --numThreads value            Number of threads used in this action (default: 4)
+   --logFile value               Location of the log file (default: "os.Stdout")
    
 ```
 
@@ -906,12 +955,12 @@ DESCRIPTION:
    This function sends an amount of PRV or token from one wallet to another wallet. By default, it used 100 nano PRVs to pay the transaction fee.
 
 OPTIONS:
-   --privateKey value, -p value   a base58-encoded Incognito private key
-   --address value, --addr value  a base58-encoded payment address
-   --amount value, --amt value    the Incognito amount of the action (default: 0)
-   --tokenID value, --id value    the Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --fee value                    the PRV amount for paying the transaction fee (default: 100)
-   --version value, -v value      version of the transaction (1 or 2) (default: 2)
+   --privateKey value, -p value   A base58-encoded Incognito private key
+   --address value, --addr value  A base58-encoded payment address
+   --amount value, --amt value    The Incognito amount of the action (default: 0)
+   --tokenID value, --id value    The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --fee value                    The PRV amount for paying the transaction fee (default: 100)
+   --version value, -v value      Version of the transaction (1 or 2) (default: 2)
    
 ```
 

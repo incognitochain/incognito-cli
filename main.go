@@ -31,6 +31,7 @@ func main() {
 		defaultFlags[networkFlag],
 		defaultFlags[hostFlag],
 		defaultFlags[debugFlag],
+		defaultFlags[cacheFlag],
 	}
 
 	// all account-related commands
@@ -173,6 +174,28 @@ func main() {
 	// all committee-related commands
 	committeeCommands := []*cli.Command{
 		{
+			Name:     "stake",
+			Usage:    "Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).",
+			Category: committeeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[candidateAddressFlag],
+				defaultFlags[rewardReceiverFlag],
+				defaultFlags[autoReStakeFlag],
+			},
+			Action: stake,
+		},
+		{
+			Name:     "unstake",
+			Usage:    "Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).",
+			Category: committeeCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[candidateAddressFlag],
+			},
+			Action: unStake,
+		},
+		{
 			Name:     "checkrewards",
 			Usage:    "Get all rewards of a payment address.",
 			Category: committeeCat,
@@ -265,7 +288,7 @@ func main() {
 	pDEXCommands := []*cli.Command{
 		{
 			Name:  "pdecheckprice",
-			Usage: "Check the price between two tokenIDs",
+			Usage: "Check the price between two tokenIDs.",
 			Description: "This function checks the price of a pair of tokenIds. It must be supplied with the selling amount " +
 				"since the pDEX uses the AMM algorithm.",
 			Category: pDEXCat,
@@ -278,7 +301,7 @@ func main() {
 		},
 		{
 			Name:        "pdetrade",
-			Usage:       "Create a trade transaction",
+			Usage:       "Create a trade transaction.",
 			Description: "This function creates a trade transaction on the pDEX.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
@@ -293,7 +316,7 @@ func main() {
 		},
 		{
 			Name:        "pdecontribute",
-			Usage:       "Create a pDEX contributing transaction",
+			Usage:       "Create a pDEX contributing transaction.",
 			Description: "This function creates a pDEX contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
@@ -307,7 +330,7 @@ func main() {
 		},
 		{
 			Name:        "pdewithdraw",
-			Usage:       "Create a pDEX withdrawal transaction",
+			Usage:       "Create a pDEX withdrawal transaction.",
 			Description: "This function creates a transaction withdrawing an amount of `shared` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
@@ -321,7 +344,7 @@ func main() {
 		},
 		{
 			Name:        "pdeshare",
-			Usage:       "Retrieve the share amount of a pDEX pair",
+			Usage:       "Retrieve the share amount of a pDEX pai.r",
 			Description: "This function returns the share amount of a user within a pDEX pair.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
@@ -333,7 +356,7 @@ func main() {
 		},
 		{
 			Name:  "pdetradestatus",
-			Usage: "Get the status of a trade",
+			Usage: "Get the status of a trade.",
 			Description: "This function returns the status of a trade (1: successful, 2: failed). If a `not found` error occurs, " +
 				"it means that the trade has not been acknowledged by the beacon chain. Just wait and check again later.",
 			Category: pDEXCat,
@@ -387,7 +410,7 @@ func main() {
 				&cli.StringFlag{
 					Name:     tokenIDFlag,
 					Aliases:  aliases[tokenIDFlag],
-					Usage:    "the Incognito tokenID of the un-shielding asset",
+					Usage:    "The Incognito tokenID of the un-shielding asset",
 					Required: true,
 				},
 				defaultFlags[amountFlag],
@@ -419,7 +442,7 @@ func main() {
 				&cli.StringFlag{
 					Name:    tokenIDFlag,
 					Aliases: aliases[tokenIDFlag],
-					Usage:   "the Incognito tokenID of the shielding asset",
+					Usage:   "The Incognito tokenID of the shielding asset",
 					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
 				},
 			},
@@ -437,7 +460,7 @@ func main() {
 				&cli.StringFlag{
 					Name:    tokenIDFlag,
 					Aliases: aliases[tokenIDFlag],
-					Usage:   "the Incognito tokenID of the shielding asset",
+					Usage:   "The Incognito tokenID of the shielding asset",
 					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
 				},
 				&cli.StringFlag{
@@ -479,7 +502,7 @@ func main() {
 				&cli.StringFlag{
 					Name:    tokenIDFlag,
 					Aliases: aliases[tokenIDFlag],
-					Usage:   "the Incognito tokenID of the un-shielding asset",
+					Usage:   "The Incognito tokenID of the un-shielding asset",
 					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
 				},
 			},

@@ -16,7 +16,8 @@ const (
 	networkFlag       = "network"
 	hostFlag          = "host"
 	clientVersionFlag = "clientVersion"
-	debugFlag         = "enableDebug"
+	debugFlag         = "debug"
+	cacheFlag         = "utxoCache"
 	yesToAllFlag      = "yesToAll"
 	privateKeyFlag    = "privateKey"
 	addressFlag       = "address"
@@ -53,26 +54,32 @@ const (
 	evmFlag             = "evm"
 	externalTxIDFlag    = "externalTxHash"
 	externalAddressFlag = "externalAddress"
+
+	candidateAddressFlag = "candidateAddress"
+	rewardReceiverFlag   = "rewardAddress"
+	autoReStakeFlag      = "autoReStake"
 )
 
 // aliases for defaultFlags
 var aliases = map[string][]string{
-	networkFlag:         {"net"},
-	debugFlag:           {"d"},
-	privateKeyFlag:      {"p"},
-	otaKeyFlag:          {"ota"},
-	readonlyKeyFlag:     {"ro"},
-	addressFlag:         {"addr"},
-	tokenIDFlag:         {"id"},
-	tokenID1Flag:        {"id1"},
-	tokenID2Flag:        {"id2"},
-	amountFlag:          {"amt"},
-	versionFlag:         {"v"},
-	csvFileFlag:         {"csv"},
-	shieldAmountFlag:    {"amt"},
-	externalAddressFlag: {"eAddr"},
-	txHashFlag:          {"iTxID"},
-	externalTxIDFlag:    {"eTxID"},
+	networkFlag:          {"net"},
+	debugFlag:            {"d"},
+	privateKeyFlag:       {"p"},
+	otaKeyFlag:           {"ota"},
+	readonlyKeyFlag:      {"ro"},
+	addressFlag:          {"addr"},
+	tokenIDFlag:          {"id"},
+	tokenID1Flag:         {"id1"},
+	tokenID2Flag:         {"id2"},
+	amountFlag:           {"amt"},
+	versionFlag:          {"v"},
+	csvFileFlag:          {"csv"},
+	shieldAmountFlag:     {"amt"},
+	externalAddressFlag:  {"eAddr"},
+	txHashFlag:           {"iTxID"},
+	externalTxIDFlag:     {"eTxID"},
+	candidateAddressFlag: {"canAddr"},
+	rewardReceiverFlag:   {"rwdAddr"},
 }
 
 // category constants
