@@ -179,6 +179,7 @@ func main() {
 			Category: committeeCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
+				defaultFlags[miningKeyFlag],
 				defaultFlags[candidateAddressFlag],
 				defaultFlags[rewardReceiverFlag],
 				defaultFlags[autoReStakeFlag],
@@ -191,6 +192,7 @@ func main() {
 			Category: committeeCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
+				defaultFlags[miningKeyFlag],
 				defaultFlags[candidateAddressFlag],
 			},
 			Action: unStake,

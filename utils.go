@@ -17,7 +17,7 @@ var (
 	network       string
 	host          string
 	debug         int
-	cache		  int
+	cache         int
 	askUser       = true
 	isMainNet     = false
 	clientVersion = 2

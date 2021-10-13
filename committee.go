@@ -31,9 +31,15 @@ func stake(c *cli.Context) error {
 	if !isValidAddress(rewardAddr) {
 		return fmt.Errorf("%v is invalid", rewardReceiverFlag)
 	}
+	miningKey := c.String(miningKeyFlag)
+	if miningKey == "" {
+		miningKey = incclient.PrivateKeyToMiningKey(privateKey)
+	}
+	if !isValidMiningKey(miningKey) {
+		return fmt.Errorf("%v is invalid", miningKeyFlag)
+	}
 	reStake := c.Int(autoReStakeFlag)
 	autoReStake := reStake != 0
-	miningKey := incclient.PrivateKeyToMiningKey(privateKey)
 
 	txHash, err := cfg.incClient.CreateAndSendShardStakingTransaction(privateKey, miningKey, canAddr, rewardAddr, autoReStake)
 	if err != nil {
@@ -62,7 +68,13 @@ func unStake(c *cli.Context) error {
 	if !isValidAddress(canAddr) {
 		return fmt.Errorf("%v is invalid", candidateAddressFlag)
 	}
-	miningKey := incclient.PrivateKeyToMiningKey(privateKey)
+	miningKey := c.String(miningKeyFlag)
+	if miningKey == "" {
+		miningKey = incclient.PrivateKeyToMiningKey(privateKey)
+	}
+	if !isValidMiningKey(miningKey) {
+		return fmt.Errorf("%v is invalid", miningKeyFlag)
+	}
 
 	txHash, err := cfg.incClient.CreateAndSendUnStakingTransaction(privateKey, miningKey, canAddr)
 	if err != nil {

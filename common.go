@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/camelcase"
 	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
+	"github.com/incognitochain/go-incognito-sdk-v2/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
 	"regexp"
@@ -55,6 +56,7 @@ const (
 	externalTxIDFlag    = "externalTxHash"
 	externalAddressFlag = "externalAddress"
 
+	miningKeyFlag        = "miningKey"
 	candidateAddressFlag = "candidateAddress"
 	rewardReceiverFlag   = "rewardAddress"
 	autoReStakeFlag      = "autoReStake"
@@ -78,8 +80,10 @@ var aliases = map[string][]string{
 	externalAddressFlag:  {"eAddr"},
 	txHashFlag:           {"iTxID"},
 	externalTxIDFlag:     {"eTxID"},
+	miningKeyFlag:        {"mKey", "vKey"},
 	candidateAddressFlag: {"canAddr"},
 	rewardReceiverFlag:   {"rwdAddr"},
+	autoReStakeFlag:      {"reStake"},
 }
 
 // category constants
@@ -167,6 +171,20 @@ func isValidReadonlyKey(readonlyKeyStr string) bool {
 	readonlyKey := kWallet.KeySet.ReadonlyKey
 
 	if readonlyKey.GetPublicSpend() == nil || readonlyKey.GetPrivateView() == nil {
+		return false
+	}
+
+	return true
+}
+
+// isValidMiningKey checks if a base58-encoded mining key is valid or not.
+func isValidMiningKey(miningKeyStr string) bool {
+	if miningKeyStr == "" {
+		return false
+	}
+
+	_, _, err := base58.Base58Check{}.Decode(miningKeyStr)
+	if err != nil {
 		return false
 	}
 

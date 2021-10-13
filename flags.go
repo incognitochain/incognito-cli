@@ -217,6 +217,13 @@ var defaultFlags = map[string]cli.Flag{
 		Usage:   "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
 		Value:   "",
 	},
+
+	miningKeyFlag: &cli.StringFlag{
+		Name:     miningKeyFlag,
+		Aliases:  aliases[miningKeyFlag],
+		Usage:    "An Incognito mining key of the committee candidate (default: the mining key associated with the privateKey)",
+		Required: false,
+	},
 	candidateAddressFlag: &cli.StringFlag{
 		Name:     candidateAddressFlag,
 		Aliases:  aliases[candidateAddressFlag],
@@ -231,6 +238,7 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	autoReStakeFlag: &cli.IntFlag{
 		Name:     autoReStakeFlag,
+		Aliases:  aliases[autoReStakeFlag],
 		Usage:    "Whether or not to automatically re-stake (0 - false, <> 0 - true)",
 		Value:    1,
 		Required: false,
