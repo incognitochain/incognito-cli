@@ -9,16 +9,6 @@ import (
 )
 
 func convertUTXOs(c *cli.Context) error {
-	enableLog := c.Bool("enableLog")
-	if enableLog {
-		logFile := c.String("logFile")
-		if logFile == "" || logFile == "os.Stdout" {
-			incclient.Logger = incclient.NewLogger(true)
-		} else {
-			incclient.Logger = incclient.NewLogger(true, logFile)
-		}
-	}
-
 	err := initNetWork()
 	if err != nil {
 		return err
@@ -39,7 +29,7 @@ func convertUTXOs(c *cli.Context) error {
 		return fmt.Errorf("numThreads in invalid")
 	}
 
-	incclient.Logger.Printf("CONVERTING tokenID %v, numThreads %v, enableLog %v\n", tokenIDStr, numThreads, enableLog)
+	incclient.Logger.Printf("CONVERTING tokenID %v, numThreads %v\n", tokenIDStr, numThreads)
 	utxoList, _, err := cfg.incClient.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
 	if err != nil {
 		return err
@@ -78,13 +68,6 @@ func convertUTXOs(c *cli.Context) error {
 }
 
 func convertAll(c *cli.Context) error {
-	logFile := c.String("logFile")
-	if logFile == "" || logFile == "os.Stdout" {
-		incclient.Logger = incclient.NewLogger(true)
-	} else {
-		incclient.Logger = incclient.NewLogger(true, logFile)
-	}
-
 	err := initNetWork()
 	if err != nil {
 		return err
