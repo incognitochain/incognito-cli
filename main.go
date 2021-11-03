@@ -293,6 +293,11 @@ func main() {
 				defaultFlags[tokenIDToSellFlag],
 				defaultFlags[tokenIDToBuyFlag],
 				defaultFlags[sellingAmountFlag],
+				&cli.StringFlag{
+					Name:     pairIDFlag,
+					Usage:    "The ID of the target pool",
+					Value: "",
+				},
 			},
 			Action: pDEXCheckPrice,
 		},
