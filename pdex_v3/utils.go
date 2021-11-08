@@ -160,6 +160,7 @@ func clonePoolPairState(p *jsonresult.Pdexv3PoolPairState) *jsonresult.Pdexv3Poo
 	tmpPoolPair.Token0VirtualAmount = new(big.Int).Set(p.State.Token0VirtualAmount)
 	tmpPoolPair.Token1VirtualAmount = new(big.Int).Set(p.State.Token1VirtualAmount)
 	res.State = tmpPoolPair
+	res.Shares = make(map[string]*jsonresult.Pdexv3Share)
 	for k, v := range p.Shares {
 		tmpRes := &jsonresult.Pdexv3Share{}
 		tmpRes.Amount = v.Amount
@@ -173,12 +174,18 @@ func clonePoolPairState(p *jsonresult.Pdexv3PoolPairState) *jsonresult.Pdexv3Poo
 		}
 		res.Shares[k] = tmpRes
 	}
+
+	res.LpFeesPerShare = make(map[common.Hash]*big.Int)
 	for k, v := range p.LpFeesPerShare {
 		res.LpFeesPerShare[k] = big.NewInt(0).Set(v)
 	}
+
+	res.ProtocolFees = make(map[common.Hash]uint64)
 	for k, v := range p.ProtocolFees {
 		res.ProtocolFees[k] = v
 	}
+
+	res.StakingPoolFees = make(map[common.Hash]uint64)
 	for k, v := range p.StakingPoolFees {
 		res.StakingPoolFees[k] = v
 	}

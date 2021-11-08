@@ -8,15 +8,16 @@ import (
 )
 
 func chooseBestPoolFromAPair(
-	pools map[string]*jsonresult.Pdexv3PoolPair,
 	poolPairStates map[string]*jsonresult.Pdexv3PoolPairState,
 	tokenIDStrNodeSource string,
 	tokenIDStrNodeDest string,
 	sellAmt uint64,
-) (*jsonresult.Pdexv3PoolPair, uint64) {
+) (*jsonresult.Pdexv3PoolPair, string, uint64) {
 	maxReceive := uint64(0)
 	var chosenPool *jsonresult.Pdexv3PoolPair
-	for poolID, pool := range pools {
+	var chosenPoolID string
+	for poolID, poolState := range poolPairStates {
+		pool := poolState.State
 		if (tokenIDStrNodeSource == pool.Token0ID.String() && tokenIDStrNodeDest == pool.Token1ID.String()) ||
 			(tokenIDStrNodeSource == pool.Token1ID.String() && tokenIDStrNodeDest == pool.Token0ID.String()) {
 			receive := trade(
@@ -27,11 +28,12 @@ func chooseBestPoolFromAPair(
 			)
 			if receive > maxReceive {
 				maxReceive = receive
-				chosenPool = pool
+				chosenPool = &pool
+				chosenPoolID = poolID
 			}
 		}
 	}
-	return chosenPool, maxReceive
+	return chosenPool, chosenPoolID, maxReceive
 }
 
 func trade(
@@ -71,14 +73,14 @@ func trade(
 	return expectedReceived
 }
 
+// FindGoodTradePath attempts to find a good enough trading path for the given trading pair, selling amount, and pool pairs.
 func FindGoodTradePath(
 	maxPathLen uint,
-	pools map[string]*jsonresult.Pdexv3PoolPair,
 	poolPairStates map[string]*jsonresult.Pdexv3PoolPairState,
 	tokenIDStrSource string,
 	tokenIDStrDest string,
 	originalSellAmount uint64,
-) ([]*jsonresult.Pdexv3PoolPair, uint64) {
+) ([]*jsonresult.Pdexv3PoolPair, []string, uint64) {
 
 	pc := &PriceCalculator{
 		Graph: make(map[string][]Node),
@@ -86,7 +88,8 @@ func FindGoodTradePath(
 
 	simplePools := make([]*SimplePoolNodeData, 0)
 
-	for _, pool := range pools {
+	for _, poolState := range poolPairStates {
+		pool := poolState.State
 		token0Liq := new(big.Int).Mul(pool.Token0VirtualAmount, big.NewInt(int64(BaseAmplifier)))
 		token0Liq.Div(token0Liq, new(big.Int).SetUint64(uint64(pool.Amplifier)))
 		token1Liq := new(big.Int).Mul(pool.Token1VirtualAmount, big.NewInt(int64(BaseAmplifier)))
@@ -103,31 +106,34 @@ func FindGoodTradePath(
 	allPaths := pc.findPaths(maxPathLen+1, simplePools, tokenIDStrSource, tokenIDStrDest)
 
 	if len(allPaths) == 0 {
-		return []*jsonresult.Pdexv3PoolPair{}, 0
+		return nil, nil, 0
 	}
 
 	maxReceive := uint64(0)
-	var chosenPath []*jsonresult.Pdexv3PoolPair
-
+	var chosenPairs []*jsonresult.Pdexv3PoolPair
+	var chosenPath []string
 	for _, path := range allPaths {
 		sellAmt := originalSellAmount
 
-		var pathByPool []*jsonresult.Pdexv3PoolPair
+		var poolsByPath []*jsonresult.Pdexv3PoolPair
+		var poolIDsByPath []string
 
 		for i := 0; i < len(path)-1; i++ {
 			tokenIDStrNodeSource := path[i]
 			tokenIDStrNodeDest := path[i+1]
 
-			pool, receive := chooseBestPoolFromAPair(pools, poolPairStates, tokenIDStrNodeSource, tokenIDStrNodeDest, sellAmt)
+			pool, poolID, receive := chooseBestPoolFromAPair(poolPairStates, tokenIDStrNodeSource, tokenIDStrNodeDest, sellAmt)
 			sellAmt = receive
-			pathByPool = append(pathByPool, pool)
+			poolsByPath = append(poolsByPath, pool)
+			poolIDsByPath = append(poolIDsByPath, poolID)
 		}
 
-		if len(pathByPool) == 0 || sellAmt > maxReceive {
+		if len(poolsByPath) == 0 || sellAmt > maxReceive {
 			maxReceive = sellAmt
-			chosenPath = pathByPool
+			chosenPairs = poolsByPath
+			chosenPath = poolIDsByPath
 		}
 	}
 
-	return chosenPath, maxReceive
+	return chosenPairs, chosenPath, maxReceive
 }

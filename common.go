@@ -37,14 +37,20 @@ const (
 	isResetFlag       = "isReset"
 	txHashFlag        = "txHash"
 
-	tokenIDToSellFlag       = "sellTokenID"
-	tokenIDToBuyFlag        = "buyTokenID"
-	sellingAmountFlag       = "sellingAmount"
-	minAcceptableAmountFlag = "minAcceptAmount"
-	tradingFeeFlag          = "tradingFee"
-	pairIDFlag              = "pairId"
-	tokenID1Flag            = "tokenID1"
-	tokenID2Flag            = "tokenID2"
+	tokenIDToSellFlag        = "sellTokenID"
+	tokenIDToBuyFlag         = "buyTokenID"
+	sellingAmountFlag        = "sellingAmount"
+	minAcceptableAmountFlag  = "minAcceptAmount"
+	tradingFeeFlag           = "tradingFee"
+	pairIDFlag               = "pairId"
+	tokenID1Flag             = "tokenID1"
+	tokenID2Flag             = "tokenID2"
+	prvFeeFlag               = "prvFee"
+	tradingPathFlag          = "tradingPath"
+	maxTradingPathLengthFlag = "maxPaths"
+	nftIDFlag                = "nftID"
+	pairHashFlag             = "pairHash"
+	amplifierFlag            = "amplifier"
 
 	mnemonicFlag  = "mnemonic"
 	numShardsFlag = "numShards"
@@ -84,6 +90,13 @@ var aliases = map[string][]string{
 	candidateAddressFlag: {"canAddr"},
 	rewardReceiverFlag:   {"rwdAddr"},
 	autoReStakeFlag:      {"reStake"},
+
+	tokenIDToSellFlag:       {"sellID"},
+	tokenIDToBuyFlag:        {"buyID"},
+	sellingAmountFlag:       {"sellAmt"},
+	minAcceptableAmountFlag: {"minAmt"},
+	pairIDFlag:              {"pairID"},
+	amplifierFlag:           {"amp"},
 }
 
 // category constants
@@ -251,16 +264,21 @@ func flagToVariable(f string) string {
 
 func buildUsageTextFromCommand(command *cli.Command) {
 	res := command.Name
+	hasOptionalFlags := false
 	for _, f := range command.Flags {
 		flagString := fmt.Sprintf(" --%v %v", f.Names()[0], flagToVariable(f.Names()[0]))
 		if requiredFlag, ok := f.(cli.RequiredFlag); ok {
 			if !requiredFlag.IsRequired() {
 				// optional flag is put inside a [] symbol.
 				flagString = fmt.Sprintf(" [--%v %v]", f.Names()[0], flagToVariable(f.Names()[0]))
+				hasOptionalFlags = true
 			}
 		}
 		res += flagString
 	}
 
-	command.UsageText = res + "\n\n\t OPTIONAL flags are denoted by a [] bracket."
+	command.UsageText = res
+	if hasOptionalFlags {
+		command.UsageText += "\n\n\t OPTIONAL flags are denoted by a [] bracket."
+	}
 }

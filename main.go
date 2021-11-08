@@ -295,11 +295,24 @@ func main() {
 				defaultFlags[sellingAmountFlag],
 				&cli.StringFlag{
 					Name:     pairIDFlag,
-					Usage:    "The ID of the target pool",
-					Value: "",
+					Usage:    "The ID of the target pool pair",
+					Required: true,
 				},
 			},
 			Action: pDEXCheckPrice,
+		},
+		{
+			Name:        "pdefindpath",
+			Usage:       "Find a `good` trading path for a trade.",
+			Description: "This function helps find a good trading path for a trade.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[tokenIDToSellFlag],
+				defaultFlags[tokenIDToBuyFlag],
+				defaultFlags[sellingAmountFlag],
+				defaultFlags[maxTradingPathLengthFlag],
+			},
+			Action: pDEXFindPath,
 		},
 		{
 			Name:        "pdetrade",
@@ -312,9 +325,45 @@ func main() {
 				defaultFlags[tokenIDToBuyFlag],
 				defaultFlags[sellingAmountFlag],
 				defaultFlags[minAcceptableAmountFlag],
+				defaultFlags[tradingPathFlag],
 				defaultFlags[tradingFeeFlag],
+				defaultFlags[prvFeeFlag],
+				defaultFlags[maxTradingPathLengthFlag],
 			},
 			Action: pDEXTrade,
+		},
+		{
+			Name:        "pdetradestatus",
+			Usage:       "Check the status of a pDEX trade.",
+			Description: "This function retrieves the status of a pDEX trade. The status should be read as follows:\n" +
+				"\t-1: an error has occurred (mainly because the transaction has not yet reached the beacon chain)\n" +
+				"\t1: the trade is accepted\n" +
+				"\t2: the trade is not accepted\n",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: pDEXTradeStatus,
+		},
+		{
+			Name:        "pdemintnft",
+			Usage:       "Create a (pDEX) NFT minting transaction.",
+			Description: "This function creates and broadcasts a transaction that mints a new (pDEX) NFT for the pDEX.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+			},
+			Action: pDEXMintNFT,
+		},
+		{
+			Name:        "pdemintnftstatus",
+			Usage:       "Check the status of a (pDEX) NFT minting transaction.",
+			Description: "This function retrieves the status of a (pDEX) NFT minting transaction.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: pDEXCheckMintNFT,
 		},
 		{
 			Name:        "pdecontribute",
@@ -323,50 +372,52 @@ func main() {
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
-				defaultFlags[pairIDFlag],
-				defaultFlags[tokenIDFlag],
+				defaultFlags[nftIDFlag],
+				defaultFlags[pairHashFlag],
 				defaultFlags[amountFlag],
-				defaultFlags[versionFlag],
+				defaultFlags[amplifierFlag],
+				defaultFlags[tokenIDFlag],
+				defaultFlags[pairIDFlag],
 			},
 			Action: pDEXContribute,
 		},
-		{
-			Name:        "pdewithdraw",
-			Usage:       "Create a pDEX withdrawal transaction.",
-			Description: "This function creates a transaction withdrawing an amount of `shared` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
-			Category:    pDEXCat,
-			Flags: []cli.Flag{
-				defaultFlags[privateKeyFlag],
-				defaultFlags[amountFlag],
-				defaultFlags[tokenID1Flag],
-				defaultFlags[tokenID2Flag],
-				defaultFlags[versionFlag],
-			},
-			Action: pDEXWithdraw,
-		},
-		{
-			Name:        "pdeshare",
-			Usage:       "Retrieve the share amount of a pDEX pai.r",
-			Description: "This function returns the share amount of a user within a pDEX pair.",
-			Category:    pDEXCat,
-			Flags: []cli.Flag{
-				defaultFlags[addressFlag],
-				defaultFlags[tokenID1Flag],
-				defaultFlags[tokenID2Flag],
-			},
-			Action: pDEXGetShare,
-		},
-		{
-			Name:  "pdetradestatus",
-			Usage: "Get the status of a trade.",
-			Description: "This function returns the status of a trade (1: successful, 2: failed). If a `not found` error occurs, " +
-				"it means that the trade has not been acknowledged by the beacon chain. Just wait and check again later.",
-			Category: pDEXCat,
-			Flags: []cli.Flag{
-				defaultFlags[txHashFlag],
-			},
-			Action: pDEXTradeStatus,
-		},
+		//{
+		//	Name:        "pdewithdraw",
+		//	Usage:       "Create a pDEX withdrawal transaction.",
+		//	Description: "This function creates a transaction withdrawing an amount of `shared` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
+		//	Category:    pDEXCat,
+		//	Flags: []cli.Flag{
+		//		defaultFlags[privateKeyFlag],
+		//		defaultFlags[amountFlag],
+		//		defaultFlags[tokenID1Flag],
+		//		defaultFlags[tokenID2Flag],
+		//		defaultFlags[versionFlag],
+		//	},
+		//	Action: pDEXWithdraw,
+		//},
+		//{
+		//	Name:        "pdeshare",
+		//	Usage:       "Retrieve the share amount of a pDEX pai.r",
+		//	Description: "This function returns the share amount of a user within a pDEX pair.",
+		//	Category:    pDEXCat,
+		//	Flags: []cli.Flag{
+		//		defaultFlags[addressFlag],
+		//		defaultFlags[tokenID1Flag],
+		//		defaultFlags[tokenID2Flag],
+		//	},
+		//	Action: pDEXGetShare,
+		//},
+		//{
+		//	Name:  "pdetradestatus",
+		//	Usage: "Get the status of a trade.",
+		//	Description: "This function returns the status of a trade (1: successful, 2: failed). If a `not found` error occurs, " +
+		//		"it means that the trade has not been acknowledged by the beacon chain. Just wait and check again later.",
+		//	Category: pDEXCat,
+		//	Flags: []cli.Flag{
+		//		defaultFlags[txHashFlag],
+		//	},
+		//	Action: pDEXTradeStatus,
+		//},
 	}
 
 	// Bridge commands
