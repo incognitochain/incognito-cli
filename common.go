@@ -94,8 +94,8 @@ var aliases = map[string][]string{
 	tokenIDToBuyFlag:        {"buyID", "buyId"},
 	sellingAmountFlag:       {"sellAmt"},
 	minAcceptableAmountFlag: {"minAmt"},
-	pairIDFlag:              {"pairID", "pairId"},
-	nftIDFlag:               {"nftID", "nftId"},
+	pairIDFlag:              {"pairId"},
+	nftIDFlag:               {"nftId"},
 	amplifierFlag:           {"amp"},
 }
 
