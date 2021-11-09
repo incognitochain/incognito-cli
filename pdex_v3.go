@@ -269,8 +269,8 @@ func pDEXContribute(c *cli.Context) error {
 	}
 
 	amplifier := c.Uint64(amplifierFlag)
-	if amount == 0 {
-		return fmt.Errorf("%v cannot be zero", amountFlag)
+	if amplifier == 0 {
+		return fmt.Errorf("%v cannot be zero", amplifierFlag)
 	}
 
 	pairID := c.String(pairIDFlag)
@@ -294,5 +294,76 @@ func pDEXContribute(c *cli.Context) error {
 	}
 
 	fmt.Printf("TxHash: %v\n", txHash)
+	return nil
+}
+
+// pDEXWithdraw withdraws a pair of tokens from the pDEX.
+func pDEXWithdraw(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	pairID := c.String(pairIDFlag)
+	nftID := c.String(nftIDFlag)
+
+	tokenID1 := c.String(tokenID1Flag)
+	if !isValidTokenID(tokenID1) {
+		return fmt.Errorf("%v is invalid", tokenID1Flag)
+	}
+	tokenID2 := c.String(tokenID2Flag)
+	if !isValidTokenID(tokenID2) {
+		return fmt.Errorf("%v is invalid", tokenID2Flag)
+	}
+
+	shareAmount := c.Uint64(amountFlag)
+	myShare, err := cfg.incClient.GetPoolShareAmount(pairID, nftID)
+	if err != nil {
+		return err
+	}
+	if shareAmount == 0 {
+		shareAmount = myShare
+	}
+	if shareAmount > myShare {
+		return fmt.Errorf("maximum share allowed to withdraw: %v", myShare)
+	}
+
+	txHash, err := cfg.incClient.CreateAndSendPdexv3WithdrawLiquidityTransaction(
+		privateKey,
+		pairID,
+		tokenID1,
+		tokenID2,
+		nftID,
+		shareAmount,
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("TxHash: %v\n", txHash)
+	return nil
+}
+
+// pDEXGetShare returns the share amount of a pDEX nftID with-in a given poolID.
+func pDEXGetShare(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	pairID := c.String(pairIDFlag)
+	nftID := c.String(nftIDFlag)
+
+	share, err := cfg.incClient.GetPoolShareAmount(pairID, nftID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Share: %v\n", share)
 	return nil
 }

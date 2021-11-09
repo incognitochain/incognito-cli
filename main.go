@@ -333,13 +333,13 @@ func main() {
 			Action: pDEXTrade,
 		},
 		{
-			Name:        "pdetradestatus",
-			Usage:       "Check the status of a pDEX trade.",
+			Name:  "pdetradestatus",
+			Usage: "Check the status of a pDEX trade.",
 			Description: "This function retrieves the status of a pDEX trade. The status should be read as follows:\n" +
 				"\t-1: an error has occurred (mainly because the transaction has not yet reached the beacon chain)\n" +
 				"\t1: the trade is accepted\n" +
 				"\t2: the trade is not accepted\n",
-			Category:    pDEXCat,
+			Category: pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],
 			},
@@ -367,8 +367,8 @@ func main() {
 		},
 		{
 			Name:        "pdecontribute",
-			Usage:       "Create a pDEX contributing transaction.",
-			Description: "This function creates a pDEX contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md",
+			Usage:       "Create a pDEX liquidity-contributing transaction.",
+			Description: "This function creates a pDEX liquidity-contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -381,43 +381,44 @@ func main() {
 			},
 			Action: pDEXContribute,
 		},
-		//{
-		//	Name:        "pdewithdraw",
-		//	Usage:       "Create a pDEX withdrawal transaction.",
-		//	Description: "This function creates a transaction withdrawing an amount of `shared` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
-		//	Category:    pDEXCat,
-		//	Flags: []cli.Flag{
-		//		defaultFlags[privateKeyFlag],
-		//		defaultFlags[amountFlag],
-		//		defaultFlags[tokenID1Flag],
-		//		defaultFlags[tokenID2Flag],
-		//		defaultFlags[versionFlag],
-		//	},
-		//	Action: pDEXWithdraw,
-		//},
-		//{
-		//	Name:        "pdeshare",
-		//	Usage:       "Retrieve the share amount of a pDEX pai.r",
-		//	Description: "This function returns the share amount of a user within a pDEX pair.",
-		//	Category:    pDEXCat,
-		//	Flags: []cli.Flag{
-		//		defaultFlags[addressFlag],
-		//		defaultFlags[tokenID1Flag],
-		//		defaultFlags[tokenID2Flag],
-		//	},
-		//	Action: pDEXGetShare,
-		//},
-		//{
-		//	Name:  "pdetradestatus",
-		//	Usage: "Get the status of a trade.",
-		//	Description: "This function returns the status of a trade (1: successful, 2: failed). If a `not found` error occurs, " +
-		//		"it means that the trade has not been acknowledged by the beacon chain. Just wait and check again later.",
-		//	Category: pDEXCat,
-		//	Flags: []cli.Flag{
-		//		defaultFlags[txHashFlag],
-		//	},
-		//	Action: pDEXTradeStatus,
-		//},
+		{
+			Name:        "pdewithdraw",
+			Usage:       "Create a pDEX liquidity-withdrawal transaction.",
+			Description: "This function creates a transaction withdrawing an amount of `share` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				&cli.StringFlag{
+					Name:     pairIDFlag,
+					Usage:    "The ID of the contributed pool pair",
+					Required: true,
+				},
+				defaultFlags[nftIDFlag],
+				defaultFlags[tokenID1Flag],
+				defaultFlags[tokenID2Flag],
+				&cli.Uint64Flag{
+					Name:     amountFlag,
+					Aliases:  aliases[amountFlag],
+					Usage:    "The amount of share wished to withdraw. If set to 0, it will withdraw all of the share.",
+				},
+			},
+			Action: pDEXWithdraw,
+		},
+		{
+			Name:        "pdeshare",
+			Usage:       "Retrieve the share amount of a pDEX poolID given an nftID.",
+			Description: "This function returns the share amount of an nftID within a pDEX poolID.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     pairIDFlag,
+					Usage:    "The ID of the target pool pair",
+					Required: true,
+				},
+				defaultFlags[nftIDFlag],
+			},
+			Action: pDEXGetShare,
+		},
 	}
 
 	// Bridge commands
