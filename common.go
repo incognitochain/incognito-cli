@@ -75,9 +75,9 @@ var aliases = map[string][]string{
 	otaKeyFlag:           {"ota"},
 	readonlyKeyFlag:      {"ro"},
 	addressFlag:          {"addr"},
-	tokenIDFlag:          {"id"},
-	tokenID1Flag:         {"id1"},
-	tokenID2Flag:         {"id2"},
+	tokenIDFlag:          {"id", "ID"},
+	tokenID1Flag:         {"id1", "ID1"},
+	tokenID2Flag:         {"id2", "ID2"},
 	amountFlag:           {"amt"},
 	versionFlag:          {"v"},
 	csvFileFlag:          {"csv"},
@@ -90,11 +90,12 @@ var aliases = map[string][]string{
 	rewardReceiverFlag:   {"rwdAddr"},
 	autoReStakeFlag:      {"reStake"},
 
-	tokenIDToSellFlag:       {"sellID"},
-	tokenIDToBuyFlag:        {"buyID"},
+	tokenIDToSellFlag:       {"sellID", "sellId"},
+	tokenIDToBuyFlag:        {"buyID", "buyId"},
 	sellingAmountFlag:       {"sellAmt"},
 	minAcceptableAmountFlag: {"minAmt"},
-	pairIDFlag:              {"pairID"},
+	pairIDFlag:              {"pairID", "pairId"},
+	nftIDFlag:               {"nftID", "nftId"},
 	amplifierFlag:           {"amp"},
 }
 
