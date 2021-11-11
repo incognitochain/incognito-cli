@@ -488,6 +488,32 @@ func main() {
 			Action: pDEXOrderWithdrawalStatus,
 		},
 		{
+			Name:        "pdestake",
+			Usage:       "Stake a token to the pDEX.",
+			Description: "This function creates a transaction staking a token to the pDEX.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[nftIDFlag],
+				defaultFlags[tokenIDFlag],
+				defaultFlags[amountFlag],
+			},
+			Action: pDEXStake,
+		},
+		{
+			Name:        "pdeunstake",
+			Usage:       "Un-stake a token from the pDEX.",
+			Description: "This function creates a transaction un-staking a token from the pDEX.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[nftIDFlag],
+				defaultFlags[tokenIDFlag],
+				defaultFlags[amountFlag],
+			},
+			Action: pDEXUnStake,
+		},
+		{
 			Name:        "pdeshare",
 			Usage:       "Retrieve the share amount of a pDEX poolID given an nftID.",
 			Description: "This function returns the share amount of an nftID within a pDEX poolID.",
