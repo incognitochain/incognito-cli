@@ -48,6 +48,7 @@ const (
 	tradingPathFlag          = "tradingPath"
 	maxTradingPathLengthFlag = "maxPaths"
 	nftIDFlag                = "nftID"
+	orderIDFlag              = "orderID"
 	pairHashFlag             = "pairHash"
 	amplifierFlag            = "amplifier"
 
@@ -96,6 +97,7 @@ var aliases = map[string][]string{
 	minAcceptableAmountFlag: {"minAmt"},
 	pairIDFlag:              {"pairId"},
 	nftIDFlag:               {"nftId"},
+	orderIDFlag:             {"orderId"},
 	amplifierFlag:           {"amp"},
 }
 

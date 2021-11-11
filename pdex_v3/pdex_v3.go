@@ -1,7 +1,6 @@
 package pdex_v3
 
 import (
-	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/jsonresult"
 	"github.com/incognitochain/incognito-cli/pdex_v3/v2utils"
 	"math/big"
@@ -67,7 +66,6 @@ func trade(
 	)
 
 	if err != nil {
-		fmt.Printf("Error calculating trade ammont %s \n", err)
 		return 0
 	}
 	return expectedReceived

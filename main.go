@@ -324,9 +324,9 @@ func main() {
 				defaultFlags[tokenIDToSellFlag],
 				defaultFlags[tokenIDToBuyFlag],
 				defaultFlags[sellingAmountFlag],
+				defaultFlags[tradingFeeFlag],
 				defaultFlags[minAcceptableAmountFlag],
 				defaultFlags[tradingPathFlag],
-				defaultFlags[tradingFeeFlag],
 				defaultFlags[prvFeeFlag],
 				defaultFlags[maxTradingPathLengthFlag],
 			},
@@ -335,10 +335,8 @@ func main() {
 		{
 			Name:  "pdetradestatus",
 			Usage: "Check the status of a pDEX trade.",
-			Description: "This function retrieves the status of a pDEX trade. The status should be read as follows:\n" +
-				"\t-1: an error has occurred (mainly because the transaction has not yet reached the beacon chain)\n" +
-				"\t1: the trade is accepted\n" +
-				"\t2: the trade is not accepted\n",
+			Description: "This function retrieves the status of a pDEX trade. If an error is thrown, it is mainly " +
+				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
 			Category: pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],
@@ -363,7 +361,7 @@ func main() {
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],
 			},
-			Action: pDEXCheckMintNFT,
+			Action: pDEXMintNFTStatus,
 		},
 		{
 			Name:        "pdecontribute",
@@ -377,9 +375,24 @@ func main() {
 				defaultFlags[amountFlag],
 				defaultFlags[amplifierFlag],
 				defaultFlags[tokenIDFlag],
-				defaultFlags[pairIDFlag],
+				&cli.StringFlag{
+					Name: pairIDFlag,
+					Usage: "The ID of the contributing pool pair. For pool-initializing transactions (e.g, first contribution in the pool), it should be left empty.",
+					Value: "",
+				},
 			},
 			Action: pDEXContribute,
+		},
+		{
+			Name:  "pdecontributionstatus",
+			Usage: "Check the status of a pDEX liquidity contribution.",
+			Description: "This function retrieves the status of a pDEX liquidity contribution. If an error is thrown, it is mainly " +
+				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: pDEXContributionStatus,
 		},
 		{
 			Name:        "pdewithdraw",
@@ -403,6 +416,76 @@ func main() {
 				},
 			},
 			Action: pDEXWithdraw,
+		},
+		{
+			Name:  "pdewithdrawalstatus",
+			Usage: "Check the status of a pDEX liquidity withdrawal.",
+			Description: "This function retrieves the status of a pDEX liquidity withdrawal. If an error is thrown, it is mainly " +
+				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: pDEXWithdrawalStatus,
+		},
+		{
+			Name:        "pdeaddorder",
+			Usage:       "Add an order book to the pDEX.",
+			Description: "This function creates a transaction adding an order to the pDEX.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[pairIDFlag],
+				defaultFlags[nftIDFlag],
+				defaultFlags[tokenIDToSellFlag],
+				defaultFlags[tokenIDToBuyFlag],
+				defaultFlags[sellingAmountFlag],
+				defaultFlags[minAcceptableAmountFlag],
+			},
+			Action: pDEXAddOrder,
+		},
+		{
+			Name:  "pdeorderaddstatus",
+			Usage: "Check the status of a pDEX order-adding withdrawal.",
+			Description: "This function retrieves the status of a pDEX order-adding withdrawal. If an error is thrown, it is mainly " +
+				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: pDEXOrderAddingStatus,
+		},
+		{
+			Name:        "pdewithdraworder",
+			Usage:       "Withdraw an order from the pDEX.",
+			Description: "This function creates a transaction withdraing an order to the pDEX.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[orderIDFlag],
+				defaultFlags[pairIDFlag],
+				defaultFlags[nftIDFlag],
+				defaultFlags[amountFlag],
+				defaultFlags[tokenID1Flag],
+				&cli.StringFlag{
+					Name:    tokenID2Flag,
+					Aliases: aliases[tokenID2Flag],
+					Usage:   "ID of the second token (if have). In the case of withdrawing a single token, leave it empty.",
+					Value:   "",
+				},
+			},
+			Action: pDEXWithdrawOrder,
+		},
+		{
+			Name:  "pdeorderwithdrawalstatus",
+			Usage: "Check the status of a pDEX order-withdrawal withdrawal.",
+			Description: "This function retrieves the status of a pDEX order-withdrawal withdrawal. If an error is thrown, it is mainly " +
+				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
+			Category: pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+			},
+			Action: pDEXOrderWithdrawalStatus,
 		},
 		{
 			Name:        "pdeshare",
