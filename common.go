@@ -310,9 +310,9 @@ func buildUsageTextFromCommand(command *cli.Command, parents ...string) {
 			}
 		}
 		res += flagString
-		if parent != "" {
-			res = fmt.Sprintf("%v %v", parent, res)
-		}
+	}
+	if parent != "" {
+		res = fmt.Sprintf("%v %v", parent, res)
 	}
 
 	command.UsageText = res
