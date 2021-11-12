@@ -182,6 +182,28 @@ func pDEXWithdrawStakingRewardStatus(c *cli.Context) error {
 	return nil
 }
 
+// pDEXWithdrawLPFeeStatus retrieves the status of a pDEX LP fee withdrawal transaction.
+func pDEXWithdrawLPFeeStatus(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	txHash := c.String(txHashFlag)
+	status, err := cfg.incClient.CheckDEXLPFeeWithdrawalStatus(txHash)
+	if err != nil {
+		return err
+	}
+
+	jsb, err := json.MarshalIndent(status, "", "\t")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsb))
+
+	return nil
+}
+
 // pDEXMintNFTStatus gets the status of a pDEx NFT minting transaction.
 func pDEXMintNFTStatus(c *cli.Context) error {
 	err := initNetWork()

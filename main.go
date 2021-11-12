@@ -539,7 +539,30 @@ func main() {
 					Value: common.PRVIDStr,
 				},
 			},
-			Action: pDEXUnStake,
+			Action: pDEXWithdrawStakingReward,
+		},
+		{
+			Name:        "pdelpvalue",
+			Usage:       "Check the estimated LP value in a given pool.",
+			Description: "This command retrieves the information about the value of an LP in a given pool.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[pairIDFlag],
+				defaultFlags[nftIDFlag],
+			},
+			Action: pDEXGetEstimatedLPValue,
+		},
+		{
+			Name:        "pdewithdrawlpfee",
+			Usage:       "Withdraw LP fees from the pDEX.",
+			Description: "This command creates a transaction withdrawing LP fees from the pDEX.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[pairIDFlag],
+				defaultFlags[nftIDFlag],
+			},
+			Action: pDEXWithdrawLPFee,
 		},
 		{
 			Name:        "pdeshare",
@@ -555,6 +578,16 @@ func main() {
 				defaultFlags[nftIDFlag],
 			},
 			Action: pDEXGetShare,
+		},
+		{
+			Name:        "pdemynft",
+			Usage:       "Retrieve the list of NFTs for a given private key.",
+			Description: "This command returns the list of NFTs for a given private key.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+			},
+			Action: pDEXGetAllNFTs,
 		},
 		{
 			Name:        "pdestakereward",
@@ -574,7 +607,7 @@ func main() {
 	}
 	pDEXStatusCommands := &cli.Command{
 		Name:        "pdestatus",
-		Usage:       "Retrieve the status of a pDEX action",
+		Usage:       "Retrieve the status of a pDEX action.",
 		Description: fmt.Sprintf("This command helps retrieve the status of a pDEX action given its hash. %v", errMsg),
 		Category:    pDEXCat,
 		Subcommands: []*cli.Command{
@@ -649,6 +682,14 @@ func main() {
 					defaultFlags[txHashFlag],
 				},
 				Action: pDEXWithdrawStakingRewardStatus,
+			},
+			{
+				Name:  "withdrawlpfee",
+				Usage: "Check the status of a pDEX LP fee withdrawal transaction.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXWithdrawLPFeeStatus,
 			},
 		},
 	}

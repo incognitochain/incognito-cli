@@ -221,6 +221,25 @@ func isValidTokenID(tokenIDStr string) bool {
 	return true
 }
 
+// isValidDEXPairID checks if a string pairIDStr is valid or not.
+func isValidDEXPairID(pairIDStr string) bool {
+	if pairIDStr == "" {
+		return false
+	}
+	tmpStrings := strings.Split(pairIDStr, "-")
+	if len(tmpStrings) != 3 {
+		return false
+	}
+	for _, tmp := range tmpStrings {
+		_, err := iCommon.Hash{}.NewHashFromStr(tmp)
+		if err != nil {
+			return false
+		}
+	}
+
+	return true
+}
+
 // isValidEVMAddress checks if a string tokenAddress is valid or not.
 func isValidEVMAddress(tokenAddress string) bool {
 	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")

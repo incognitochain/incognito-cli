@@ -395,7 +395,7 @@ func pDEXUnStake(c *cli.Context) error {
 	return nil
 }
 
-// CheckDEXStakingReward returns the estimated pDEX staking reward.
+// CheckDEXStakingReward returns the estimated pDEX staking rewards.
 func CheckDEXStakingReward(c *cli.Context) error {
 	err := initNetWork()
 	if err != nil {
@@ -415,7 +415,7 @@ func CheckDEXStakingReward(c *cli.Context) error {
 	return jsonPrint(res)
 }
 
-// pDEXWithdrawStakingReward creates a transaction withdrawing an amount of staking reward from the pDEX.
+// pDEXWithdrawStakingReward creates a transaction withdrawing the staking rewards from the pDEX.
 func pDEXWithdrawStakingReward(c *cli.Context) error {
 	err := initNetWork()
 	if err != nil {
@@ -465,6 +465,69 @@ func pDEXGetShare(c *cli.Context) error {
 
 	fmt.Printf("Share: %v\n", share)
 	return nil
+}
+
+// pDEXWithdrawLPFee creates a transaction withdrawing the LP fees for an nftID from the pDEX.
+func pDEXWithdrawLPFee(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	nftID := c.String(nftIDFlag)
+
+	pairID := c.String(pairIDFlag)
+	if !isValidDEXPairID(pairID) {
+		return fmt.Errorf("%v is invalid", pairIDFlag)
+	}
+
+	lpValue, err := cfg.incClient.GetEstimatedLPValue(0, pairID, nftID)
+	if err != nil {
+		return err
+	}
+	if len(lpValue.TradingFee) == 0 {
+		return fmt.Errorf("not enough LP fee to withdraw")
+	}
+
+	txHash, err := cfg.incClient.CreateAndSendPdexv3WithdrawLPFeeTransaction(
+		privateKey,
+		pairID,
+		nftID,
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("TxHash: %v\n", txHash)
+
+	return nil
+}
+
+// pDEXGetEstimatedLPValue returns the estimated LP values of an LP in a given pool.
+func pDEXGetEstimatedLPValue(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	poolPairID := c.String(pairIDFlag)
+	if !isValidDEXPairID(poolPairID) {
+		return fmt.Errorf("%v is invalid", pairIDFlag)
+	}
+	nftID := c.String(nftIDFlag)
+
+	res, err := cfg.incClient.GetEstimatedLPValue(0, poolPairID, nftID)
+	if err != nil {
+		return err
+	}
+	err = jsonPrint(res)
+
+	return err
 }
 
 // pDEXFindPath finds a proper trading path.
@@ -562,4 +625,25 @@ func pDEXCheckPrice(c *cli.Context) error {
 
 	fmt.Printf("bestPairID %v: %v\n", pairID, bestExpectedReceive)
 	return nil
+}
+
+// pDEXGetAllNFTs returns the list of NFTs for a given private key.
+func pDEXGetAllNFTs(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	allNFTs, err := cfg.incClient.GetAllNFTs(privateKey)
+	if err != nil {
+		return err
+	}
+	err = jsonPrint(allNFTs)
+
+	return err
 }
