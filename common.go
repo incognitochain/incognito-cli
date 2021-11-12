@@ -107,9 +107,9 @@ const (
 	accountCat     = "ACCOUNTS"
 	committeeCat   = "COMMITTEES"
 	transactionCat = "TRANSACTIONS"
-	pDEXCat        = "PDEX"
-	evmBridgeCat   = "EVMBRIDGE"
-	portalCat      = "PORTAL"
+	pDEXCat        = "DEX"
+	evmBridgeCat   = "BRIDGE"
+	portalCat      = "BRIDGE"
 )
 
 var cfg *Config
