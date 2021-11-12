@@ -264,7 +264,11 @@ func flagToVariable(f string) string {
 	return res
 }
 
-func buildUsageTextFromCommand(command *cli.Command) {
+func buildUsageTextFromCommand(command *cli.Command, parents ...string) {
+	parent := ""
+	if len(parents) > 0 {
+		parent = parents[0]
+	}
 	res := command.Name
 	hasOptionalFlags := false
 	for _, f := range command.Flags {
@@ -277,6 +281,9 @@ func buildUsageTextFromCommand(command *cli.Command) {
 			}
 		}
 		res += flagString
+		if parent != "" {
+			res = fmt.Sprintf("%v %v", parent, res)
+		}
 	}
 
 	command.UsageText = res
