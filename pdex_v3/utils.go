@@ -150,12 +150,12 @@ func clonePoolPairState(p *jsonresult.Pdexv3PoolPairState) *jsonresult.Pdexv3Poo
 	res := &jsonresult.Pdexv3PoolPairState{}
 
 	tmpPoolPair := jsonresult.Pdexv3PoolPair{
-		ShareAmount:         p.State.ShareAmount,
-		Token0ID:            p.State.Token0ID,
-		Token1ID:            p.State.Token1ID,
-		Token0RealAmount:    p.State.Token0RealAmount,
-		Token1RealAmount:    p.State.Token1RealAmount,
-		Amplifier:           p.State.Amplifier,
+		ShareAmount:      p.State.ShareAmount,
+		Token0ID:         p.State.Token0ID,
+		Token1ID:         p.State.Token1ID,
+		Token0RealAmount: p.State.Token0RealAmount,
+		Token1RealAmount: p.State.Token1RealAmount,
+		Amplifier:        p.State.Amplifier,
 	}
 	tmpPoolPair.Token0VirtualAmount = new(big.Int).Set(p.State.Token0VirtualAmount)
 	tmpPoolPair.Token1VirtualAmount = new(big.Int).Set(p.State.Token1VirtualAmount)

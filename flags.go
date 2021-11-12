@@ -158,8 +158,8 @@ var defaultFlags = map[string]cli.Flag{
 		Value:   0,
 	},
 	tradingFeeFlag: &cli.Uint64Flag{
-		Name:  tradingFeeFlag,
-		Usage: "The trading fee",
+		Name:     tradingFeeFlag,
+		Usage:    "The trading fee",
 		Required: true,
 	},
 	tokenID1Flag: &cli.StringFlag{

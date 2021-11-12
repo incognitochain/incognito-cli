@@ -16,7 +16,6 @@ type OrderBook struct {
 	orders []*Order
 }
 
-
 func NewOrderBook(tmpOrder jsonresult.Pdexv3Orderbook) OrderBook {
 	res := OrderBook{}
 	orders := make([]*Order, len(tmpOrder.Orders))

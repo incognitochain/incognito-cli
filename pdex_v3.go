@@ -155,7 +155,7 @@ func pDEXContribute(c *cli.Context) error {
 		nftID,
 		amount,
 		amplifier,
-		)
+	)
 	if err != nil {
 		return err
 	}
@@ -601,7 +601,7 @@ func pDEXCheckPrice(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		for path, _ := range pairs {
+		for path := range pairs {
 			expectedPrice, err := cfg.incClient.CheckPrice(path, tokenIdToSell, sellingAmount)
 			if err != nil {
 				fmt.Println(path, err)
