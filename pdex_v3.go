@@ -304,9 +304,9 @@ func pDEXWithdrawOrder(c *cli.Context) error {
 		privateKey,
 		pairID,
 		orderID,
-		tokenIDs,
 		nftID,
 		amount,
+		tokenId2,
 	)
 	if err != nil {
 		return err
