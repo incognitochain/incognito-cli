@@ -332,7 +332,7 @@ func pDEXStake(c *cli.Context) error {
 	nftID := c.String(nftIDFlag)
 
 	tokenID := c.String(tokenIDFlag)
-	if !isValidTokenID(tokenIDFlag) {
+	if !isValidTokenID(tokenID) {
 		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
 
@@ -371,7 +371,7 @@ func pDEXUnStake(c *cli.Context) error {
 	nftID := c.String(nftIDFlag)
 
 	tokenID := c.String(tokenIDFlag)
-	if !isValidTokenID(tokenIDFlag) {
+	if !isValidTokenID(tokenID) {
 		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
 
@@ -385,6 +385,59 @@ func pDEXUnStake(c *cli.Context) error {
 		tokenID,
 		nftID,
 		amount,
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("TxHash: %v\n", txHash)
+
+	return nil
+}
+
+// CheckDEXStakingReward returns the estimated pDEX staking reward.
+func CheckDEXStakingReward(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	nftID := c.String(nftIDFlag)
+	tokenID := c.String(tokenIDFlag)
+	if !isValidTokenID(tokenID) {
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	}
+
+	res, err := cfg.incClient.GetEstimatedDEXStakingReward(0, tokenID, nftID)
+	if err != nil {
+		return err
+	}
+	return jsonPrint(res)
+}
+
+// pDEXWithdrawStakingReward creates a transaction withdrawing an amount of staking reward from the pDEX.
+func pDEXWithdrawStakingReward(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	nftID := c.String(nftIDFlag)
+
+	tokenID := c.String(tokenIDFlag)
+	if !isValidTokenID(tokenID) {
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	}
+
+	txHash, err := cfg.incClient.CreateAndSendPdexv3WithdrawStakeRewardTransaction(
+		privateKey,
+		tokenID,
+		nftID,
 	)
 	if err != nil {
 		return err

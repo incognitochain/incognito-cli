@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 	"sort"
 )
+
+var errMsg = "If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid."
 
 func main() {
 	app := &cli.App{
@@ -25,6 +28,7 @@ func main() {
 		Copyright: "This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any " +
 			"commercial usages should be acknowledged by the Incognito Devs Team.",
 	}
+	app.EnableBashCompletion = true
 
 	// set app defaultFlags
 	app.Flags = []cli.Flag{
@@ -63,8 +67,8 @@ func main() {
 		//{
 		//	Name:  "balanceall",
 		//	Usage: "Return the non-zero balances of an account for all tokenIDs.",
-		//	Description: "This function returns the non-zero balances of an account for all tokenIDs. Due to the large number of " +
-		//		"tokens on the network, this function requires a long amount of time to proceed.",
+		//	Description: "This command returns the non-zero balances of an account for all tokenIDs. Due to the large number of " +
+		//		"tokens on the network, This command requires a long amount of time to proceed.",
 		//	Category: accountCat,
 		//	Flags: []cli.Flag{
 		//		defaultFlags[privateKeyFlag],
@@ -97,7 +101,7 @@ func main() {
 			Name:    "consolidate",
 			Aliases: []string{"csl"},
 			Usage:   "Consolidate UTXOs of an account.",
-			Description: "This function helps consolidate UTXOs of an account. It consolidates a version of UTXOs at a time, users need to specify which version they need to consolidate. " +
+			Description: "This command helps consolidate UTXOs of an account. It consolidates a version of UTXOs at a time, users need to specify which version they need to consolidate. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
 			Category: accountCat,
 			Flags: []cli.Flag{
@@ -112,7 +116,7 @@ func main() {
 			Name:    "history",
 			Aliases: []string{"hst"},
 			Usage:   "Retrieve the history of an account.",
-			Description: "This function helps retrieve the history of an account w.r.t a tokenID. " +
+			Description: "This command helps retrieve the history of an account w.r.t a tokenID. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
 			Category: accountCat,
 			Flags: []cli.Flag{
@@ -131,7 +135,7 @@ func main() {
 			Name:        "generateaccount",
 			Aliases:     []string{"genacc"},
 			Usage:       "Generate a new Incognito account.",
-			Description: "This function helps generate a new mnemonic phrase and its Incognito accounts.",
+			Description: "This command helps generate a new mnemonic phrase and its Incognito accounts.",
 			Category:    accountCat,
 			Flags: []cli.Flag{
 				defaultFlags[numShardsFlag],
@@ -142,7 +146,7 @@ func main() {
 			Name:        "importeaccount",
 			Aliases:     []string{"import"},
 			Usage:       "Import a mnemonic of 12 words.",
-			Description: "This function helps generate Incognito accounts given a mnemonic.",
+			Description: "This command helps generate Incognito accounts given a mnemonic.",
 			Category:    accountCat,
 			Flags: []cli.Flag{
 				defaultFlags[mnemonicFlag],
@@ -154,7 +158,7 @@ func main() {
 			Name:    "submitkey",
 			Aliases: []string{"sub"},
 			Usage:   "Submit an ota key to the full-node.",
-			Description: "This function submits an otaKey to the full-node to use the full-node's cache. If an access token " +
+			Description: "This command submits an otaKey to the full-node to use the full-node's cache. If an access token " +
 				"is provided, it will submit the ota key in an authorized manner. See " +
 				"https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/submit_key.md " +
 				"for more details.",
@@ -227,7 +231,7 @@ func main() {
 		{
 			Name:  "send",
 			Usage: "Send an amount of PRV or token from one wallet to another wallet.",
-			Description: "This function sends an amount of PRV or token from one wallet to another wallet. By default, " +
+			Description: "This command sends an amount of PRV or token from one wallet to another wallet. By default, " +
 				"it used 100 nano PRVs to pay the transaction fee.",
 			Category: transactionCat,
 			Flags: []cli.Flag{
@@ -243,7 +247,7 @@ func main() {
 		{
 			Name:  "convert",
 			Usage: "Convert UTXOs of an account w.r.t a tokenID.",
-			Description: "This function helps convert UTXOs v1 of a user to UTXO v2 w.r.t a tokenID. " +
+			Description: "This command helps convert UTXOs v1 of a user to UTXO v2 w.r.t a tokenID. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
 			Category: transactionCat,
 			Flags: []cli.Flag{
@@ -256,7 +260,7 @@ func main() {
 		{
 			Name:  "convertall",
 			Usage: "Convert UTXOs of an account for all assets.",
-			Description: "This function helps convert UTXOs v1 of a user to UTXO v2 for all assets. " +
+			Description: "This command helps convert UTXOs v1 of a user to UTXO v2 for all assets. " +
 				"It will automatically check for all UTXOs v1 of all tokens and convert them. " +
 				"Please note that this process is time-consuming and requires a considerable amount of CPU.",
 			Category: transactionCat,
@@ -269,7 +273,7 @@ func main() {
 		{
 			Name:  "checkreceiver",
 			Usage: "Check if an OTA key is a receiver of a transaction.",
-			Description: "This function checks if an OTA key is a receiver of a transaction. If so, it will try to decrypt " +
+			Description: "This command checks if an OTA key is a receiver of a transaction. If so, it will try to decrypt " +
 				"the received outputs and return the receiving info.",
 			Category: transactionCat,
 			Flags: []cli.Flag{
@@ -286,7 +290,7 @@ func main() {
 		{
 			Name:  "pdecheckprice",
 			Usage: "Check the price between two tokenIDs.",
-			Description: "This function checks the price of a pair of tokenIds. It must be supplied with the selling amount " +
+			Description: "This command checks the price of a pair of tokenIds. It must be supplied with the selling amount " +
 				"since the pDEX uses the AMM algorithm.",
 			Category: pDEXCat,
 			Flags: []cli.Flag{
@@ -304,7 +308,7 @@ func main() {
 		{
 			Name:        "pdefindpath",
 			Usage:       "Find a `good` trading path for a trade.",
-			Description: "This function helps find a good trading path for a trade.",
+			Description: "This command helps find a good trading path for a trade.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[tokenIDToSellFlag],
@@ -317,7 +321,7 @@ func main() {
 		{
 			Name:        "pdetrade",
 			Usage:       "Create a trade transaction.",
-			Description: "This function creates a trade transaction on the pDEX.",
+			Description: "This command creates a trade transaction on the pDEX.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -335,7 +339,7 @@ func main() {
 		{
 			Name:  "pdetradestatus",
 			Usage: "Check the status of a pDEX trade.",
-			Description: "This function retrieves the status of a pDEX trade. If an error is thrown, it is mainly " +
+			Description: "This command retrieves the status of a pDEX trade. If an error is thrown, it is mainly " +
 				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
 			Category: pDEXCat,
 			Flags: []cli.Flag{
@@ -346,7 +350,7 @@ func main() {
 		{
 			Name:        "pdemintnft",
 			Usage:       "Create a (pDEX) NFT minting transaction.",
-			Description: "This function creates and broadcasts a transaction that mints a new (pDEX) NFT for the pDEX.",
+			Description: "This command creates and broadcasts a transaction that mints a new (pDEX) NFT for the pDEX.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -356,7 +360,7 @@ func main() {
 		{
 			Name:        "pdemintnftstatus",
 			Usage:       "Check the status of a (pDEX) NFT minting transaction.",
-			Description: "This function retrieves the status of a (pDEX) NFT minting transaction.",
+			Description: "This command retrieves the status of a (pDEX) NFT minting transaction.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],
@@ -366,7 +370,7 @@ func main() {
 		{
 			Name:        "pdecontribute",
 			Usage:       "Create a pDEX liquidity-contributing transaction.",
-			Description: "This function creates a pDEX liquidity-contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md",
+			Description: "This command creates a pDEX liquidity-contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -376,7 +380,7 @@ func main() {
 				defaultFlags[amplifierFlag],
 				defaultFlags[tokenIDFlag],
 				&cli.StringFlag{
-					Name: pairIDFlag,
+					Name:  pairIDFlag,
 					Usage: "The ID of the contributing pool pair. For pool-initializing transactions (e.g, first contribution in the pool), it should be left empty.",
 					Value: "",
 				},
@@ -386,7 +390,7 @@ func main() {
 		{
 			Name:  "pdecontributionstatus",
 			Usage: "Check the status of a pDEX liquidity contribution.",
-			Description: "This function retrieves the status of a pDEX liquidity contribution. If an error is thrown, it is mainly " +
+			Description: "This command retrieves the status of a pDEX liquidity contribution. If an error is thrown, it is mainly " +
 				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
 			Category: pDEXCat,
 			Flags: []cli.Flag{
@@ -397,7 +401,7 @@ func main() {
 		{
 			Name:        "pdewithdraw",
 			Usage:       "Create a pDEX liquidity-withdrawal transaction.",
-			Description: "This function creates a transaction withdrawing an amount of `share` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
+			Description: "This command creates a transaction withdrawing an amount of `share` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -410,9 +414,9 @@ func main() {
 				defaultFlags[tokenID1Flag],
 				defaultFlags[tokenID2Flag],
 				&cli.Uint64Flag{
-					Name:     amountFlag,
-					Aliases:  aliases[amountFlag],
-					Usage:    "The amount of share wished to withdraw. If set to 0, it will withdraw all of the share.",
+					Name:    amountFlag,
+					Aliases: aliases[amountFlag],
+					Usage:   "The amount of share wished to withdraw. If set to 0, it will withdraw all of the share.",
 				},
 			},
 			Action: pDEXWithdraw,
@@ -420,7 +424,7 @@ func main() {
 		{
 			Name:  "pdewithdrawalstatus",
 			Usage: "Check the status of a pDEX liquidity withdrawal.",
-			Description: "This function retrieves the status of a pDEX liquidity withdrawal. If an error is thrown, it is mainly " +
+			Description: "This command retrieves the status of a pDEX liquidity withdrawal. If an error is thrown, it is mainly " +
 				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
 			Category: pDEXCat,
 			Flags: []cli.Flag{
@@ -431,7 +435,7 @@ func main() {
 		{
 			Name:        "pdeaddorder",
 			Usage:       "Add an order book to the pDEX.",
-			Description: "This function creates a transaction adding an order to the pDEX.",
+			Description: "This command creates a transaction adding an order to the pDEX.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -447,7 +451,7 @@ func main() {
 		{
 			Name:  "pdeorderaddstatus",
 			Usage: "Check the status of a pDEX order-adding withdrawal.",
-			Description: "This function retrieves the status of a pDEX order-adding withdrawal. If an error is thrown, it is mainly " +
+			Description: "This command retrieves the status of a pDEX order-adding withdrawal. If an error is thrown, it is mainly " +
 				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
 			Category: pDEXCat,
 			Flags: []cli.Flag{
@@ -458,7 +462,7 @@ func main() {
 		{
 			Name:        "pdewithdraworder",
 			Usage:       "Withdraw an order from the pDEX.",
-			Description: "This function creates a transaction withdraing an order to the pDEX.",
+			Description: "This command creates a transaction withdraing an order to the pDEX.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -478,8 +482,8 @@ func main() {
 		},
 		{
 			Name:  "pdeorderwithdrawalstatus",
-			Usage: "Check the status of a pDEX order-withdrawal withdrawal.",
-			Description: "This function retrieves the status of a pDEX order-withdrawal withdrawal. If an error is thrown, it is mainly " +
+			Usage: "Check the status of a pDEX order-withdrawal transaction.",
+			Description: "This command retrieves the status of a pDEX order-withdrawal transaction. If an error is thrown, it is mainly " +
 				"because the transaction has not yet reached the beacon chain or the txHash is invalid.",
 			Category: pDEXCat,
 			Flags: []cli.Flag{
@@ -490,33 +494,57 @@ func main() {
 		{
 			Name:        "pdestake",
 			Usage:       "Stake a token to the pDEX.",
-			Description: "This function creates a transaction staking a token to the pDEX.",
+			Description: "This command creates a transaction staking a token to the pDEX.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[nftIDFlag],
-				defaultFlags[tokenIDFlag],
 				defaultFlags[amountFlag],
+				&cli.StringFlag{
+					Name:  tokenIDFlag,
+					Usage: "The ID of the target staking pool ID (or token ID)",
+					Value: common.PRVIDStr,
+				},
 			},
 			Action: pDEXStake,
 		},
 		{
 			Name:        "pdeunstake",
 			Usage:       "Un-stake a token from the pDEX.",
-			Description: "This function creates a transaction un-staking a token from the pDEX.",
+			Description: "This command creates a transaction un-staking a token from the pDEX.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[nftIDFlag],
-				defaultFlags[tokenIDFlag],
 				defaultFlags[amountFlag],
+				&cli.StringFlag{
+					Name:  tokenIDFlag,
+					Usage: "The ID of the target staking pool ID (or token ID)",
+					Value: common.PRVIDStr,
+				},
+			},
+			Action: pDEXUnStake,
+		},
+		{
+			Name:        "pdewithdrawstakereward",
+			Usage:       "Withdraw staking rewards from the pDEX.",
+			Description: "This command creates a transaction withdrawing staking rewards from the pDEX.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[nftIDFlag],
+				&cli.StringFlag{
+					Name:  tokenIDFlag,
+					Usage: "The ID of the target staking pool ID (or token ID)",
+					Value: common.PRVIDStr,
+				},
 			},
 			Action: pDEXUnStake,
 		},
 		{
 			Name:        "pdeshare",
 			Usage:       "Retrieve the share amount of a pDEX poolID given an nftID.",
-			Description: "This function returns the share amount of an nftID within a pDEX poolID.",
+			Description: "This command returns the share amount of an nftID within a pDEX poolID.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
@@ -528,7 +556,103 @@ func main() {
 			},
 			Action: pDEXGetShare,
 		},
+		{
+			Name:        "pdestakereward",
+			Usage:       "Retrieve the estimated pDEX staking rewards.",
+			Description: "This command returns the estimated pDEX staking rewards of an nftID within a pDEX staking pool.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[nftIDFlag],
+				&cli.StringFlag{
+					Name:  tokenIDFlag,
+					Usage: "The ID of the target staking pool ID (or token ID)",
+					Value: common.PRVIDStr,
+				},
+			},
+			Action: CheckDEXStakingReward,
+		},
 	}
+	pDEXStatusCommands := &cli.Command{
+		Name:        "pdestatus",
+		Usage:       "Retrieve the status of a pDEX action",
+		Description: fmt.Sprintf("This command helps retrieve the status of a pDEX action given its hash. %v", errMsg),
+		Category:    pDEXCat,
+		Subcommands: []*cli.Command{
+			{
+				Name:  "trade",
+				Usage: "Check the status of a pDEX trade.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXTradeStatus,
+			},
+			{
+				Name:  "mintnft",
+				Usage: "Check the status of a (pDEX) NFT minting transaction.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXMintNFTStatus,
+			},
+			{
+				Name:  "contribute",
+				Usage: "Check the status of a pDEX liquidity contribution.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXContributionStatus,
+			},
+			{
+				Name:  "withdraw",
+				Usage: "Check the status of a pDEX liquidity withdrawal.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXWithdrawalStatus,
+			},
+			{
+				Name:  "addorder",
+				Usage: "Check the status of a pDEX order-adding withdrawal.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXOrderAddingStatus,
+			},
+			{
+				Name:  "withdraworder",
+				Usage: "Check the status of a pDEX order-withdrawal transaction.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXOrderWithdrawalStatus,
+			},
+			{
+				Name:  "stake",
+				Usage: "Check the status of a pDEX staking transaction.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXStakingStatus,
+			},
+			{
+				Name:  "unstake",
+				Usage: "Check the status of a pDEX un-staking transaction.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXUnStakingStatus,
+			},
+			{
+				Name:  "withdrawstakereward",
+				Usage: "Check the status of a pDEX staking reward withdrawal transaction.",
+				Flags: []cli.Flag{
+					defaultFlags[txHashFlag],
+				},
+				Action: pDEXWithdrawStakingRewardStatus,
+			},
+		},
+	}
+	pDEXCommands = append(pDEXCommands, pDEXStatusCommands)
 
 	// Bridge commands
 	evmBridgeCommands := []*cli.Command{
@@ -553,7 +677,7 @@ func main() {
 		{
 			Name:        "evmretryshield",
 			Usage:       "Retry a shield from the given already-been-deposited-to-sc EVM transaction.",
-			Description: "This function re-shields an already-been-deposited-to-sc transaction in case of prior failure.",
+			Description: "This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.",
 			Category:    evmBridgeCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -583,7 +707,7 @@ func main() {
 		{
 			Name:        "evmretryunshield",
 			Usage:       "Retry an un-shielding request from the given already-been-burned Incognito transaction.",
-			Description: "This function tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.",
+			Description: "This command tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.",
 			Category:    evmBridgeCat,
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],
@@ -598,7 +722,7 @@ func main() {
 		{
 			Name:        "portalshieldaddress",
 			Usage:       "Generate a portal shielding address.",
-			Description: "This function helps generate the portal shielding address for a payment address and a tokenID.",
+			Description: "This command helps generate the portal shielding address for a payment address and a tokenID.",
 			Category:    portalCat,
 			Flags: []cli.Flag{
 				defaultFlags[addressFlag],
@@ -614,7 +738,7 @@ func main() {
 		{
 			Name:  "portalshield",
 			Usage: "Shield a portal token (e.g, BTC) into the Incognito network.",
-			Description: "This function helps shield a portal token into the Incognito network after the fund has been " +
+			Description: "This command helps shield a portal token into the Incognito network after the fund has been " +
 				"transferred to the depositing address (generated by `portalshieldaddress`).",
 			Category: portalCat,
 			Flags: []cli.Flag{
@@ -637,7 +761,7 @@ func main() {
 		{
 			Name:  "portalshieldstatus",
 			Usage: "Get the status of a portal shielding request.",
-			Description: "This function helps retrieve the status of a portal shielding request.\n" +
+			Description: "This command helps retrieve the status of a portal shielding request.\n" +
 				"Status should be understood as: " +
 				"0 - rejected; 1 - accepted.\n" +
 				"If you encounter an error, it might be because the request hasn't reached the " +
@@ -651,7 +775,7 @@ func main() {
 		{
 			Name:        "portalunshield",
 			Usage:       "Withdraw portal tokens (BTC) from the Incognito network.",
-			Description: "This function helps withdraw portal tokens (BTC) out of the Incognito network.",
+			Description: "This command helps withdraw portal tokens (BTC) out of the Incognito network.",
 			Category:    portalCat,
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -674,7 +798,7 @@ func main() {
 		{
 			Name:  "portalunshieldstatus",
 			Usage: "Get the status of a portal un-shielding request.",
-			Description: "This function helps retrieve the status of a portal un-shielding request.\n" +
+			Description: "This command helps retrieve the status of a portal un-shielding request.\n" +
 				"Status should be understood as: " +
 				"0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.\n" +
 				"If you encounter an error saying \"unexpected end of JSON input\", it might be because the request hasn't reached the " +
@@ -696,6 +820,11 @@ func main() {
 	app.Commands = append(app.Commands, portalCommands...)
 
 	for _, command := range app.Commands {
+		if len(command.Subcommands) > 0 {
+			for _, subCommand := range command.Subcommands {
+				buildUsageTextFromCommand(subCommand, command.Name)
+			}
+		}
 		buildUsageTextFromCommand(command)
 	}
 

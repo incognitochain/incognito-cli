@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/camelcase"
@@ -242,6 +243,15 @@ func isValidEVMAddress(tokenAddress string) bool {
 // isSupportedVersion checks if the given version of transaction is supported or not.
 func isSupportedVersion(version int8) bool {
 	return version == 1 || version == 2
+}
+
+func jsonPrint(val interface{}) error {
+	jsb, err := json.MarshalIndent(val, "", "\t")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsb))
+	return nil
 }
 
 // flagToVariable gets the variable representation for a flag.

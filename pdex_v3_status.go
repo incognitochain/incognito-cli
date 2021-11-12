@@ -116,7 +116,73 @@ func pDEXOrderWithdrawalStatus(c *cli.Context) error {
 	return nil
 }
 
-// pDEXMintNFTStatus gets the status of a (c)NFT minting transaction.
+// pDEXStakingStatus retrieves the status of a staking transaction.
+func pDEXStakingStatus(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	txHash := c.String(txHashFlag)
+	status, err := cfg.incClient.CheckDEXStakingStatus(txHash)
+	if err != nil {
+		return err
+	}
+
+	jsb, err := json.MarshalIndent(status, "", "\t")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsb))
+
+	return nil
+}
+
+// pDEXUnStakingStatus retrieves the status of a pDEX un-staking transaction.
+func pDEXUnStakingStatus(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	txHash := c.String(txHashFlag)
+	status, err := cfg.incClient.CheckDEXUnStakingStatus(txHash)
+	if err != nil {
+		return err
+	}
+
+	jsb, err := json.MarshalIndent(status, "", "\t")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsb))
+
+	return nil
+}
+
+// pDEXWithdrawStakingRewardStatus retrieves the status of a pDEX staking reward withdrawal transaction.
+func pDEXWithdrawStakingRewardStatus(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	txHash := c.String(txHashFlag)
+	status, err := cfg.incClient.CheckDEXStakingRewardWithdrawalStatus(txHash)
+	if err != nil {
+		return err
+	}
+
+	jsb, err := json.MarshalIndent(status, "", "\t")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsb))
+
+	return nil
+}
+
+// pDEXMintNFTStatus gets the status of a pDEx NFT minting transaction.
 func pDEXMintNFTStatus(c *cli.Context) error {
 	err := initNetWork()
 	if err != nil {
