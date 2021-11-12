@@ -41,7 +41,7 @@ func generateDocsToFile(app *cli.App, file string) error {
 			write(f, fmt.Sprintf("\t* [`%v`](#%v)\n", cmdName, strings.ToLower(cmdName)))
 			for _, subCommand := range commandsInCategory[cat][j].Subcommands {
 				subCmdName := fmt.Sprintf("%v_%v", cmdName, subCommand.Name)
-				write(f, fmt.Sprintf("\t\t* [`%v`](#%v)\n", subCmdName, strings.ToLower(subCmdName)))
+				write(f, fmt.Sprintf("\t\t* [`%v %v`](#%v)\n", cmdName, subCommand.Name, strings.ToLower(subCmdName)))
 			}
 		}
 
@@ -110,7 +110,6 @@ func createDocsForCommand(app *cli.App, command *cli.Command, f *os.File, parent
 		}
 		write(f, "```\n\n")
 	}
-
 
 	return nil
 }
