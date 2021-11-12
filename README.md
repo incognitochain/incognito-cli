@@ -386,35 +386,51 @@ DESCRIPTION:
 #### evm_retryshield
 This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.
 ```shell
-$ incognito-cli help evm, retryshield
+$ incognito-cli evm help retryshield
 NAME:
-   incognito-cli evm - Perform an EVM action (e.g, shield, unshield, etc.).
+   incognito-cli evm retryshield - Retry a shield from the given already-been-deposited-to-sc EVM transaction.
 
 USAGE:
-   evm
+   evm evm evm evm retryshield --privateKey PRIVATE_KEY --externalTxHash EXTERNAL_TX_HASH [--evm EVM] [--externalTokenAddress EXTERNAL_TOKEN_ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform an EVM action (e.g, shield, unshield, etc.).
+   This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --externalTxHash value, --eTxID value         The external transaction hash
+   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
+   --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   
 ```
 
 #### evm_retryunshield
 This command tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
 ```shell
-$ incognito-cli help evm, retryunshield
+$ incognito-cli evm help retryunshield
 NAME:
-   incognito-cli evm - Perform an EVM action (e.g, shield, unshield, etc.).
+   incognito-cli evm retryunshield - Retry an un-shielding request from the given already-been-burned Incognito transaction.
 
 USAGE:
-   evm
+   evm evm retryunshield --txHash TX_HASH [--evm EVM]
+
+   OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform an EVM action (e.g, shield, unshield, etc.).
+   This command tries to un-shield an asset from an already-been-burned Incognito transaction in case of prior failure.
+
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   --evm value                    The EVM network (ETH or BSC) (default: "ETH")
+   
 ```
 
 #### evm_shield
@@ -426,18 +442,34 @@ This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito
 Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
 DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
 ```shell
-$ incognito-cli help evm, shield
+$ incognito-cli evm help shield
 NAME:
-   incognito-cli evm - Perform an EVM action (e.g, shield, unshield, etc.).
+   incognito-cli evm shield - Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network.
 
 USAGE:
-   evm
+   evm evm evm evm evm shield --privateKey PRIVATE_KEY --shieldAmount SHIELD_AMOUNT [--evm EVM] [--externalTokenAddress EXTERNAL_TOKEN_ADDRESS] [--address ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform an EVM action (e.g, shield, unshield, etc.).
+   This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+      1. Deposit the EVM asset into the corresponding smart contract.
+        1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
+      2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
+   
+   Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+   DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --shieldAmount value, --amt value             The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
+   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
+   --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
+   
 ```
 
 #### evm_unshield
@@ -449,18 +481,30 @@ This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incog
 Please be aware that EVM un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. Otherwise, use the un-shielding function from the Incognito app. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
 DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS.
 ```shell
-$ incognito-cli help evm, unshield
+$ incognito-cli evm help unshield
 NAME:
-   incognito-cli evm - Perform an EVM action (e.g, shield, unshield, etc.).
+   incognito-cli evm unshield - Withdraw an EVM (ETH/BNB/ERC20/BEP20) token from the Incognito network.
 
 USAGE:
-   evm
+   evm evm evm unshield --privateKey PRIVATE_KEY --tokenID TOKEN_ID --amount AMOUNT
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform an EVM action (e.g, shield, unshield, etc.).
+   This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
+      1. Users burn the token inside the Incognito chain.
+      2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
+      3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
+   
+   Please be aware that EVM un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. Otherwise, use the un-shielding function from the Incognito app. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+   DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --tokenID value, --id value, --ID value       The Incognito tokenID of the un-shielding asset
+   --amount value, --amt value                   The Incognito amount of the action (default: 0)
+   
 ```
 
 ### portal
@@ -483,35 +527,51 @@ DESCRIPTION:
 #### portal_shield
 This command helps shield a portal token into the Incognito network after the fund has been transferred to the depositing address (generated by `portalshieldaddress`).
 ```shell
-$ incognito-cli help portal, shield
+$ incognito-cli portal help shield
 NAME:
-   incognito-cli portal - Perform a portal action (e.g, shield, unshield, etc.).
+   incognito-cli portal shield - Shield a portal token (e.g, BTC) into the Incognito network.
 
 USAGE:
-   portal
+   portal portal portal portal shield --privateKey PRIVATE_KEY --externalTxHash EXTERNAL_TX_HASH [--tokenID TOKEN_ID] [--address ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform a portal action (e.g, shield, unshield, etc.).
+   This command helps shield a portal token into the Incognito network after the fund has been transferred to the depositing address (generated by `portalshieldaddress`).
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --externalTxHash value, --eTxID value         The external transaction hash
+   --tokenID value, --id value, --ID value       The Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
+   
 ```
 
 #### portal_shieldaddress
 This command helps generate the portal shielding address for a payment address and a tokenID.
 ```shell
-$ incognito-cli help portal, shieldaddress
+$ incognito-cli portal help shieldaddress
 NAME:
-   incognito-cli portal - Perform a portal action (e.g, shield, unshield, etc.).
+   incognito-cli portal shieldaddress - Generate a portal shielding address.
 
 USAGE:
-   portal
+   portal portal shieldaddress --address ADDRESS [--tokenID TOKEN_ID]
+
+   OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform a portal action (e.g, shield, unshield, etc.).
+   This command helps generate the portal shielding address for a payment address and a tokenID.
+
+OPTIONS:
+   --address value, --addr value            A base58-encoded payment address
+   --tokenID value, --id value, --ID value  The Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   
 ```
 
 #### portal_shieldstatus
@@ -519,35 +579,50 @@ This command helps retrieve the status of a portal shielding request.
 Status should be understood as: 0 - rejected; 1 - accepted.
 If you encounter an error, it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 ```shell
-$ incognito-cli help portal, shieldstatus
+$ incognito-cli portal help shieldstatus
 NAME:
-   incognito-cli portal - Perform a portal action (e.g, shield, unshield, etc.).
+   incognito-cli portal shieldstatus - Get the status of a portal shielding request.
 
 USAGE:
-   portal
+   portal shieldstatus --txHash TX_HASH
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform a portal action (e.g, shield, unshield, etc.).
+   This command helps retrieve the status of a portal shielding request.
+   Status should be understood as: 0 - rejected; 1 - accepted.
+   If you encounter an error, it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
+
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### portal_unshield
 This command helps withdraw portal tokens (BTC) out of the Incognito network.
 ```shell
-$ incognito-cli help portal, unshield
+$ incognito-cli portal help unshield
 NAME:
-   incognito-cli portal - Perform a portal action (e.g, shield, unshield, etc.).
+   incognito-cli portal unshield - Withdraw portal tokens (BTC) from the Incognito network.
 
 USAGE:
-   portal
+   portal portal portal portal unshield --privateKey PRIVATE_KEY --externalAddress EXTERNAL_ADDRESS --amount AMOUNT [--tokenID TOKEN_ID]
+
+   OPTIONAL flags are denoted by a [] bracket.
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform a portal action (e.g, shield, unshield, etc.).
+   This command helps withdraw portal tokens (BTC) out of the Incognito network.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --externalAddress value, --eAddr value        A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.
+   --amount value, --amt value                   The Incognito amount of the action (default: 0)
+   --tokenID value, --id value, --ID value       The Incognito tokenID of the un-shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   
 ```
 
 #### portal_unshieldstatus
@@ -555,18 +630,24 @@ This command helps retrieve the status of a portal un-shielding request.
 Status should be understood as: 0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.
 If you encounter an error saying "unexpected end of JSON input", it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
 ```shell
-$ incognito-cli help portal, unshieldstatus
+$ incognito-cli portal help unshieldstatus
 NAME:
-   incognito-cli portal - Perform a portal action (e.g, shield, unshield, etc.).
+   incognito-cli portal unshieldstatus - Get the status of a portal un-shielding request.
 
 USAGE:
-   portal
+   portal unshieldstatus --txHash TX_HASH
 
 CATEGORY:
    BRIDGE
 
 DESCRIPTION:
-   This command helps perform a portal action (e.g, shield, unshield, etc.).
+   This command helps retrieve the status of a portal un-shielding request.
+   Status should be understood as: 0 - waiting; 1 - processed but not completed; 2 - completed; 3 - rejected.
+   If you encounter an error saying "unexpected end of JSON input", it might be because the request hasn't reached the beacon chain yet. Please try again a few minutes later.
+
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 ## COMMITTEES
@@ -678,171 +759,238 @@ DESCRIPTION:
 #### pdeaction_addorder
 This command creates a transaction adding an order to the pDEX.
 ```shell
-$ incognito-cli help pdeaction, addorder
+$ incognito-cli pdeaction help addorder
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction addorder - Add an order book to the pDEX.
 
 USAGE:
-   pdeaction
+   pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction addorder --privateKey PRIVATE_KEY --pairID PAIR_ID --nftID NFT_ID --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT [--minAcceptAmount MIN_ACCEPT_AMOUNT]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a transaction adding an order to the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value         A base58-encoded Incognito private key
+   --pairID value, --pairId value                       The ID of the target pool pair
+   --nftID value, --nftId value                         A pDEX NFT generated by the nft minting command
+   --sellTokenID value, --sellID value, --sellId value  ID of the token to sell
+   --buyTokenID value, --buyID value, --buyId value     ID of the token to buy
+   --sellingAmount value, --sellAmt value               The amount of sellTokenID wished to sell (default: 0)
+   --minAcceptAmount value, --minAmt value              The minimum acceptable amount of buyTokenID wished to receive (default: 0)
+   
 ```
 
 #### pdeaction_contribute
 This command creates a pDEX liquidity-contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md
 ```shell
-$ incognito-cli help pdeaction, contribute
+$ incognito-cli pdeaction help contribute
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction contribute - Create a pDEX liquidity-contributing transaction.
 
 USAGE:
-   pdeaction
+   pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction contribute --privateKey PRIVATE_KEY --nftID NFT_ID --pairHash PAIR_HASH --amount AMOUNT --amplifier AMPLIFIER [--tokenID TOKEN_ID] [--pairID PAIR_ID]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a pDEX liquidity-contributing transaction. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --nftID value, --nftId value                  A pDEX NFT generated by the nft minting command
+   --pairHash value                              A unique string representing the contributing pair
+   --amount value, --amt value                   The Incognito amount of the action (default: 0)
+   --amplifier value, --amp value                The amplifier for the target contributing pool (default: 0)
+   --tokenID value, --id value, --ID value       The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --pairID value                                The ID of the contributing pool pair. For pool-initializing transactions (e.g, first contribution in the pool), it should be left empty.
+   
 ```
 
 #### pdeaction_mintnft
 This command creates and broadcasts a transaction that mints a new (pDEX) NFT for the pDEX.
 ```shell
-$ incognito-cli help pdeaction, mintnft
+$ incognito-cli pdeaction help mintnft
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction mintnft - Create a (pDEX) NFT minting transaction.
 
 USAGE:
-   pdeaction
-
-CATEGORY:
-   DEX
+   pdeaction mintnft --privateKey PRIVATE_KEY
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates and broadcasts a transaction that mints a new (pDEX) NFT for the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   
 ```
 
 #### pdeaction_stake
 This command creates a transaction staking a token to the pDEX.
 ```shell
-$ incognito-cli help pdeaction, stake
+$ incognito-cli pdeaction help stake
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction stake - Stake a token to the pDEX.
 
 USAGE:
-   pdeaction
+   pdeaction pdeaction pdeaction pdeaction stake --privateKey PRIVATE_KEY --nftID NFT_ID --amount AMOUNT [--tokenID TOKEN_ID]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a transaction staking a token to the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --nftID value, --nftId value                  A pDEX NFT generated by the nft minting command
+   --amount value, --amt value                   The Incognito amount of the action (default: 0)
+   --tokenID value                               The ID of the target staking pool ID (or token ID) (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   
 ```
 
 #### pdeaction_trade
 This command creates a trade transaction on the pDEX.
 ```shell
-$ incognito-cli help pdeaction, trade
+$ incognito-cli pdeaction help trade
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction trade - Create a trade transaction.
 
 USAGE:
-   pdeaction
+   pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction trade --privateKey PRIVATE_KEY --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT --tradingFee TRADING_FEE [--minAcceptAmount MIN_ACCEPT_AMOUNT] [--tradingPath TRADING_PATH] [--prvFee PRV_FEE] [--maxPaths MAX_PATHS]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a trade transaction on the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value         A base58-encoded Incognito private key
+   --sellTokenID value, --sellID value, --sellId value  ID of the token to sell
+   --buyTokenID value, --buyID value, --buyId value     ID of the token to buy
+   --sellingAmount value, --sellAmt value               The amount of sellTokenID wished to sell (default: 0)
+   --tradingFee value                                   The trading fee (default: 0)
+   --minAcceptAmount value, --minAmt value              The minimum acceptable amount of buyTokenID wished to receive (default: 0)
+   --tradingPath pairID1,pairID2                        A list of trading pair IDs seperated by a comma (Example: pairID1,pairID2). If none is given, the tool will automatically find a suitable path.
+   --prvFee value                                       Whether or not to pay fee in PRV (0 - no, <> 0 - yes) (default: 1)
+   --maxPaths value                                     The maximum length of the trading path. (default: 5)
+   
 ```
 
 #### pdeaction_unstake
 This command creates a transaction un-staking a token from the pDEX.
 ```shell
-$ incognito-cli help pdeaction, unstake
+$ incognito-cli pdeaction help unstake
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction unstake - Un-stake a token from the pDEX.
 
 USAGE:
-   pdeaction
+   pdeaction pdeaction pdeaction pdeaction unstake --privateKey PRIVATE_KEY --nftID NFT_ID --amount AMOUNT [--tokenID TOKEN_ID]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a transaction un-staking a token from the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --nftID value, --nftId value                  A pDEX NFT generated by the nft minting command
+   --amount value, --amt value                   The Incognito amount of the action (default: 0)
+   --tokenID value                               The ID of the target staking pool ID (or token ID) (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   
 ```
 
 #### pdeaction_withdraw
 This command creates a transaction withdrawing an amount of `share` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md
 ```shell
-$ incognito-cli help pdeaction, withdraw
+$ incognito-cli pdeaction help withdraw
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction withdraw - Create a pDEX liquidity-withdrawal transaction.
 
 USAGE:
-   pdeaction
+   pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction withdraw --privateKey PRIVATE_KEY --pairID PAIR_ID --nftID NFT_ID --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2] [--amount AMOUNT]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a transaction withdrawing an amount of `share` from the pDEX. See more about this transaction: https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/withdrawal.md
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --pairID value                                The ID of the contributed pool pair
+   --nftID value, --nftId value                  A pDEX NFT generated by the nft minting command
+   --tokenID1 value, --id1 value, --ID1 value    ID of the first token
+   --tokenID2 value, --id2 value, --ID2 value    ID of the second token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --amount value, --amt value                   The amount of share wished to withdraw. If set to 0, it will withdraw all of the share. (default: 0)
+   
 ```
 
 #### pdeaction_withdrawlpfee
 This command creates a transaction withdrawing LP fees from the pDEX.
 ```shell
-$ incognito-cli help pdeaction, withdrawlpfee
+$ incognito-cli pdeaction help withdrawlpfee
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction withdrawlpfee - Withdraw LP fees from the pDEX.
 
 USAGE:
-   pdeaction
-
-CATEGORY:
-   DEX
+   pdeaction pdeaction pdeaction withdrawlpfee --privateKey PRIVATE_KEY --pairID PAIR_ID --nftID NFT_ID
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a transaction withdrawing LP fees from the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --pairID value, --pairId value                The ID of the target pool pair
+   --nftID value, --nftId value                  A pDEX NFT generated by the nft minting command
+   
 ```
 
 #### pdeaction_withdraworder
 This command creates a transaction withdrawing an order to the pDEX.
 ```shell
-$ incognito-cli help pdeaction, withdraworder
+$ incognito-cli pdeaction help withdraworder
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction withdraworder - Withdraw an order from the pDEX.
 
 USAGE:
-   pdeaction
+   pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction pdeaction withdraworder --privateKey PRIVATE_KEY --orderID ORDER_ID --pairID PAIR_ID --nftID NFT_ID --amount AMOUNT --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a transaction withdrawing an order to the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --orderID value, --orderId value              The ID of the order.
+   --pairID value, --pairId value                The ID of the target pool pair
+   --nftID value, --nftId value                  A pDEX NFT generated by the nft minting command
+   --amount value, --amt value                   The Incognito amount of the action (default: 0)
+   --tokenID1 value, --id1 value, --ID1 value    ID of the first token
+   --tokenID2 value, --id2 value, --ID2 value    ID of the second token (if have). In the case of withdrawing a single token, leave it empty.
+   
 ```
 
 #### pdeaction_withdrawstakereward
 This command creates a transaction withdrawing staking rewards from the pDEX.
 ```shell
-$ incognito-cli help pdeaction, withdrawstakereward
+$ incognito-cli pdeaction help withdrawstakereward
 NAME:
-   incognito-cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction withdrawstakereward - Withdraw staking rewards from the pDEX.
 
 USAGE:
-   pdeaction
+   pdeaction pdeaction pdeaction withdrawstakereward --privateKey PRIVATE_KEY --nftID NFT_ID [--tokenID TOKEN_ID]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps perform a pDEX action.
+   This command creates a transaction withdrawing staking rewards from the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --nftID value, --nftId value                  A pDEX NFT generated by the nft minting command
+   --tokenID value                               The ID of the target staking pool ID (or token ID) (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   
 ```
 
 ### pdeinfo
@@ -865,103 +1013,122 @@ DESCRIPTION:
 #### pdeinfo_checkprice
 This command checks the price of a pair of tokenIds. It must be supplied with the selling amount since the pDEX uses the AMM algorithm.
 ```shell
-$ incognito-cli help pdeinfo, checkprice
+$ incognito-cli pdeinfo help checkprice
 NAME:
-   incognito-cli pdeinfo - Retrieve pDEX information.
+   incognito-cli pdeinfo checkprice - Check the price between two tokenIDs.
 
 USAGE:
-   pdeinfo
-
-CATEGORY:
-   DEX
+   pdeinfo pdeinfo pdeinfo pdeinfo checkprice --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT --pairID PAIR_ID
 
 DESCRIPTION:
-   This command helps retrieve some information of the pDEX.
+   This command checks the price of a pair of tokenIds. It must be supplied with the selling amount since the pDEX uses the AMM algorithm.
+
+OPTIONS:
+   --sellTokenID value, --sellID value, --sellId value  ID of the token to sell
+   --buyTokenID value, --buyID value, --buyId value     ID of the token to buy
+   --sellingAmount value, --sellAmt value               The amount of sellTokenID wished to sell (default: 0)
+   --pairID value                                       The ID of the target pool pair
+   
 ```
 
 #### pdeinfo_findpath
 This command helps find a good trading path for a trade.
 ```shell
-$ incognito-cli help pdeinfo, findpath
+$ incognito-cli pdeinfo help findpath
 NAME:
-   incognito-cli pdeinfo - Retrieve pDEX information.
+   incognito-cli pdeinfo findpath - Find a `good` trading path for a trade.
 
 USAGE:
-   pdeinfo
+   pdeinfo pdeinfo pdeinfo pdeinfo findpath --sellTokenID SELL_TOKEN_ID --buyTokenID BUY_TOKEN_ID --sellingAmount SELLING_AMOUNT [--maxPaths MAX_PATHS]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps retrieve some information of the pDEX.
+   This command helps find a good trading path for a trade.
+
+OPTIONS:
+   --sellTokenID value, --sellID value, --sellId value  ID of the token to sell
+   --buyTokenID value, --buyID value, --buyId value     ID of the token to buy
+   --sellingAmount value, --sellAmt value               The amount of sellTokenID wished to sell (default: 0)
+   --maxPaths value                                     The maximum length of the trading path. (default: 5)
+   
 ```
 
 #### pdeinfo_lpvalue
 This command retrieves the information about the value of an LP in a given pool.
 ```shell
-$ incognito-cli help pdeinfo, lpvalue
+$ incognito-cli pdeinfo help lpvalue
 NAME:
-   incognito-cli pdeinfo - Retrieve pDEX information.
+   incognito-cli pdeinfo lpvalue - Check the estimated LP value in a given pool.
 
 USAGE:
-   pdeinfo
-
-CATEGORY:
-   DEX
+   pdeinfo pdeinfo lpvalue --pairID PAIR_ID --nftID NFT_ID
 
 DESCRIPTION:
-   This command helps retrieve some information of the pDEX.
+   This command retrieves the information about the value of an LP in a given pool.
+
+OPTIONS:
+   --pairID value, --pairId value  The ID of the target pool pair
+   --nftID value, --nftId value    A pDEX NFT generated by the nft minting command
+   
 ```
 
 #### pdeinfo_mynft
 This command returns the list of NFTs for a given private key.
 ```shell
-$ incognito-cli help pdeinfo, mynft
+$ incognito-cli pdeinfo help mynft
 NAME:
-   incognito-cli pdeinfo - Retrieve pDEX information.
+   incognito-cli pdeinfo mynft - Retrieve the list of NFTs for a given private key.
 
 USAGE:
-   pdeinfo
-
-CATEGORY:
-   DEX
+   pdeinfo mynft --privateKey PRIVATE_KEY
 
 DESCRIPTION:
-   This command helps retrieve some information of the pDEX.
+   This command returns the list of NFTs for a given private key.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   
 ```
 
 #### pdeinfo_share
 This command returns the share amount of an nftID within a pDEX poolID.
 ```shell
-$ incognito-cli help pdeinfo, share
+$ incognito-cli pdeinfo help share
 NAME:
-   incognito-cli pdeinfo - Retrieve pDEX information.
+   incognito-cli pdeinfo share - Retrieve the share amount of a pDEX poolID given an nftID.
 
 USAGE:
-   pdeinfo
-
-CATEGORY:
-   DEX
+   pdeinfo pdeinfo share --pairID PAIR_ID --nftID NFT_ID
 
 DESCRIPTION:
-   This command helps retrieve some information of the pDEX.
+   This command returns the share amount of an nftID within a pDEX poolID.
+
+OPTIONS:
+   --pairID value                The ID of the target pool pair
+   --nftID value, --nftId value  A pDEX NFT generated by the nft minting command
+   
 ```
 
 #### pdeinfo_stakereward
 This command returns the estimated pDEX staking rewards of an nftID within a pDEX staking pool.
 ```shell
-$ incognito-cli help pdeinfo, stakereward
+$ incognito-cli pdeinfo help stakereward
 NAME:
-   incognito-cli pdeinfo - Retrieve pDEX information.
+   incognito-cli pdeinfo stakereward - Retrieve the estimated pDEX staking rewards.
 
 USAGE:
-   pdeinfo
+   pdeinfo pdeinfo stakereward --nftID NFT_ID [--tokenID TOKEN_ID]
 
-CATEGORY:
-   DEX
+   OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This command helps retrieve some information of the pDEX.
+   This command returns the estimated pDEX staking rewards of an nftID within a pDEX staking pool.
+
+OPTIONS:
+   --nftID value, --nftId value  A pDEX NFT generated by the nft minting command
+   --tokenID value               The ID of the target staking pool ID (or token ID) (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   
 ```
 
 ### pdestatus
@@ -984,171 +1151,151 @@ DESCRIPTION:
 #### pdestatus_addorder
 Check the status of a pDEX order-adding withdrawal.
 ```shell
-$ incognito-cli help pdestatus, addorder
+$ incognito-cli pdestatus help addorder
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus addorder - Check the status of a pDEX order-adding withdrawal.
 
 USAGE:
-   pdestatus
+   pdestatus addorder --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_contribute
 Check the status of a pDEX liquidity contribution.
 ```shell
-$ incognito-cli help pdestatus, contribute
+$ incognito-cli pdestatus help contribute
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus contribute - Check the status of a pDEX liquidity contribution.
 
 USAGE:
-   pdestatus
+   pdestatus contribute --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_mintnft
 Check the status of a (pDEX) NFT minting transaction.
 ```shell
-$ incognito-cli help pdestatus, mintnft
+$ incognito-cli pdestatus help mintnft
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus mintnft - Check the status of a (pDEX) NFT minting transaction.
 
 USAGE:
-   pdestatus
+   pdestatus mintnft --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_stake
 Check the status of a pDEX staking transaction.
 ```shell
-$ incognito-cli help pdestatus, stake
+$ incognito-cli pdestatus help stake
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus stake - Check the status of a pDEX staking transaction.
 
 USAGE:
-   pdestatus
+   pdestatus stake --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_trade
 Check the status of a pDEX trade.
 ```shell
-$ incognito-cli help pdestatus, trade
+$ incognito-cli pdestatus help trade
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus trade - Check the status of a pDEX trade.
 
 USAGE:
-   pdestatus
+   pdestatus trade --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_unstake
 Check the status of a pDEX un-staking transaction.
 ```shell
-$ incognito-cli help pdestatus, unstake
+$ incognito-cli pdestatus help unstake
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus unstake - Check the status of a pDEX un-staking transaction.
 
 USAGE:
-   pdestatus
+   pdestatus unstake --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_withdraw
 Check the status of a pDEX liquidity withdrawal.
 ```shell
-$ incognito-cli help pdestatus, withdraw
+$ incognito-cli pdestatus help withdraw
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus withdraw - Check the status of a pDEX liquidity withdrawal.
 
 USAGE:
-   pdestatus
+   pdestatus withdraw --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_withdrawlpfee
 Check the status of a pDEX LP fee withdrawal transaction.
 ```shell
-$ incognito-cli help pdestatus, withdrawlpfee
+$ incognito-cli pdestatus help withdrawlpfee
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus withdrawlpfee - Check the status of a pDEX LP fee withdrawal transaction.
 
 USAGE:
-   pdestatus
+   pdestatus withdrawlpfee --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_withdraworder
 Check the status of a pDEX order-withdrawal transaction.
 ```shell
-$ incognito-cli help pdestatus, withdraworder
+$ incognito-cli pdestatus help withdraworder
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus withdraworder - Check the status of a pDEX order-withdrawal transaction.
 
 USAGE:
-   pdestatus
+   pdestatus withdraworder --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 #### pdestatus_withdrawstakereward
 Check the status of a pDEX staking reward withdrawal transaction.
 ```shell
-$ incognito-cli help pdestatus, withdrawstakereward
+$ incognito-cli pdestatus help withdrawstakereward
 NAME:
-   incognito-cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus withdrawstakereward - Check the status of a pDEX staking reward withdrawal transaction.
 
 USAGE:
-   pdestatus
+   pdestatus withdrawstakereward --txHash TX_HASH
 
-CATEGORY:
-   DEX
-
-DESCRIPTION:
-   This command helps retrieve the status of a pDEX action given its hash. If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid.
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
+   
 ```
 
 ## TRANSACTIONS

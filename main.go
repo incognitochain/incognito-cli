@@ -43,6 +43,7 @@ func main() {
 
 	for _, command := range app.Commands {
 		if len(command.Subcommands) > 0 {
+			sort.Sort(cli.CommandsByName(command.Subcommands))
 			for _, subCommand := range command.Subcommands {
 				buildUsageTextFromCommand(subCommand, command.Name)
 			}
