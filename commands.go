@@ -512,7 +512,12 @@ var pDEXActionCommands = &cli.Command{
 				defaultFlags[tokenIDToSellFlag],
 				defaultFlags[tokenIDToBuyFlag],
 				defaultFlags[sellingAmountFlag],
-				defaultFlags[minAcceptableAmountFlag],
+				&cli.Uint64Flag{
+					Name:     minAcceptableAmountFlag,
+					Aliases:  aliases[minAcceptableAmountFlag],
+					Usage:    fmt.Sprintf("The minimum acceptable amount of %v wished to receive", tokenIDToBuyFlag),
+					Required: true,
+				},
 			},
 			Action: pDEXAddOrder,
 		},

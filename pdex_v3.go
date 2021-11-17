@@ -247,6 +247,9 @@ func pDEXAddOrder(c *cli.Context) error {
 	}
 
 	minAcceptableAmount := c.Uint64(minAcceptableAmountFlag)
+	if minAcceptableAmount == 0 {
+		return fmt.Errorf("%v cannot be zero", minAcceptableAmount)
+	}
 	txHash, err := cfg.incClient.CreateAndSendPdexv3AddOrderTransaction(
 		privateKey,
 		pairID,
