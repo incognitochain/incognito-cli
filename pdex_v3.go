@@ -64,6 +64,9 @@ func pDEXTrade(c *cli.Context) error {
 	if len(tradingPath) == 0 {
 		return fmt.Errorf("no trading path is found for the pair %v-%v with maxPaths = %v", tokenIdToSell, tokenIdToBuy, maxPaths)
 	}
+	if len(tradingPath) > int(maxPaths) {
+		return fmt.Errorf("maximum trading path length %v, got %v", maxPaths, len(tradingPath))
+	}
 
 	prvFee := c.Int(prvFeeFlag)
 
