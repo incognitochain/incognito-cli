@@ -34,17 +34,16 @@ var accountCommands = []*cli.Command{
 		},
 		Action: checkBalance,
 	},
-	//{
-	//	Name:  "balanceall",
-	//	Usage: "Return the non-zero balances of an account for all tokenIDs.",
-	//	Description: "This command returns the non-zero balances of an account for all tokenIDs. Due to the large number of " +
-	//		"tokens on the network, This command requires a long amount of time to proceed.",
-	//	Category: accountCat,
-	//	Flags: []cli.Flag{
-	//		defaultFlags[privateKeyFlag],
-	//	},
-	//	Action: checkBalanceAll,
-	//},
+	{
+		Name: "balanceall",
+		Usage: "Check all non-zero balances (calculated based on v2 UTXOs only) of a private key. In case you have v1 UTXOs left, try using " +
+			"regular `balance` command with each token for the most correct result.",
+		Category: accountCat,
+		Flags: []cli.Flag{
+			defaultFlags[privateKeyFlag],
+		},
+		Action: getAllBalanceV2,
+	},
 	{
 		Name:     "outcoin",
 		Usage:    "Print the output coins of an account.",
