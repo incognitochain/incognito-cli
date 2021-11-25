@@ -233,6 +233,20 @@ func pDEXAddOrder(c *cli.Context) error {
 
 	pairID := c.String(pairIDFlag)
 	nftID := c.String(nftIDFlag)
+	myNFTs, err := cfg.incClient.GetAllNFTs(privateKey)
+	if err != nil {
+		return err
+	}
+	nftExist := false
+	for _, nft := range myNFTs {
+		if nft == nftID {
+			nftExist = true
+			break
+		}
+	}
+	if !nftExist {
+		return fmt.Errorf("nftID %v does not belong to the private key %v", nftID, privateKey)
+	}
 
 	tokenIdToSell := c.String(tokenIDToSellFlag)
 	if !isValidTokenID(tokenIdToSell) {
