@@ -11,134 +11,134 @@ var dexStatusErrMsg = "If an error is thrown, it is mainly because the transacti
 // accountCommands consists of all account-related commands
 var accountCommands = []*cli.Command{
 	{
-		Name:     "keyinfo",
-		Usage:    "Print all related-keys of a private key.",
-		Category: accountCat,
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:     privateKeyFlag,
-				Aliases:  aliases[privateKeyFlag],
-				Usage:    "a base58-encoded private key",
-				Required: true,
+		Name:        "account",
+		Aliases:     []string{"acc"},
+		Usage:       "Manage an Incognito account.",
+		Description: fmt.Sprintf("This command helps perform an account-related action."),
+		Category:    accountCat,
+		Subcommands: []*cli.Command{
+			{
+				Name:  "keyinfo",
+				Usage: "Print all related-keys of a private key.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     privateKeyFlag,
+						Aliases:  aliases[privateKeyFlag],
+						Usage:    "a base58-encoded private key",
+						Required: true,
+					},
+				},
+				Action: keyInfo,
+			},
+			{
+				Name:  "balance",
+				Usage: "Check the balance of an account for a tokenID.",
+				Flags: []cli.Flag{
+					defaultFlags[privateKeyFlag],
+					defaultFlags[tokenIDFlag],
+				},
+				Action: checkBalance,
+			},
+			{
+				Name: "balanceall",
+				Usage: "Check all non-zero balances (calculated based on v2 UTXOs only) of a private key. In case you have v1 UTXOs left, try using " +
+					"regular `balance` command with each token for the best result.",
+				Flags: []cli.Flag{
+					defaultFlags[privateKeyFlag],
+				},
+				Action: getAllBalanceV2,
+			},
+			{
+				Name:  "outcoin",
+				Usage: "Print the output coins of an account.",
+				Flags: []cli.Flag{
+					defaultFlags[addressFlag],
+					defaultFlags[otaKeyFlag],
+					defaultFlags[readonlyKeyFlag],
+					defaultFlags[tokenIDFlag],
+				},
+				Action: getOutCoins,
+			},
+			{
+				Name:  "utxo",
+				Usage: "Print the UTXOs of an account.",
+				Flags: []cli.Flag{
+					defaultFlags[privateKeyFlag],
+					defaultFlags[tokenIDFlag],
+				},
+				Action: checkUTXOs,
+			},
+			{
+				Name:    "consolidate",
+				Aliases: []string{"csl"},
+				Usage:   "Consolidate UTXOs of an account.",
+				Description: "This command helps consolidate UTXOs of an account. It consolidates a version of UTXOs at a time, users need to specify which version they need to consolidate. " +
+					"Please note that this process is time-consuming and requires a considerable amount of CPU.",
+				Flags: []cli.Flag{
+					defaultFlags[privateKeyFlag],
+					defaultFlags[tokenIDFlag],
+					defaultFlags[versionFlag],
+					defaultFlags[numThreadsFlag],
+				},
+				Action: consolidateUTXOs,
+			},
+			{
+				Name:    "history",
+				Aliases: []string{"hst"},
+				Usage:   "Retrieve the history of an account.",
+				Description: "This command helps retrieve the history of an account w.r.t a tokenID. " +
+					"Please note that this process is time-consuming and requires a considerable amount of CPU.",
+				Flags: []cli.Flag{
+					defaultFlags[privateKeyFlag],
+					&cli.StringFlag{
+						Name:  "tokenID",
+						Usage: "ID of the token",
+						Value: common.PRVIDStr,
+					},
+					defaultFlags[numThreadsFlag],
+					defaultFlags[csvFileFlag],
+				},
+				Action: getHistory,
+			},
+			{
+				Name:        "generate",
+				Aliases:     []string{"gen"},
+				Usage:       "Generate a new Incognito account.",
+				Description: "This command helps generate a new mnemonic phrase and its Incognito accounts.",
+				Flags: []cli.Flag{
+					defaultFlags[numShardsFlag],
+				},
+				Action: genKeySet,
+			},
+			{
+				Name:        "importaccount",
+				Aliases:     []string{"import"},
+				Usage:       "Import a mnemonic of 12 words.",
+				Description: "This command helps generate Incognito accounts given a mnemonic.",
+				Flags: []cli.Flag{
+					defaultFlags[mnemonicFlag],
+					defaultFlags[numShardsFlag],
+				},
+				Action: importMnemonic,
+			},
+			{
+				Name:    "submitkey",
+				Aliases: []string{"sub"},
+				Usage:   "Submit an ota key to the full-node.",
+				Description: "This command submits an otaKey to the full-node to use the full-node's cache. If an access token " +
+					"is provided, it will submit the ota key in an authorized manner. See " +
+					"https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/submit_key.md " +
+					"for more details.",
+				Category: accountCat,
+				Flags: []cli.Flag{
+					defaultFlags[otaKeyFlag],
+					defaultFlags[accessTokenFlag],
+					defaultFlags[fromHeightFlag],
+					defaultFlags[isResetFlag],
+				},
+				Action: submitKey,
 			},
 		},
-		Action: keyInfo,
-	},
-	{
-		Name:     "balance",
-		Usage:    "Check the balance of an account for a tokenID.",
-		Category: accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[privateKeyFlag],
-			defaultFlags[tokenIDFlag],
-		},
-		Action: checkBalance,
-	},
-	{
-		Name: "balanceall",
-		Usage: "Check all non-zero balances (calculated based on v2 UTXOs only) of a private key. In case you have v1 UTXOs left, try using " +
-			"regular `balance` command with each token for the most correct result.",
-		Category: accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[privateKeyFlag],
-		},
-		Action: getAllBalanceV2,
-	},
-	{
-		Name:     "outcoin",
-		Usage:    "Print the output coins of an account.",
-		Category: accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[addressFlag],
-			defaultFlags[otaKeyFlag],
-			defaultFlags[readonlyKeyFlag],
-			defaultFlags[tokenIDFlag],
-		},
-		Action: getOutCoins,
-	},
-	{
-		Name:     "utxo",
-		Usage:    "Print the UTXOs of an account.",
-		Category: accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[privateKeyFlag],
-			defaultFlags[tokenIDFlag],
-		},
-		Action: checkUTXOs,
-	},
-	{
-		Name:    "consolidate",
-		Aliases: []string{"csl"},
-		Usage:   "Consolidate UTXOs of an account.",
-		Description: "This command helps consolidate UTXOs of an account. It consolidates a version of UTXOs at a time, users need to specify which version they need to consolidate. " +
-			"Please note that this process is time-consuming and requires a considerable amount of CPU.",
-		Category: accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[privateKeyFlag],
-			defaultFlags[tokenIDFlag],
-			defaultFlags[versionFlag],
-			defaultFlags[numThreadsFlag],
-		},
-		Action: consolidateUTXOs,
-	},
-	{
-		Name:    "history",
-		Aliases: []string{"hst"},
-		Usage:   "Retrieve the history of an account.",
-		Description: "This command helps retrieve the history of an account w.r.t a tokenID. " +
-			"Please note that this process is time-consuming and requires a considerable amount of CPU.",
-		Category: accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[privateKeyFlag],
-			&cli.StringFlag{
-				Name:  "tokenID",
-				Usage: "ID of the token",
-				Value: common.PRVIDStr,
-			},
-			defaultFlags[numThreadsFlag],
-			defaultFlags[csvFileFlag],
-		},
-		Action: getHistory,
-	},
-	{
-		Name:        "generateaccount",
-		Aliases:     []string{"genacc"},
-		Usage:       "Generate a new Incognito account.",
-		Description: "This command helps generate a new mnemonic phrase and its Incognito accounts.",
-		Category:    accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[numShardsFlag],
-		},
-		Action: genKeySet,
-	},
-	{
-		Name:        "importeaccount",
-		Aliases:     []string{"import"},
-		Usage:       "Import a mnemonic of 12 words.",
-		Description: "This command helps generate Incognito accounts given a mnemonic.",
-		Category:    accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[mnemonicFlag],
-			defaultFlags[numShardsFlag],
-		},
-		Action: importMnemonic,
-	},
-	{
-		Name:    "submitkey",
-		Aliases: []string{"sub"},
-		Usage:   "Submit an ota key to the full-node.",
-		Description: "This command submits an otaKey to the full-node to use the full-node's cache. If an access token " +
-			"is provided, it will submit the ota key in an authorized manner. See " +
-			"https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/submit_key.md " +
-			"for more details.",
-		Category: accountCat,
-		Flags: []cli.Flag{
-			defaultFlags[otaKeyFlag],
-			defaultFlags[accessTokenFlag],
-			defaultFlags[fromHeightFlag],
-			defaultFlags[isResetFlag],
-		},
-		Action: submitKey,
 	},
 }
 
