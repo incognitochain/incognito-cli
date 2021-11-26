@@ -430,7 +430,7 @@ var pDEXCommands = []*cli.Command{
 var pDEXActionCommands = &cli.Command{
 	Name:        "pdeaction",
 	Usage:       "Perform a pDEX action.",
-	Description: fmt.Sprintf("This command helps perform a pDEX action."),
+	Description: fmt.Sprintf("This command helps perform a pDEX action. Most of the terms here are based on the SDK tutorial series (https://github.com/incognitochain/go-incognito-sdk-v2/blob/dev/pdex-v3/tutorials/docs/pdex/intro.md)."),
 	Category:    pDEXCat,
 	Subcommands: []*cli.Command{
 		{
@@ -609,7 +609,7 @@ var pDEXActionCommands = &cli.Command{
 var pDEXInfoCommands = &cli.Command{
 	Name:        "pdeinfo",
 	Usage:       "Retrieve pDEX information.",
-	Description: fmt.Sprintf("This command helps retrieve some information of the pDEX."),
+	Description: fmt.Sprintf("This command helps retrieve some information of the pDEX. Most of the terms here are based on the SDK tutorial series (https://github.com/incognitochain/go-incognito-sdk-v2/blob/dev/pdex-v3/tutorials/docs/pdex/intro.md)."),
 	Category:    pDEXCat,
 	Subcommands: []*cli.Command{
 		{
