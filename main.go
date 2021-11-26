@@ -340,8 +340,20 @@ func main() {
 			Action: pDEXWithdraw,
 		},
 		{
+			Name:        "pdefeewithdraw",
+			Usage:       "Create a pDEX fee-withdrawal transaction.",
+			Description: "This function creates a transaction withdrawing an amount of LP fee from the pDEX.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[tokenID1Flag],
+				defaultFlags[tokenID2Flag],
+			},
+			Action: pDEXFeeWithdraw,
+		},
+		{
 			Name:        "pdeshare",
-			Usage:       "Retrieve the share amount of a pDEX pai.r",
+			Usage:       "Retrieve the share amount of a pDEX pair.",
 			Description: "This function returns the share amount of a user within a pDEX pair.",
 			Category:    pDEXCat,
 			Flags: []cli.Flag{
@@ -350,6 +362,18 @@ func main() {
 				defaultFlags[tokenID2Flag],
 			},
 			Action: pDEXGetShare,
+		},
+		{
+			Name:        "pdelpfee",
+			Usage:       "Retrieve the LP trading fee of a user in a pDEX pair.",
+			Description: "This function returns the LP trading fee of a user in a pDEX pair.",
+			Category:    pDEXCat,
+			Flags: []cli.Flag{
+				defaultFlags[addressFlag],
+				defaultFlags[tokenID1Flag],
+				defaultFlags[tokenID2Flag],
+			},
+			Action: pDEXGetTradingFees,
 		},
 		{
 			Name:  "pdetradestatus",

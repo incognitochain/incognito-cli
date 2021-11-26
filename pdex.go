@@ -177,6 +177,43 @@ func pDEXWithdraw(c *cli.Context) error {
 	return nil
 }
 
+// pDEXFeeWithdraw withdraws LP fees from the pDEX.
+func pDEXFeeWithdraw(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	tokenId1 := c.String(tokenID1Flag)
+	if !isValidTokenID(tokenId1) {
+		return fmt.Errorf("%v is invalid", tokenID1Flag)
+	}
+
+	tokenId2 := c.String(tokenID2Flag)
+	if !isValidTokenID(tokenId2) {
+		return fmt.Errorf("%v is invalid", tokenID2Flag)
+	}
+
+	txHash, err := cfg.incClient.CreateAndSendPDEFeeWithdrawalTransaction(
+		privateKey,
+		tokenId1,
+		tokenId2,
+		2,
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("TxHash: %v\n", txHash)
+
+	return nil
+}
+
 // pDEXGetShare returns the share amount of a user w.r.t a pDEX pair.
 func pDEXGetShare(c *cli.Context) error {
 	err := initNetWork()
@@ -205,6 +242,38 @@ func pDEXGetShare(c *cli.Context) error {
 	}
 
 	fmt.Printf("shareAmount: %v\n", shareAmount)
+
+	return nil
+}
+
+// pDEXGetTradingFees returns the trading fees amount of a user w.r.t a pDEX pair.
+func pDEXGetTradingFees(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	address := c.String(addressFlag)
+	if !isValidAddress(address) {
+		return fmt.Errorf("%v is invalid", addressFlag)
+	}
+
+	tokenId1 := c.String(tokenID1Flag)
+	if !isValidTokenID(tokenId1) {
+		return fmt.Errorf("%v is invalid", tokenID1Flag)
+	}
+
+	tokenId2 := c.String(tokenID2Flag)
+	if !isValidTokenID(tokenId2) {
+		return fmt.Errorf("%v is invalid", tokenID2Flag)
+	}
+
+	lpFee, err := cfg.incClient.GetLPFeeAmount(0, tokenId1, tokenId2, address)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("tradingFee: %v\n", lpFee)
 
 	return nil
 }
