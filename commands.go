@@ -490,8 +490,6 @@ var pDEXActionCommands = &cli.Command{
 					Required: true,
 				},
 				defaultFlags[nftIDFlag],
-				defaultFlags[tokenID1Flag],
-				defaultFlags[tokenID2Flag],
 				&cli.Uint64Flag{
 					Name:    amountFlag,
 					Aliases: aliases[amountFlag],

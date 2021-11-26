@@ -180,16 +180,11 @@ func pDEXWithdraw(c *cli.Context) error {
 	}
 
 	pairID := c.String(pairIDFlag)
+	if !isValidDEXPairID(pairID) {
+		return fmt.Errorf("%v is invalid", pairHashFlag)
+	}
+	tmpTokenIDs := strings.Split(pairID, "-")[:2]
 	nftID := c.String(nftIDFlag)
-
-	tokenID1 := c.String(tokenID1Flag)
-	if !isValidTokenID(tokenID1) {
-		return fmt.Errorf("%v is invalid", tokenID1Flag)
-	}
-	tokenID2 := c.String(tokenID2Flag)
-	if !isValidTokenID(tokenID2) {
-		return fmt.Errorf("%v is invalid", tokenID2Flag)
-	}
 
 	shareAmount := c.Uint64(amountFlag)
 	myShare, err := cfg.incClient.GetPoolShareAmount(pairID, nftID)
@@ -206,8 +201,8 @@ func pDEXWithdraw(c *cli.Context) error {
 	txHash, err := cfg.incClient.CreateAndSendPdexv3WithdrawLiquidityTransaction(
 		privateKey,
 		pairID,
-		tokenID1,
-		tokenID2,
+		tmpTokenIDs[0],
+		tmpTokenIDs[1],
 		nftID,
 		shareAmount,
 	)
