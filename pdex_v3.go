@@ -233,7 +233,7 @@ func pDEXAddOrder(c *cli.Context) error {
 
 	pairID := c.String(pairIDFlag)
 	nftID := c.String(nftIDFlag)
-	myNFTs, err := cfg.incClient.GetAllNFTs(privateKey)
+	myNFTs, err := cfg.incClient.GetMyNFTs(privateKey)
 	if err != nil {
 		return err
 	}
@@ -659,7 +659,7 @@ func pDEXGetAllNFTs(c *cli.Context) error {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
 	}
 
-	allNFTs, err := cfg.incClient.GetAllNFTs(privateKey)
+	allNFTs, err := cfg.incClient.GetMyNFTs(privateKey)
 	if err != nil {
 		return err
 	}
