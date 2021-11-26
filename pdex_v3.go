@@ -678,3 +678,24 @@ func pDEXGetAllNFTs(c *cli.Context) error {
 
 	return err
 }
+
+// pDEXGetOrderByID returns the detail of an order given its id.
+func pDEXGetOrderByID(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	orderID := c.String(orderIDFlag)
+	if orderID == "" {
+		return fmt.Errorf("%v is invalid", orderIDFlag)
+	}
+
+	order, err := cfg.incClient.GetOrderByID(0, orderID)
+	if err != nil {
+		return err
+	}
+	err = jsonPrint(order)
+
+	return err
+}

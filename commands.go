@@ -617,6 +617,15 @@ var pDEXInfoCommands = &cli.Command{
 			Action: pDEXGetAllNFTs,
 		},
 		{
+			Name:        "getorder",
+			Usage:       "Retrieve the detail of an order given its id.",
+			Description: "This command returns the detail of an order given its id.",
+			Flags: []cli.Flag{
+				defaultFlags[orderIDFlag],
+			},
+			Action: pDEXGetOrderByID,
+		},
+		{
 			Name:        "share",
 			Usage:       "Retrieve the share amount of a pDEX poolID given an nftID.",
 			Description: "This command returns the share amount of an nftID within a pDEX poolID.",
