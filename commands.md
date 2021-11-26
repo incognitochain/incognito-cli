@@ -10,10 +10,10 @@ NAME:
    incognito-cli - A simple CLI application for the Incognito network
 
 USAGE:
-   ___go_build_github_com_incognitochain_incognito_cli [global options] command [command options] [arguments...]
+   incognito-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   v0.0.3
+   v0.1.0
 
 DESCRIPTION:
    A simple CLI application for the Incognito network. With this tool, you can run some basic functions on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens, consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding ETH/BNB/ERC20/BEP20, etc.
@@ -127,7 +127,7 @@ This command helps perform an account-related action.
 ```shell
 $ incognito-cli help account
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli account - Manage an Incognito account.
+   incognito-cli account - Manage an Incognito account.
 
 USAGE:
    account
@@ -344,7 +344,7 @@ This command helps perform an EVM action (e.g, shield, unshield, etc.).
 ```shell
 $ incognito-cli help evm
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli evm - Perform an EVM action (e.g, shield, unshield, etc.).
+   incognito-cli evm - Perform an EVM action (e.g, shield, unshield, etc.).
 
 USAGE:
    evm
@@ -473,7 +473,7 @@ This command helps perform a portal action (e.g, shield, unshield, etc.).
 ```shell
 $ incognito-cli help portal
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli portal - Perform a portal action (e.g, shield, unshield, etc.).
+   incognito-cli portal - Perform a portal action (e.g, shield, unshield, etc.).
 
 USAGE:
    portal
@@ -602,7 +602,7 @@ Get all rewards of a payment address.
 ```shell
 $ incognito-cli help checkrewards
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli checkrewards - Get all rewards of a payment address.
+   incognito-cli checkrewards - Get all rewards of a payment address.
 
 USAGE:
    checkrewards --address ADDRESS
@@ -620,7 +620,7 @@ Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk
 ```shell
 $ incognito-cli help stake
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli stake - Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
+   incognito-cli stake - Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
 
 USAGE:
    stake --privateKey PRIVATE_KEY [--miningKey MINING_KEY] [--candidateAddress CANDIDATE_ADDRESS] [--rewardAddress REWARD_ADDRESS] [--autoReStake AUTO_RE_STAKE]
@@ -644,7 +644,7 @@ Create an un-staking transaction (https://github.com/incognitochain/go-incognito
 ```shell
 $ incognito-cli help unstake
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli unstake - Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).
+   incognito-cli unstake - Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).
 
 USAGE:
    unstake --privateKey PRIVATE_KEY [--miningKey MINING_KEY] [--candidateAddress CANDIDATE_ADDRESS]
@@ -666,7 +666,7 @@ Withdraw the reward of a privateKey w.r.t to a tokenID.
 ```shell
 $ incognito-cli help withdrawreward
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli withdrawreward - Withdraw the reward of a privateKey w.r.t to a tokenID.
+   incognito-cli withdrawreward - Withdraw the reward of a privateKey w.r.t to a tokenID.
 
 USAGE:
    withdrawreward --privateKey PRIVATE_KEY [--address ADDRESS] [--tokenID TOKEN_ID] [--version VERSION]
@@ -690,7 +690,7 @@ This command helps perform a pDEX action. Most of the terms here are based on th
 ```shell
 $ incognito-cli help pdeaction
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli pdeaction - Perform a pDEX action.
+   incognito-cli pdeaction - Perform a pDEX action.
 
 USAGE:
    pdeaction
@@ -941,7 +941,7 @@ This command helps retrieve some information of the pDEX. Most of the terms here
 ```shell
 $ incognito-cli help pdeinfo
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli pdeinfo - Retrieve pDEX information.
+   incognito-cli pdeinfo - Retrieve pDEX information.
 
 USAGE:
    pdeinfo
@@ -1097,7 +1097,7 @@ This command helps retrieve the status of a pDEX action given its hash. If an er
 ```shell
 $ incognito-cli help pdestatus
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli pdestatus - Retrieve the status of a pDEX action.
+   incognito-cli pdestatus - Retrieve the status of a pDEX action.
 
 USAGE:
    pdestatus
@@ -1265,7 +1265,7 @@ This command checks if an OTA key is a receiver of a transaction. If so, it will
 ```shell
 $ incognito-cli help checkreceiver
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli checkreceiver - Check if an OTA key is a receiver of a transaction.
+   incognito-cli checkreceiver - Check if an OTA key is a receiver of a transaction.
 
 USAGE:
    checkreceiver --txHash TX_HASH --otaKey OTA_KEY [--readonlyKey READONLY_KEY]
@@ -1290,7 +1290,7 @@ This command helps convert UTXOs v1 of a user to UTXO v2 w.r.t a tokenID. Please
 ```shell
 $ incognito-cli help convert
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli convert - Convert UTXOs of an account w.r.t a tokenID.
+   incognito-cli convert - Convert UTXOs of an account w.r.t a tokenID.
 
 USAGE:
    convert --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS]
@@ -1315,7 +1315,7 @@ This command helps convert UTXOs v1 of a user to UTXO v2 for all assets. It will
 ```shell
 $ incognito-cli help convertall
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli convertall - Convert UTXOs of an account for all assets.
+   incognito-cli convertall - Convert UTXOs of an account for all assets.
 
 USAGE:
    convertall --privateKey PRIVATE_KEY [--numThreads NUM_THREADS]
@@ -1339,7 +1339,7 @@ This command sends an amount of PRV or token from one wallet to another wallet. 
 ```shell
 $ incognito-cli help send
 NAME:
-   ___go_build_github_com_incognitochain_incognito_cli send - Send an amount of PRV or token from one wallet to another wallet.
+   incognito-cli send - Send an amount of PRV or token from one wallet to another wallet.
 
 USAGE:
    send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--fee FEE] [--version VERSION]

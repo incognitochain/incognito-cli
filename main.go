@@ -11,7 +11,7 @@ func main() {
 	app := &cli.App{
 		Name:    "incognito-cli",
 		Usage:   "A simple CLI application for the Incognito network",
-		Version: "v0.0.3",
+		Version: "v0.1.0",
 		Description: "A simple CLI application for the Incognito network. With this tool, you can run some basic functions" +
 			" on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens," +
 			" consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding " +
