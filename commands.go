@@ -509,7 +509,6 @@ var pDEXActionCommands = &cli.Command{
 				defaultFlags[pairIDFlag],
 				defaultFlags[nftIDFlag],
 				defaultFlags[tokenIDToSellFlag],
-				defaultFlags[tokenIDToBuyFlag],
 				defaultFlags[sellingAmountFlag],
 				&cli.Uint64Flag{
 					Name:     minAcceptableAmountFlag,

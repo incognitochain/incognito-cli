@@ -232,6 +232,11 @@ func pDEXAddOrder(c *cli.Context) error {
 	}
 
 	pairID := c.String(pairIDFlag)
+	if !isValidDEXPairID(pairID) {
+		return fmt.Errorf("%v is invalid", pairHashFlag)
+	}
+	tokenIDs := strings.Split(pairID, "-")[:2]
+
 	nftID := c.String(nftIDFlag)
 	myNFTs, err := cfg.incClient.GetMyNFTs(privateKey)
 	if err != nil {
@@ -252,10 +257,12 @@ func pDEXAddOrder(c *cli.Context) error {
 	if !isValidTokenID(tokenIdToSell) {
 		return fmt.Errorf("%v is invalid", tokenIDToSellFlag)
 	}
-
-	tokenIdToBuy := c.String(tokenIDToBuyFlag)
-	if !isValidTokenID(tokenIdToBuy) {
-		return fmt.Errorf("%v is invalid", tokenIDToBuyFlag)
+	if tokenIdToSell != tokenIDs[0] && tokenIdToSell != tokenIDs[1] {
+		return fmt.Errorf("tokenToSell %v not belong to pool pair %v", tokenIdToSell, pairID)
+	}
+	tokenIdToBuy := tokenIDs[1]
+	if tokenIdToSell == tokenIDs[1] {
+		tokenIdToBuy = tokenIDs[0]
 	}
 
 	sellingAmount := c.Uint64(sellingAmountFlag)
@@ -298,6 +305,9 @@ func pDEXWithdrawOrder(c *cli.Context) error {
 	}
 
 	pairID := c.String(pairIDFlag)
+	if !isValidDEXPairID(pairID) {
+		return fmt.Errorf("%v is invalid", pairHashFlag)
+	}
 	nftID := c.String(nftIDFlag)
 	orderID := c.String(orderIDFlag)
 
@@ -326,7 +336,7 @@ func pDEXWithdrawOrder(c *cli.Context) error {
 		orderID,
 		nftID,
 		amount,
-		tokenId2,
+		tokenIDs...,
 	)
 	if err != nil {
 		return err
