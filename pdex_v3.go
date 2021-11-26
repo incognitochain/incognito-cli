@@ -308,16 +308,17 @@ func pDEXWithdrawOrder(c *cli.Context) error {
 	if !isValidDEXPairID(pairID) {
 		return fmt.Errorf("%v is invalid", pairHashFlag)
 	}
+	tmpTokenIDs := strings.Split(pairID, "-")[:2]
 	nftID := c.String(nftIDFlag)
 	orderID := c.String(orderIDFlag)
 
 	tokenId1 := c.String(tokenID1Flag)
-	if !isValidTokenID(tokenId1) {
+	if !isValidTokenID(tokenId1) && tokenId1 != tmpTokenIDs[0] && tokenId1 != tmpTokenIDs[1] {
 		return fmt.Errorf("%v is invalid", tokenID1Flag)
 	}
 
 	tokenId2 := c.String(tokenID2Flag)
-	if tokenId2 != "" && !isValidTokenID(tokenId2) {
+	if tokenId2 != "" && !isValidTokenID(tokenId2) && tokenId2 != tmpTokenIDs[0] && tokenId2 != tmpTokenIDs[1] {
 		return fmt.Errorf("%v is invalid", tokenID2Flag)
 	}
 
