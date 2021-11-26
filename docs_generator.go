@@ -18,7 +18,7 @@ func generateDocsToFile(app *cli.App, file string) error {
 	if err != nil {
 		return err
 	}
-
+	write(f, "There are two options for you to run the Incognito CLI by:\n1. Downloading the pre-compiled executable binary file, you can find it in the [releases](https://github.com/incognitochain/incognito-cli/releases).\n2. Compiling your own executable binary file from source as in the Installation instruction above.\n\n")
 	write(f, "Then execute the binary file with the following commands.\n\n")
 	write(f, "```shell\n")
 	write(f, fmt.Sprintf("$ %v help\n", app.Name))

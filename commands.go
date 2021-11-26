@@ -539,7 +539,7 @@ var pDEXActionCommands = &cli.Command{
 					Name:    amountFlag,
 					Aliases: aliases[amountFlag],
 					Usage:   "Amount to withdraw (0 for all)",
-					Value:  0,
+					Value:   0,
 				},
 			},
 			Action: pDEXWithdrawOrder,
