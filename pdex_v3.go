@@ -323,9 +323,6 @@ func pDEXWithdrawOrder(c *cli.Context) error {
 	}
 
 	amount := c.Uint64(amountFlag)
-	if amount == 0 {
-		return fmt.Errorf("%v cannot be zero", amountFlag)
-	}
 
 	tokenIDs := []string{tokenId1}
 	if tokenId2 != "" {
