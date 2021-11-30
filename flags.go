@@ -77,7 +77,7 @@ var defaultFlags = map[string]cli.Flag{
 	amountFlag: &cli.Uint64Flag{
 		Name:     amountFlag,
 		Aliases:  aliases[amountFlag],
-		Usage:    "The Incognito amount of the action",
+		Usage:    "The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000)",
 		Required: true,
 	},
 	feeFlag: &cli.Uint64Flag{
