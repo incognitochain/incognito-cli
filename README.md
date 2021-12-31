@@ -76,7 +76,9 @@ COMMANDS:
    PDEX:
      pdecheckprice   Check the price between two tokenIDs.
      pdecontribute   Create a pDEX contributing transaction.
-     pdeshare        Retrieve the share amount of a pDEX pai.r
+     pdefeewithdraw  Create a pDEX fee-withdrawal transaction.
+     pdelpfee        Retrieve the LP trading fee of a user in a pDEX pair.
+     pdeshare        Retrieve the share amount of a pDEX pair.
      pdetrade        Create a trade transaction.
      pdetradestatus  Get the status of a trade.
      pdewithdraw     Create a pDEX withdrawal transaction.
@@ -128,6 +130,8 @@ COPYRIGHT:
 * [`PDEX`](#pdex)
   * [`pdecheckprice`](#pdecheckprice)
   * [`pdecontribute`](#pdecontribute)
+  * [`pdefeewithdraw`](#pdefeewithdraw)
+  * [`pdelpfee`](#pdelpfee)
   * [`pdeshare`](#pdeshare)
   * [`pdetrade`](#pdetrade)
   * [`pdetradestatus`](#pdetradestatus)
@@ -222,7 +226,7 @@ NAME:
    incognito-cli history - Retrieve the history of an account.
 
 USAGE:
-   history --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE] [--csvFile CSV_FILE]
+   history --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS] [--csvFile CSV_FILE]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -236,8 +240,6 @@ OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --tokenID value                               ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --numThreads value                            Number of threads used in this action (default: 4)
-   --enableLog                                   Enable log for this action (default: false)
-   --logFile value                               Location of the log file (default: "os.Stdout")
    --csvFile value, --csv value                  The csv file location to store the history
    
 ```
@@ -626,12 +628,62 @@ OPTIONS:
    
 ```
 
+### pdefeewithdraw
+This function creates a transaction withdrawing an amount of LP fee from the pDEX.
+```shell
+$ incognito-cli help pdefeewithdraw
+NAME:
+   incognito-cli pdefeewithdraw - Create a pDEX fee-withdrawal transaction.
+
+USAGE:
+   pdefeewithdraw --privateKey PRIVATE_KEY --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   PDEX
+
+DESCRIPTION:
+   This function creates a transaction withdrawing an amount of LP fee from the pDEX.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --tokenID1 value                              ID of the first token
+   --tokenID2 value                              ID of the second token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   
+```
+
+### pdelpfee
+This function returns the LP trading fee of a user in a pDEX pair.
+```shell
+$ incognito-cli help pdelpfee
+NAME:
+   incognito-cli pdelpfee - Retrieve the LP trading fee of a user in a pDEX pair.
+
+USAGE:
+   pdelpfee --address ADDRESS --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   PDEX
+
+DESCRIPTION:
+   This function returns the LP trading fee of a user in a pDEX pair.
+
+OPTIONS:
+   --address value, --addr value  A base58-encoded payment address
+   --tokenID1 value               ID of the first token
+   --tokenID2 value               ID of the second token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   
+```
+
 ### pdeshare
 This function returns the share amount of a user within a pDEX pair.
 ```shell
 $ incognito-cli help pdeshare
 NAME:
-   incognito-cli pdeshare - Retrieve the share amount of a pDEX pai.r
+   incognito-cli pdeshare - Retrieve the share amount of a pDEX pair.
 
 USAGE:
    pdeshare --address ADDRESS --tokenID1 TOKEN_ID_1 [--tokenID2 TOKEN_ID_2]
@@ -894,7 +946,7 @@ NAME:
    incognito-cli convert - Convert UTXOs of an account w.r.t a tokenID.
 
 USAGE:
-   convert --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS] [--enableLog ENABLE_LOG] [--logFile LOG_FILE]
+   convert --privateKey PRIVATE_KEY [--tokenID TOKEN_ID] [--numThreads NUM_THREADS]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -908,8 +960,6 @@ OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --tokenID value, --id value                   The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --numThreads value                            Number of threads used in this action (default: 4)
-   --enableLog                                   Enable log for this action (default: false)
-   --logFile value                               Location of the log file (default: "os.Stdout")
    
 ```
 
@@ -921,7 +971,7 @@ NAME:
    incognito-cli convertall - Convert UTXOs of an account for all assets.
 
 USAGE:
-   convertall --privateKey PRIVATE_KEY [--numThreads NUM_THREADS] [--logFile LOG_FILE]
+   convertall --privateKey PRIVATE_KEY [--numThreads NUM_THREADS]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -934,7 +984,6 @@ DESCRIPTION:
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --numThreads value                            Number of threads used in this action (default: 4)
-   --logFile value                               Location of the log file (default: "os.Stdout")
    
 ```
 
