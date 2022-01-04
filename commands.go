@@ -129,7 +129,6 @@ var accountCommands = []*cli.Command{
 					"is provided, it will submit the ota key in an authorized manner. See " +
 					"https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/submit_key.md " +
 					"for more details.",
-				Category: accountCat,
 				Flags: []cli.Flag{
 					defaultFlags[otaKeyFlag],
 					defaultFlags[accessTokenFlag],
