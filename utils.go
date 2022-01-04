@@ -64,9 +64,9 @@ func initClient(rpcHost string, version int) error {
 		return err
 	}
 
-	incClient, err := incclient.NewIncClientWithCache(rpcHost, ethNode, version, network)
-	if cache == 0 {
-		incClient, err = incclient.NewIncClient(rpcHost, ethNode, version, network)
+	incClient, err := incclient.NewIncClient(rpcHost, ethNode, version, network)
+	if cache != 0 {
+		incClient, err = incclient.NewIncClientWithCache(rpcHost, ethNode, version, network)
 	}
 	if err != nil {
 		return err
