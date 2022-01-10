@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
-	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 )
 
 // send creates and sends a transaction from one wallet to another w.r.t a tokenID.
 func send(c *cli.Context) error {
-	incclient.Logger.IsEnable = true
 	err := initNetWork()
 	if err != nil {
 		return err
@@ -49,12 +47,12 @@ func send(c *cli.Context) error {
 
 	var txHash string
 	if tokenIDStr == common.PRVIDStr {
-		txHash, err = client.CreateAndSendRawTransaction(privateKey,
+		txHash, err = cfg.incClient.CreateAndSendRawTransaction(privateKey,
 			[]string{address},
 			[]uint64{amount},
 			int8(version), nil)
 	} else {
-		txHash, err = client.CreateAndSendRawTokenTransaction(privateKey,
+		txHash, err = cfg.incClient.CreateAndSendRawTokenTransaction(privateKey,
 			[]string{address},
 			[]uint64{amount},
 			tokenIDStr,
@@ -65,6 +63,50 @@ func send(c *cli.Context) error {
 	}
 
 	fmt.Printf("Success!! TxHash %v\n", txHash)
+
+	return nil
+}
+
+// checkReceiver if a user is a receiver of a transaction.
+func checkReceiver(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	txHash := c.String(txHashFlag)
+	if txHash == "" {
+		return fmt.Errorf("%v is invalid", txHashFlag)
+	}
+
+	otaKey := c.String(otaKeyFlag)
+	if !isValidOtaKey(otaKey) {
+		return fmt.Errorf("%v is invalid", otaKeyFlag)
+	}
+
+	readonlyKey := c.String(readonlyKeyFlag)
+	if readonlyKey != "" && !isValidReadonlyKey(otaKey) {
+		return fmt.Errorf("%v is invalid", readonlyKeyFlag)
+	}
+
+	var received bool
+	var res map[string]uint64
+	if readonlyKey == "" {
+		received, res, err = cfg.incClient.GetReceivingInfo(txHash, otaKey)
+	} else {
+		received, res, err = cfg.incClient.GetReceivingInfo(txHash, otaKey, readonlyKey)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if !received {
+		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKeyFlag, txHash)
+	} else {
+		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKeyFlag, txHash)
+		fmt.Printf("Receiving info: %v\n", res)
+	}
 
 	return nil
 }

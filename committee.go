@@ -2,8 +2,88 @@ package main
 
 import (
 	"fmt"
+	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 )
+
+// stake creates a staking transaction.
+func stake(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+	canAddr := c.String(candidateAddressFlag)
+	if canAddr == "" {
+		canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+	}
+	if !isValidAddress(canAddr) {
+		return fmt.Errorf("%v is invalid", candidateAddressFlag)
+	}
+	rewardAddr := c.String(rewardReceiverFlag)
+	if rewardAddr == "" {
+		rewardAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+	}
+	if !isValidAddress(rewardAddr) {
+		return fmt.Errorf("%v is invalid", rewardReceiverFlag)
+	}
+	miningKey := c.String(miningKeyFlag)
+	if miningKey == "" {
+		miningKey = incclient.PrivateKeyToMiningKey(privateKey)
+	}
+	if !isValidMiningKey(miningKey) {
+		return fmt.Errorf("%v is invalid", miningKeyFlag)
+	}
+	reStake := c.Int(autoReStakeFlag)
+	autoReStake := reStake != 0
+
+	txHash, err := cfg.incClient.CreateAndSendShardStakingTransaction(privateKey, miningKey, canAddr, rewardAddr, autoReStake)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("txHash: %v\n", txHash)
+
+	return nil
+}
+
+// unStake creates an un-staking transaction.
+func unStake(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+	canAddr := c.String(candidateAddressFlag)
+	if canAddr == "" {
+		canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+	}
+	if !isValidAddress(canAddr) {
+		return fmt.Errorf("%v is invalid", candidateAddressFlag)
+	}
+	miningKey := c.String(miningKeyFlag)
+	if miningKey == "" {
+		miningKey = incclient.PrivateKeyToMiningKey(privateKey)
+	}
+	if !isValidMiningKey(miningKey) {
+		return fmt.Errorf("%v is invalid", miningKeyFlag)
+	}
+
+	txHash, err := cfg.incClient.CreateAndSendUnStakingTransaction(privateKey, miningKey, canAddr)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("txHash: %v\n", txHash)
+
+	return nil
+}
 
 // checkRewards gets all rewards of a payment address.
 func checkRewards(c *cli.Context) error {
@@ -17,7 +97,7 @@ func checkRewards(c *cli.Context) error {
 		return fmt.Errorf("payment address is invalid")
 	}
 
-	rewards, err := client.GetRewardAmount(addr)
+	rewards, err := cfg.incClient.GetRewardAmount(addr)
 	if err != nil {
 		return err
 	}
@@ -60,7 +140,7 @@ func withdrawReward(c *cli.Context) error {
 
 	fmt.Printf("Withdrawing the reward for tokenID %v, using tx version %v\n", tokenIDStr, version)
 
-	txHash, err := client.CreateAndSendWithDrawRewardTransaction(privateKey, addr, tokenIDStr, int8(version))
+	txHash, err := cfg.incClient.CreateAndSendWithDrawRewardTransaction(privateKey, addr, tokenIDStr, int8(version))
 	if err != nil {
 		return err
 	}
