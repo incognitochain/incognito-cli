@@ -40,7 +40,6 @@ COMMANDS:
    TRANSACTIONS:
      checkreceiver  Check if an OTA key is a receiver of a transaction.
      convert        Convert UTXOs of an account w.r.t a tokenID.
-     convertall     Convert UTXOs of an account for all assets.
      send           Send an amount of PRV or token from one wallet to another wallet.
 
 GLOBAL OPTIONS:
@@ -119,7 +118,6 @@ COPYRIGHT:
 * [`TRANSACTIONS`](#transactions)
 	* [`checkreceiver`](#checkreceiver)
 	* [`convert`](#convert)
-	* [`convertall`](#convertall)
 	* [`send`](#send)
 ## ACCOUNTS
 ### account
@@ -1301,30 +1299,6 @@ DESCRIPTION:
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --tokenID value, --id value, --ID value       The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --numThreads value                            Number of threads used in this action (default: 4)
-   
-```
-
-### convertall
-This command helps convert UTXOs v1 of a user to UTXO v2 for all assets. It will automatically check for all UTXOs v1 of all tokens and convert them. Please note that this process is time-consuming and requires a considerable amount of CPU.
-```shell
-$ incognito-cli help convertall
-NAME:
-   incognito-cli convertall - Convert UTXOs of an account for all assets.
-
-USAGE:
-   convertall --privateKey PRIVATE_KEY [--numThreads NUM_THREADS]
-
-   OPTIONAL flags are denoted by a [] bracket.
-
-CATEGORY:
-   TRANSACTIONS
-
-DESCRIPTION:
-   This command helps convert UTXOs v1 of a user to UTXO v2 for all assets. It will automatically check for all UTXOs v1 of all tokens and convert them. Please note that this process is time-consuming and requires a considerable amount of CPU.
-
-OPTIONS:
-   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --numThreads value                            Number of threads used in this action (default: 4)
    
 ```
