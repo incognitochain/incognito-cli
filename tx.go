@@ -102,9 +102,9 @@ func checkReceiver(c *cli.Context) error {
 	}
 
 	if !received {
-		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKeyFlag, txHash)
+		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKey, txHash)
 	} else {
-		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKeyFlag, txHash)
+		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKey, txHash)
 		fmt.Printf("Receiving info: %v\n", res)
 	}
 
