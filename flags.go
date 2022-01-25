@@ -228,8 +228,13 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	numShardsFlag: &cli.IntFlag{
 		Name:  numShardsFlag,
-		Usage: "The number of shard",
+		Usage: "The number of shards",
 		Value: 8,
+	},
+	numAccountsFlag: &cli.IntFlag{
+		Name:  numAccountsFlag,
+		Usage: "The number of accounts",
+		Value: 1,
 	},
 
 	evmAddressFlag: &cli.StringFlag{
