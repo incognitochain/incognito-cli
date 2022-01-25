@@ -320,8 +320,10 @@ func genKeySet(c *cli.Context) error {
 	}
 	common.MaxShardNumber = numShards
 
-	numAccounts := 5
+	numAccounts := c.Int(numAccountsFlag)
+
 	fmt.Printf("mnemonic: %v\n", mnemonic)
+	accounts := make([]*incclient.KeyInfo, 0)
 	for i := 0; i < numAccounts; i++ {
 		childKey, err := w.DeriveChild(uint32(i))
 		if err != nil {
@@ -333,14 +335,9 @@ func genKeySet(c *cli.Context) error {
 			return err
 		}
 
-		jsb, err := json.MarshalIndent(info, "", "\t")
-		if err != nil {
-			return fmt.Errorf("marshalling key info error: %v", err)
-		}
-		fmt.Println(string(jsb))
+		accounts = append(accounts, info)
 	}
-
-	return nil
+	return jsonPrint(accounts)
 }
 
 func importMnemonic(c *cli.Context) error {
@@ -357,8 +354,10 @@ func importMnemonic(c *cli.Context) error {
 	}
 	common.MaxShardNumber = numShards
 
-	numAccounts := 5
+	numAccounts := c.Int(numAccountsFlag)
+
 	fmt.Printf("mnemonic: %v\n", mnemonic)
+	accounts := make([]*incclient.KeyInfo, 0)
 	for i := 0; i < numAccounts; i++ {
 		childKey, err := w.DeriveChild(uint32(i))
 		if err != nil {
@@ -370,12 +369,9 @@ func importMnemonic(c *cli.Context) error {
 			return err
 		}
 
-		jsb, err := json.MarshalIndent(info, "", "\t")
-		if err != nil {
-			return fmt.Errorf("marshalling key info error: %v", err)
-		}
-		fmt.Println(string(jsb))
+		accounts = append(accounts, info)
 	}
+	err = jsonPrint(accounts)
 
 	return nil
 }
