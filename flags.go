@@ -296,4 +296,40 @@ var defaultFlags = map[string]cli.Flag{
 		Value:    1,
 		Required: false,
 	},
+	chainCodeFlag: &cli.StringFlag{
+		Name:    chainCodeFlag,
+		Aliases: aliases[chainCodeFlag],
+		Usage: "A chaincode (i.e, seed) for generating the depositing address. This chaincode can either be an Incognito " +
+			"payment address or a base58-encoded one-time deposit public key. Please check this filled carefully",
+		Required: true,
+	},
+	depositPrivateKeyFlag: &cli.StringFlag{
+		Name:    depositPrivateKeyFlag,
+		Aliases: aliases[depositPrivateKeyFlag],
+		Usage:   "A base58-encoded deposit private key.",
+		Value:   "",
+	},
+	depositPubKeyFlag: &cli.StringFlag{
+		Name:    depositPubKeyFlag,
+		Aliases: aliases[depositPubKeyFlag],
+		Usage:   "A base58-encoded deposit public key.",
+		Value:   "",
+	},
+	depositIndexFlag: &cli.Uint64Flag{
+		Name:    depositIndexFlag,
+		Aliases: aliases[depositIndexFlag],
+		Usage:   "The index of the corresponding OTDepositPubKey",
+		Value:   0,
+	},
+	signatureFlag: &cli.StringFlag{
+		Name:    signatureFlag,
+		Aliases: aliases[signatureFlag],
+		Usage:   "A base58-encoded signature.",
+		Value:   "",
+	},
+	receiverFlag: &cli.StringFlag{
+		Name:    receiverFlag,
+		Aliases: aliases[receiverFlag],
+		Usage:   "An base58-encoded OTA receiver (default: generated from the privateKey).",
+	},
 }

@@ -1,23 +1,45 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/key"
 	"github.com/urfave/cli/v2"
 	"log"
 )
 
-// getPortalDepositAddress generates the portal depositing (i.e, shielding) address for a payment address and a tokenID.
+// getPortalDepositAddress generates the portal depositing (i.e, shielding) address for a chain-code and a tokenID.
 func getPortalDepositAddress(c *cli.Context) error {
 	err := initNetWork()
 	if err != nil {
 		return err
 	}
 
-	address := c.String(addressFlag)
-	if !isValidAddress(address) {
-		return fmt.Errorf("%v is invalid", addressFlag)
+	chainCode := c.String(chainCodeFlag)
+
+	tokenIDStr := c.String(tokenIDFlag)
+	if !isValidTokenID(tokenIDStr) {
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	}
+
+	shieldAddress, err := cfg.incClient.GeneratePortalShieldingAddress(chainCode, tokenIDStr)
+	if err != nil {
+		return err
+	}
+
+	return jsonPrint(shieldAddress)
+}
+
+// getNextDepositAddress generates returns the next possible OTDepositKey for a private key and a tokenID.
+func getNextDepositAddress(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
@@ -25,13 +47,17 @@ func getPortalDepositAddress(c *cli.Context) error {
 		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
 
-	shieldAddress, err := cfg.incClient.GeneratePortalShieldingAddress(address, tokenIDStr)
+	depositKey, depositAddress, err := cfg.incClient.GetNextOTDepositKey(privateKey, tokenIDStr)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("ShieldingAddress: %v\n", shieldAddress)
-	return nil
+	type Result struct {
+		OTDepositKey   *key.OTDepositKey
+		DepositAddress string
+	}
+
+	return jsonPrint(Result{OTDepositKey: depositKey, DepositAddress: depositAddress})
 }
 
 // portalShield deposits a portal token (e.g, BTC) into the Incognito chain.
@@ -88,6 +114,73 @@ func portalShield(c *cli.Context) error {
 	return nil
 }
 
+// portalShield deposits a portal token (e.g, BTC) into the Incognito chain.
+func portalShieldWithDepositKey(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+	if cfg.btcClient == nil {
+		return fmt.Errorf("portal shielding is not supported by this CLI configuration")
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	tokenIDStr := c.String(tokenIDFlag)
+	if !isValidTokenID(tokenIDStr) {
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	}
+
+	depositPrivateKeyStr := c.String(depositPrivateKeyFlag)
+	depositPubKeyStr := c.String(depositPubKeyFlag)
+	depositKeyIndex := c.Uint64(depositIndexFlag)
+	signature := c.String(signatureFlag)
+	receiver := c.String(receiverFlag)
+	if receiver != "" && !isValidOTAReceiver(receiver) {
+		return fmt.Errorf("%v is invalid", receiverFlag)
+	}
+
+	externalTxHash := c.String(externalTxIDFlag)
+	// check if the transaction has enough confirmations.
+	isConfirmed, blkHeight, err := cfg.btcClient.IsConfirmedTx(externalTxHash)
+	if err != nil {
+		return err
+	}
+	if !isConfirmed {
+		return fmt.Errorf("tx %v does not have enough 6 confirmations", externalTxHash)
+	}
+	// generate the shielding proof.
+	shieldingProof, err := cfg.btcClient.BuildProof(externalTxHash, blkHeight)
+	if err != nil {
+		return err
+	}
+
+	depositParams := incclient.DepositParams{
+		TokenID:           tokenIDStr,
+		ShieldProof:       shieldingProof,
+		DepositPrivateKey: depositPrivateKeyStr,
+		DepositPubKey:     depositPubKeyStr,
+		DepositKeyIndex:   depositKeyIndex,
+		Receiver:          receiver,
+		Signature:         signature,
+	}
+
+	// create an Incognito transaction to submit the proof.
+	txHash, err := cfg.incClient.CreateAndSendPortalShieldTransactionWithDepositKey(privateKey,
+		depositParams, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	type Result struct {
+		TxHash string
+	}
+	return jsonPrint(Result{TxHash: txHash})
+}
+
 // getPortalShieldStatus returns the status of a portal shielding request.
 func getPortalShieldStatus(c *cli.Context) error {
 	err := initNetWork()
@@ -104,13 +197,8 @@ func getPortalShieldStatus(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	log.Println(string(jsb))
 
-	return nil
+	return jsonPrint(status)
 }
 
 // portalUnShield creates and sends a port un-shielding transaction.
@@ -153,7 +241,10 @@ func portalUnShield(c *cli.Context) error {
 		return err
 	}
 
-	log.Printf("TxHash: %v\n", txHash)
+	type Result struct {
+		TxHash string
+	}
+	_ = jsonPrint(Result{TxHash: txHash})
 	log.Println("Please wait for ~ 30-60 minutes for the fund to be released!!")
 	log.Println("Use command `portalunshieldstatus` to check the status of the request.")
 
@@ -176,11 +267,6 @@ func getPortalUnShieldStatus(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	log.Println(string(jsb))
 
-	return nil
+	return jsonPrint(status)
 }

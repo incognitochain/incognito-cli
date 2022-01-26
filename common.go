@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/camelcase"
+	"github.com/incognitochain/go-incognito-sdk-v2/coin"
 	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/common/base58"
+	"github.com/incognitochain/go-incognito-sdk-v2/crypto"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
 	"regexp"
@@ -68,6 +70,13 @@ const (
 	candidateAddressFlag = "candidateAddress"
 	rewardReceiverFlag   = "rewardAddress"
 	autoReStakeFlag      = "autoReStake"
+
+	chainCodeFlag         = "chainCode"
+	depositPrivateKeyFlag = "depositPrivateKey"
+	depositPubKeyFlag     = "depositPubKey"
+	depositIndexFlag      = "depositIndex"
+	signatureFlag         = "signature"
+	receiverFlag          = "receiver"
 )
 
 // aliases for defaultFlags
@@ -101,6 +110,13 @@ var aliases = map[string][]string{
 	nftIDFlag:               {"nftId"},
 	orderIDFlag:             {"orderId"},
 	amplifierFlag:           {"amp"},
+
+	chainCodeFlag:         {"code", "seed"},
+	depositPrivateKeyFlag: {"dPrivKey", "dPrv"},
+	depositPubKeyFlag:     {"dPubKey", "dPub"},
+	depositIndexFlag:      {"dIndex", "dIdx"},
+	signatureFlag:         {"sig"},
+	receiverFlag:          {"recv", "r"},
 }
 
 // category constants
@@ -258,6 +274,29 @@ func isValidEVMAddress(tokenAddress string) bool {
 	}
 
 	return true
+}
+
+func isValidDepositPubKey(depositPubKeyStr string) bool {
+	depositPubKey, _, err := base58.Base58Check{}.Decode(depositPubKeyStr)
+	if err != nil {
+		return false
+	}
+	tmp, err := new(crypto.Point).FromBytesS(depositPubKey)
+	if err != nil || tmp == nil {
+		return false
+	}
+
+	return true
+}
+
+func isValidOTAReceiver(receiver string) bool {
+	otaReceiver := new(coin.OTAReceiver)
+	err := otaReceiver.FromString(receiver)
+	if err != nil {
+		return false
+	}
+
+	return otaReceiver.IsValid()
 }
 
 // isSupportedVersion checks if the given version of transaction is supported or not.
