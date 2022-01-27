@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/bridge-eth/common/base58"
+	"github.com/incognitochain/go-incognito-sdk-v2/coin"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
@@ -401,4 +402,24 @@ func submitKey(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+func newOTAReceiver(c *cli.Context) error {
+	addr := c.String(addressFlag)
+	w, err := wallet.Base58CheckDeserialize(addr)
+	if err != nil || len(w.KeySet.PaymentAddress.Pk) == 0 {
+		return fmt.Errorf("%v is invalid", addr)
+	}
+
+	otaReceiver := new(coin.OTAReceiver)
+	err = otaReceiver.FromAddress(w.KeySet.PaymentAddress)
+	if err != nil {
+		return err
+	}
+
+	type Res struct {
+		Receiver string
+	}
+
+	return jsonPrint(Res{Receiver: otaReceiver.String()})
 }

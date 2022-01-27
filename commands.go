@@ -7,6 +7,7 @@ import (
 )
 
 var dexStatusErrMsg = "If an error is thrown, it is mainly because the transaction has not yet reached the beacon chain or the txHash is invalid."
+var defaultPortalTokenID = "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696"
 
 // accountCommands consists of all account-related commands
 var accountCommands = []*cli.Command{
@@ -138,6 +139,16 @@ var accountCommands = []*cli.Command{
 					defaultFlags[isResetFlag],
 				},
 				Action: submitKey,
+			},
+			{
+				Name:        "otareceiver",
+				Usage:       "Generate an OTAReceiver for a payment address.",
+				Description: "This command generates an OTAReceiver for a given payment address.",
+				Aliases:     []string{"ota"},
+				Flags: []cli.Flag{
+					defaultFlags[addressFlag],
+				},
+				Action: newOTAReceiver,
 			},
 		},
 	},
@@ -343,13 +354,13 @@ var portalCommands = &cli.Command{
 					Name:    tokenIDFlag,
 					Aliases: aliases[tokenIDFlag],
 					Usage:   "The Incognito tokenID of the shielding asset",
-					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
+					Value:   defaultPortalTokenID,
 				},
 			},
 			Action: getPortalDepositAddress,
 		},
 		{
-			Name:  "shieldota",
+			Name:  "nextshieldaddress",
 			Usage: "Generate the next possible shielding address.",
 			Description: "This command helps generate the next possible shielding address for a private key and a tokenID. " +
 				"Please AVOID sending multiple times to a shielding address.",
@@ -359,10 +370,31 @@ var portalCommands = &cli.Command{
 					Name:    tokenIDFlag,
 					Aliases: aliases[tokenIDFlag],
 					Usage:   "The Incognito tokenID of the shielding asset",
-					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
+					Value:   defaultPortalTokenID,
 				},
 			},
 			Action: getNextDepositAddress,
+		},
+		{
+			Name:  "signreceiver",
+			Usage: "Sign to authorize the receiver of a shield request.",
+			Description: "This command helps generate a valid signature that authorizes an OTAReceiver to be the recipient " +
+				"of a shield request.",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     depositPrivateKeyFlag,
+					Aliases:  aliases[depositPrivateKeyFlag],
+					Usage:    "A base58-encoded deposit private key.",
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:     receiverFlag,
+					Aliases:  aliases[receiverFlag],
+					Usage:    "An base58-encoded OTA receiver.",
+					Required: true,
+				},
+			},
+			Action: signDepositOTAReceiver,
 		},
 		{
 			Name:  "shield",
@@ -376,7 +408,7 @@ var portalCommands = &cli.Command{
 					Name:    tokenIDFlag,
 					Aliases: aliases[tokenIDFlag],
 					Usage:   "The Incognito tokenID of the shielding asset",
-					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
+					Value:   defaultPortalTokenID,
 				},
 				&cli.StringFlag{
 					Name:    addressFlag,
@@ -398,7 +430,7 @@ var portalCommands = &cli.Command{
 					Name:    tokenIDFlag,
 					Aliases: aliases[tokenIDFlag],
 					Usage:   "The Incognito tokenID of the shielding asset",
-					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
+					Value:   defaultPortalTokenID,
 				},
 				defaultFlags[depositIndexFlag],
 				defaultFlags[depositPrivateKeyFlag],
@@ -438,7 +470,7 @@ var portalCommands = &cli.Command{
 					Name:    tokenIDFlag,
 					Aliases: aliases[tokenIDFlag],
 					Usage:   "The Incognito tokenID of the un-shielding asset",
-					Value:   "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696",
+					Value:   defaultPortalTokenID,
 				},
 			},
 			Action: portalUnShield,

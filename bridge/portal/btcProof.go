@@ -205,7 +205,6 @@ func (b *BTCClient) BuildProof(txHashStr string, blkHeight uint64) (string, erro
 			}
 
 			if len(txHashes) == block.NumTX {
-				fmt.Println("numTxs", len(txHashes))
 				break
 			} else {
 				cur += 500
