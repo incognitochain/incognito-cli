@@ -223,7 +223,7 @@ var defaultFlags = map[string]cli.Flag{
 	mnemonicFlag: &cli.StringFlag{
 		Name:     mnemonicFlag,
 		Aliases:  []string{"m"},
-		Usage:    "A 12-word mnemonic phrase, words are separated by a \"-\" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).",
+		Usage:    "A 12-word mnemonic phrase, words are separated by a \"-\", or put in \"\" (Examples: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake, \"artist decline pepper spend good enemy caught sister sure opinion hundred lake\").",
 		Required: true,
 	},
 	numShardsFlag: &cli.IntFlag{

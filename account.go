@@ -324,7 +324,7 @@ func genKeySet(c *cli.Context) error {
 
 	fmt.Printf("mnemonic: %v\n", mnemonic)
 	accounts := make([]*incclient.KeyInfo, 0)
-	for i := 0; i < numAccounts; i++ {
+	for i := 1; i <= numAccounts; i++ {
 		childKey, err := w.DeriveChild(uint32(i))
 		if err != nil {
 			return err
@@ -358,7 +358,7 @@ func importMnemonic(c *cli.Context) error {
 
 	fmt.Printf("mnemonic: %v\n", mnemonic)
 	accounts := make([]*incclient.KeyInfo, 0)
-	for i := 0; i < numAccounts; i++ {
+	for i := 1; i <= numAccounts; i++ {
 		childKey, err := w.DeriveChild(uint32(i))
 		if err != nil {
 			return err
