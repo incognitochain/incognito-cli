@@ -1,11 +1,47 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
+
+	metadataPdexv3 "github.com/incognitochain/go-incognito-sdk-v2/metadata/pdexv3"
 	"github.com/incognitochain/incognito-cli/pdex_v3"
 	"github.com/urfave/cli/v2"
-	"strings"
 )
+
+// pDEXModifyParams creates and sends a modify params request to the pDEX.
+func pDEXModifyParams(c *cli.Context) error {
+	err := initNetWork()
+	if err != nil {
+		return err
+	}
+
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	paramsStr := c.String(paramsFlag)
+
+	var params metadataPdexv3.Pdexv3Params
+	err = json.Unmarshal([]byte(paramsStr), &params)
+	if err != nil {
+		return fmt.Errorf("%v is invalid: %v", paramsFlag, err)
+	}
+
+	txHash, err := cfg.incClient.CreateAndSendPdexv3ModifyParamsTransaction(
+		privateKey,
+		params,
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("TxHash: %v\n", txHash)
+
+	return nil
+}
 
 // pDEXTrade creates and sends a trade to the pDEX.
 func pDEXTrade(c *cli.Context) error {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/urfave/cli/v2"
 )
@@ -432,6 +433,20 @@ var pDEXActionCommands = &cli.Command{
 	Description: fmt.Sprintf("This command helps perform a pDEX action. Most of the terms here are based on the SDK tutorial series (https://github.com/incognitochain/go-incognito-sdk-v2/blob/dev/pdex-v3/tutorials/docs/pdex/intro.md)."),
 	Category:    pDEXCat,
 	Subcommands: []*cli.Command{
+		{
+			Name:        "modifyparams",
+			Usage:       "Create a modify params transaction.",
+			Description: "This command creates a modify params transaction on the pDEX.",
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				&cli.StringFlag{
+					Name:     paramsFlag,
+					Usage:    "The parameters for the new desired pDEX params",
+					Required: true,
+				},
+			},
+			Action: pDEXModifyParams,
+		},
 		{
 			Name:        "trade",
 			Usage:       "Create a trade transaction.",

@@ -3,14 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/camelcase"
 	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
-	"regexp"
-	"strings"
 )
 
 // flag constants
@@ -52,6 +53,7 @@ const (
 	orderIDFlag              = "orderID"
 	pairHashFlag             = "pairHash"
 	amplifierFlag            = "amplifier"
+	paramsFlag               = "params"
 
 	mnemonicFlag  = "mnemonic"
 	numShardsFlag = "numShards"
