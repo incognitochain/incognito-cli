@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
 	"github.com/urfave/cli/v2"
 	"log"
 	"strings"
@@ -60,10 +61,10 @@ func shield(c *cli.Context) error {
 	}
 
 	evmNetwork := c.String(evmFlag)
-	if evmNetwork != "ETH" && evmNetwork != "BSC" {
-		return fmt.Errorf("%v is invalid", evmFlag)
+	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
+	if err != nil {
+		return err
 	}
-	isBSC := evmNetwork == "BSC"
 
 	shieldAmount := c.Float64(shieldAmountFlag)
 	tokenAddressStr := c.String(tokenAddressFlag)
@@ -71,7 +72,7 @@ func shield(c *cli.Context) error {
 		return fmt.Errorf("%v is invalid", tokenAddressFlag)
 	}
 	tokenAddress := common.HexToAddress(tokenAddressStr)
-	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), isBSC)
+	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), evmNetworkID)
 	if err != nil {
 		if strings.Contains(err.Error(), "incTokenID not found") {
 			log.Printf("IncTokenID not found for %v, perhaps it doesn't exist in the Incognito network.\n", tokenAddress.String())
@@ -86,12 +87,16 @@ func shield(c *cli.Context) error {
 	if tokenAddress.String() == nativeToken {
 		tokenName = "Ethereum"
 		tokenSymbol = "ETH"
-		if isBSC {
+		switch evmNetworkID {
+		case rpc.BSCNetworkID:
 			tokenName = "Binance"
 			tokenSymbol = "BNB"
+		case rpc.PLGNetworkID:
+			tokenName = "Matic"
+			tokenSymbol = "MATIC"
 		}
 	} else {
-		tokenInfo, err := getEVMTokenInfo(tokenAddress.String())
+		tokenInfo, err := getEVMTokenInfo(tokenAddress.String(), evmNetworkID)
 		if err != nil {
 			return err
 		}
@@ -127,7 +132,7 @@ func shield(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	evmTokenBalance, err := acc.checkSufficientBalance(tokenAddress, shieldAmount, isBSC)
+	evmTokenBalance, err := acc.checkSufficientBalance(tokenAddress, shieldAmount, evmNetworkID)
 	if err != nil {
 		return err
 	}
@@ -135,10 +140,13 @@ func shield(c *cli.Context) error {
 		log.Printf("Your %v address: %v, %v: %v\n", evmNetwork, acc.address.String(), tokenName, evmTokenBalance)
 	} else {
 		nativeTokenName := "ETH"
-		if isBSC {
+		switch evmNetworkID {
+		case rpc.BSCNetworkID:
 			nativeTokenName = "BNB"
+		case rpc.PLGNetworkID:
+			nativeTokenName = "MATIC"
 		}
-		_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), isBSC)
+		_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 		if err != nil {
 			return err
 		}
@@ -152,9 +160,9 @@ func shield(c *cli.Context) error {
 	log.Println("[STEP 3] DEPOSIT PUBLIC TOKEN TO SC")
 	var evmHash *common.Hash
 	if tokenAddress.String() == nativeToken {
-		evmHash, err = acc.DepositNative(incAddress, shieldAmount, 0, 0, isBSC)
+		evmHash, err = acc.DepositNative(incAddress, shieldAmount, 0, 0, evmNetworkID)
 	} else {
-		evmHash, err = acc.DepositToken(incAddress, tokenAddressStr, shieldAmount, 0, 0, isBSC)
+		evmHash, err = acc.DepositToken(incAddress, tokenAddressStr, shieldAmount, 0, 0, evmNetworkID)
 	}
 	if err != nil {
 		return err
@@ -162,7 +170,7 @@ func shield(c *cli.Context) error {
 	log.Printf("[STEP 3] FINISHED!\n\n")
 
 	log.Println("[STEP 4] SHIELD TO INCOGNITO")
-	incTxHash, err := Shield(privateKey, incTokenID, evmHash.String(), isBSC)
+	incTxHash, err := Shield(privateKey, incTokenID, evmHash.String(), evmNetworkID)
 	if err != nil {
 		return err
 	}
@@ -199,17 +207,17 @@ func retryShield(c *cli.Context) error {
 	}
 
 	evmNetwork := c.String(evmFlag)
-	if evmNetwork != "ETH" && evmNetwork != "BSC" {
-		return fmt.Errorf("%v is invalid", evmFlag)
+	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
+	if err != nil {
+		return err
 	}
-	isBSC := evmNetwork == "BSC"
 
 	tokenAddressStr := c.String(tokenAddressFlag)
 	if !isValidEVMAddress(tokenAddressStr) {
 		return fmt.Errorf("%v is invalid", tokenAddressFlag)
 	}
 	tokenAddress := common.HexToAddress(tokenAddressStr)
-	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), isBSC)
+	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), evmNetworkID)
 	if err != nil {
 		if strings.Contains(err.Error(), "incTokenID not found") {
 			log.Printf("IncTokenID not found for %v, perhaps it doesn't exist in the Incognito network.\n", tokenAddress.String())
@@ -225,7 +233,7 @@ func retryShield(c *cli.Context) error {
 	evmHash := common.HexToHash(evmTxHashStr)
 
 	log.Println("[STEP 1] SHIELD TO INCOGNITO")
-	incTxHash, err := Shield(privateKey, incTokenID, evmHash.String(), isBSC)
+	incTxHash, err := Shield(privateKey, incTokenID, evmHash.String(), evmNetworkID)
 	if err != nil {
 		return err
 	}
@@ -278,27 +286,35 @@ func unShield(c *cli.Context) error {
 	if !isValidTokenID(incTokenIDStr) {
 		return fmt.Errorf("%v is invalid", tokenIDFlag)
 	}
-	evmTokenIDStr, isBSC, err := getEVMTokenIDIncTokenID(incTokenIDStr)
+	evmTokenIDStr, evmNetworkID, err := getEVMTokenIDIncTokenID(incTokenIDStr)
 	if err != nil {
 		return err
 	}
 	evmTokenAddress := common.HexToAddress(evmTokenIDStr)
 	evmNetwork := "ETH"
 	nativeTokenName := "ETH"
-	if isBSC {
+	switch evmNetworkID {
+	case rpc.BSCNetworkID:
 		evmNetwork = "BSC"
 		nativeTokenName = "BNB"
+	case rpc.PLGNetworkID:
+		evmNetwork = "PLG"
+		nativeTokenName = "MATIC"
 	}
 	var tokenName, tokenSymbol string
 	if evmTokenAddress.String() == nativeToken {
 		tokenName = "Ethereum"
 		tokenSymbol = "ETH"
-		if isBSC {
+		switch evmNetworkID {
+		case rpc.BSCNetworkID:
 			tokenName = "Binance"
 			tokenSymbol = "BNB"
+		case rpc.PLGNetworkID:
+			tokenName = "Matic"
+			tokenSymbol = "MATIC"
 		}
 	} else {
-		tokenInfo, err := getEVMTokenInfo(evmTokenAddress.String())
+		tokenInfo, err := getEVMTokenInfo(evmTokenAddress.String(), evmNetworkID)
 		if err != nil {
 			return err
 		}
@@ -335,7 +351,7 @@ func unShield(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), isBSC)
+	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 	if err != nil {
 		return err
 	}
@@ -366,7 +382,7 @@ func unShield(c *cli.Context) error {
 	log.Printf("[STEP 2] FINISHED!\n\n")
 
 	log.Println("[STEP 3] BURN INCOGNITO TOKEN")
-	incTxHash, err := cfg.incClient.CreateAndSendBurningRequestTransaction(privateKey, evmAddress.String(), incTokenIDStr, unShieldAmount, isBSC)
+	incTxHash, err := cfg.incClient.CreateAndSendBurningRequestTransaction(privateKey, evmAddress.String(), incTokenIDStr, unShieldAmount, evmNetworkID)
 	if err != nil {
 		return err
 	}
@@ -375,7 +391,7 @@ func unShield(c *cli.Context) error {
 
 	log.Println("[STEP 4] RETRIEVE THE BURN PROOF")
 	for {
-		burnProof, err := cfg.incClient.GetBurnProof(incTxHash, isBSC)
+		burnProof, err := cfg.incClient.GetBurnProof(incTxHash, evmNetworkID)
 		if burnProof == nil || err != nil {
 			time.Sleep(40 * time.Second)
 			log.Println("Wait for the burn proof!")
@@ -387,7 +403,7 @@ func unShield(c *cli.Context) error {
 	log.Printf("[STEP 4] FINISHED!\n\n")
 
 	log.Println("[STEP 5] SUBMIT THE BURN PROOF TO THE SC")
-	_, err = acc.UnShield(incTxHash, 0, 0, isBSC)
+	_, err = acc.UnShield(incTxHash, 0, 0, evmNetworkID)
 	if err != nil {
 		panic(err)
 	}
@@ -408,13 +424,17 @@ func retryUnShield(c *cli.Context) error {
 	incTxHash := c.String(txHashFlag)
 
 	evmNetwork := c.String(evmFlag)
-	if evmNetwork != "ETH" && evmNetwork != "BSC" {
-		return fmt.Errorf("%v is invalid", evmFlag)
+	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
+	if err != nil {
+		return err
 	}
-	isBSC := evmNetwork == "BSC"
+
 	nativeTokenName := "ETH"
-	if isBSC {
+	switch evmNetworkID {
+	case rpc.BSCNetworkID:
 		nativeTokenName = "BNB"
+	case rpc.PLGNetworkID:
+		nativeTokenName = "MATIC"
 	}
 
 	log.Printf("[STEP 1] IMPORT %v ACCOUNT\n", evmNetwork)
@@ -429,7 +449,7 @@ func retryUnShield(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), isBSC)
+	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 	if err != nil {
 		return err
 	}
@@ -439,7 +459,7 @@ func retryUnShield(c *cli.Context) error {
 
 	log.Println("[STEP 2] RETRIEVE THE BURN PROOF")
 	for {
-		burnProof, err := cfg.incClient.GetBurnProof(incTxHash, isBSC)
+		burnProof, err := cfg.incClient.GetBurnProof(incTxHash, evmNetworkID)
 		if burnProof == nil || err != nil {
 			time.Sleep(40 * time.Second)
 			log.Println("Wait for the burn proof!")
@@ -451,7 +471,7 @@ func retryUnShield(c *cli.Context) error {
 	log.Printf("[STEP 2] FINISHED!\n\n")
 
 	log.Println("[STEP 3] SUBMIT THE BURN PROOF TO THE SC")
-	_, err = acc.UnShield(incTxHash, 0, 0, isBSC)
+	_, err = acc.UnShield(incTxHash, 0, 0, evmNetworkID)
 	if err != nil {
 		panic(err)
 	}
