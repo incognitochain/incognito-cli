@@ -339,6 +339,66 @@ var evmBridgeCommands = &cli.Command{
 			Action: retryUnShield,
 			Before: defaultBeforeFunc,
 		},
+		{
+			Name:        "shieldprv",
+			Usage:       "Shield PRV from EVM networks into Incognito",
+			Description: "This command helps to burn an amount of PRV from a public EVM network and mint the corresponding amount inside the Incognito network.",
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[shieldAmountFlag],
+				&cli.StringFlag{
+					Name:  evmFlag,
+					Usage: "The EVM network (ETH or BSC)",
+					Value: "ETH",
+				},
+				&cli.StringFlag{
+					Name:    addressFlag,
+					Aliases: aliases[addressFlag],
+					Usage:   "The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)",
+				},
+			},
+			Action: shieldPRV,
+			Before: prvInitFunc,
+		},
+		{
+			Name:        "retryshieldprv",
+			Usage:       "Retry a PRV shield from the given already-been-deposited-to-sc EVM transaction.",
+			Description: "This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.",
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[externalTxIDFlag],
+				defaultFlags[evmFlag],
+			},
+			Action: retryShieldPRV,
+			Before: prvInitFunc,
+		},
+		{
+			Name:        "unshieldprv",
+			Usage:       "Withdraw PRV from Incognito to EVM networks",
+			Description: "This command helps to burn an amount of PRV from the Incognito network and mint the corresponding amount on an EVM network.",
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[amountFlag],
+				&cli.StringFlag{
+					Name:  evmFlag,
+					Usage: "The EVM network (ETH or BSC)",
+					Value: "ETH",
+				},
+			},
+			Action: unShieldPRV,
+			Before: prvInitFunc,
+		},
+		{
+			Name:        "retryunshieldprv",
+			Usage:       "Retry a PRV un-shielding request from the given already-been-burned Incognito transaction.",
+			Description: "This command tries to un-shield PRV from an already-been-burned Incognito transaction in case of prior failure.",
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+				defaultFlags[evmFlag],
+			},
+			Action: retryUnShieldPRV,
+			Before: prvInitFunc,
+		},
 	},
 }
 
