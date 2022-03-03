@@ -9,11 +9,6 @@ import (
 
 // pDEXTrade creates and sends a trade to the pDEX.
 func pDEXTrade(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -91,11 +86,6 @@ func pDEXTrade(c *cli.Context) error {
 
 // pDEXMintNFT creates and sends a transaction that mints a new C-NFT for a given user.
 func pDEXMintNFT(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -116,11 +106,6 @@ func pDEXMintNFT(c *cli.Context) error {
 
 // pDEXContribute contributes a token to the pDEX.
 func pDEXContribute(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -169,11 +154,6 @@ func pDEXContribute(c *cli.Context) error {
 
 // pDEXWithdraw withdraws a pair of tokens from the pDEX.
 func pDEXWithdraw(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -216,11 +196,6 @@ func pDEXWithdraw(c *cli.Context) error {
 
 // pDEXAddOrder places an order to the pDEX.
 func pDEXAddOrder(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -289,11 +264,6 @@ func pDEXAddOrder(c *cli.Context) error {
 
 // pDEXWithdrawOrder withdraws an order from the pDEX.
 func pDEXWithdrawOrder(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -342,11 +312,6 @@ func pDEXWithdrawOrder(c *cli.Context) error {
 
 // pDEXStake creates a pDEX staking transaction.
 func pDEXStake(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -381,11 +346,6 @@ func pDEXStake(c *cli.Context) error {
 
 // pDEXUnStake creates a pDEX un-staking transaction.
 func pDEXUnStake(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -420,11 +380,6 @@ func pDEXUnStake(c *cli.Context) error {
 
 // CheckDEXStakingReward returns the estimated pDEX staking rewards.
 func CheckDEXStakingReward(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	nftID := c.String(nftIDFlag)
 	tokenID := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenID) {
@@ -440,11 +395,6 @@ func CheckDEXStakingReward(c *cli.Context) error {
 
 // pDEXWithdrawStakingReward creates a transaction withdrawing the staking rewards from the pDEX.
 func pDEXWithdrawStakingReward(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -473,11 +423,6 @@ func pDEXWithdrawStakingReward(c *cli.Context) error {
 
 // pDEXGetShare returns the share amount of a pDEX nftID with-in a given poolID.
 func pDEXGetShare(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	pairID := c.String(pairIDFlag)
 	nftID := c.String(nftIDFlag)
 
@@ -492,11 +437,6 @@ func pDEXGetShare(c *cli.Context) error {
 
 // pDEXWithdrawLPFee creates a transaction withdrawing the LP fees for an nftID from the pDEX.
 func pDEXWithdrawLPFee(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -533,11 +473,6 @@ func pDEXWithdrawLPFee(c *cli.Context) error {
 
 // pDEXGetEstimatedLPValue returns the estimated LP values of an LP in a given pool.
 func pDEXGetEstimatedLPValue(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	poolPairID := c.String(pairIDFlag)
 	if !isValidDEXPairID(poolPairID) {
 		return fmt.Errorf("%v is invalid", pairIDFlag)
@@ -555,11 +490,6 @@ func pDEXGetEstimatedLPValue(c *cli.Context) error {
 
 // pDEXFindPath finds a proper trading path.
 func pDEXFindPath(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	tokenIdToSell := c.String(tokenIDToSellFlag)
 	if !isValidTokenID(tokenIdToSell) {
 		return fmt.Errorf("%v is invalid", tokenIDToSellFlag)
@@ -597,11 +527,7 @@ func pDEXFindPath(c *cli.Context) error {
 
 // pDEXCheckPrice checks the price of two tokenIds.
 func pDEXCheckPrice(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
+	var err error
 	tokenIdToSell := c.String(tokenIDToSellFlag)
 	if !isValidTokenID(tokenIdToSell) {
 		return fmt.Errorf("%v is invalid", tokenIDToSellFlag)

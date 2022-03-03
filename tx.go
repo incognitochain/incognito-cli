@@ -8,10 +8,7 @@ import (
 
 // send creates and sends a transaction from one wallet to another w.r.t a tokenID.
 func send(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
+	var err error
 
 	privateKey := c.String("privateKey")
 	if !isValidPrivateKey(privateKey) {
@@ -69,10 +66,7 @@ func send(c *cli.Context) error {
 
 // checkReceiver if a user is a receiver of a transaction.
 func checkReceiver(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
+	var err error
 
 	txHash := c.String(txHashFlag)
 	if txHash == "" {

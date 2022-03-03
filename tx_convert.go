@@ -7,11 +7,6 @@ import (
 )
 
 func convertUTXOs(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String("privateKey")
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("private key is invalid")
