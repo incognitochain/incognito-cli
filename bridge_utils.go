@@ -75,6 +75,12 @@ func getEVMTokenInfo(tokenAddressStr string, evmNetworkID int) (*EVMTokenInfo, e
 	res := new(EVMTokenInfo)
 	res.address = tokenAddress
 	res.network = "ETH"
+	switch evmNetworkID {
+	case rpc.BSCNetworkID:
+		res.network = "BSC"
+	case rpc.PLGNetworkID:
+		res.network = "PLG"
+	}
 
 	erc20Instance, err := erc20.NewErc20(tokenAddress, evmClient)
 	if err != nil {
@@ -380,7 +386,7 @@ func (acc EVMAccount) checkAllowance(tokenAddress common.Address, requiredAmount
 		approvedAmount := requiredAmount
 		if askUser {
 			_, err = promptInput(
-				fmt.Sprintf("%v insufficient allowance: got %v, need %v. Enter the amount you want to approve", prefix, allowance, requiredAmount),
+				fmt.Sprintf("%v insufficient allowance: got %v, need %v. Enter the amount you want to approve (e.g, 0.01, 0.1, 1, 10)", prefix, allowance, requiredAmount),
 				&approvedAmount,
 			)
 			if err != nil {
@@ -626,6 +632,38 @@ func getEVMNetworkIDFromName(networkName string) (int, error) {
 	}
 
 	return evmNetworkID, nil
+}
+
+func checkAndChangeRPCEndPoint(evmNetworkID int, err error) error {
+	if err == nil {
+		return nil
+	}
+	evmNetwork := "ETH"
+	switch evmNetworkID {
+	case rpc.BSCNetworkID:
+		evmNetwork = "BSC"
+	case rpc.PLGNetworkID:
+		evmNetwork = "PLG"
+	}
+
+	if strings.Contains(err.Error(), "504 Gateway Timeout") {
+		yesNoPrompt(fmt.Sprintf("Gateway time-out. Do you want to change the %v RPC-endpoint?", evmNetwork))
+		var newRPCEndPoint string
+		var input []byte
+		input, err = promptInput(fmt.Sprintf("Enter new %v RPC endpoint", evmNetwork), &newRPCEndPoint, true)
+		if err != nil {
+			return err
+		}
+		newRPCEndPoint = string(input)
+		cfg.evmClients[evmNetworkID], err = ethclient.Dial(newRPCEndPoint)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return err
 }
 
 /*
@@ -916,9 +954,9 @@ func (acc EVMAccount) UnShield(incTxHash string, gasLimit, gasPrice uint64, evmN
 	return &txHash, nil
 }
 
-// Shield shields an amount of ETH/ERC20 tokens to the Incognito network.
+// Shield shields an amount of EVM tokens to the Incognito network.
 // This function should be called after the DepositNative or DepositToken has finished.
-func Shield(privateKey, pTokenID string, ethTxHashStr string, evmNetworkID int) (string, error) {
+func Shield(privateKey, pTokenID string, evmTxHashStr string, evmNetworkID int) (string, error) {
 	prefix := "[Shield]"
 
 	evmClient := cfg.evmClients[evmNetworkID]
@@ -926,14 +964,19 @@ func Shield(privateKey, pTokenID string, ethTxHashStr string, evmNetworkID int) 
 		return "", errEVMNetworkNotSupported(evmNetworkID)
 	}
 
-	ethTxHash := common.HexToHash(ethTxHashStr)
-	receipt, err := evmClient.TransactionReceipt(context.Background(), ethTxHash)
+	evmTxHash := common.HexToHash(evmTxHashStr)
+	receipt, err := evmClient.TransactionReceipt(context.Background(), evmTxHash)
 	if err != nil {
 		return "", err
 	}
 	blockNumber := receipt.BlockNumber.Uint64()
 	log.Printf("%v ShieldedBlock: %v\n", prefix, blockNumber)
-	log.Printf("%v Wait for 15 confirmations\n", prefix)
+
+	numCfms := 15
+	if evmNetworkID == rpc.PLGNetworkID {
+		numCfms = 35
+	}
+	log.Printf("%v Wait for %v confirmations\n", prefix, numCfms)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
 	defer cancel()
@@ -943,7 +986,7 @@ func Shield(privateKey, pTokenID string, ethTxHashStr string, evmNetworkID int) 
 			return "", err
 		}
 
-		if header.Number.Uint64() > blockNumber+15 {
+		if header.Number.Uint64() > blockNumber+uint64(numCfms) {
 			log.Println(prefix, "Enough confirmations!!")
 			break
 		}
@@ -951,7 +994,7 @@ func Shield(privateKey, pTokenID string, ethTxHashStr string, evmNetworkID int) 
 		time.Sleep(30 * time.Second)
 	}
 
-	depositProof, _, err := cfg.incClient.GetEVMDepositProof(ethTxHash.String(), evmNetworkID)
+	depositProof, _, err := cfg.incClient.GetEVMDepositProof(evmTxHash.String(), evmNetworkID)
 	if err != nil {
 		return "", err
 	}

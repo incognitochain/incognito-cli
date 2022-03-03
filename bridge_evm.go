@@ -132,29 +132,35 @@ func shield(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	evmTokenBalance, err := acc.checkSufficientBalance(tokenAddress, shieldAmount, evmNetworkID)
-	if err != nil {
-		return err
-	}
-	if tokenAddress.String() == nativeToken {
-		log.Printf("Your %v address: %v, %v: %v\n", evmNetwork, acc.address.String(), tokenName, evmTokenBalance)
-	} else {
-		nativeTokenName := "ETH"
-		switch evmNetworkID {
-		case rpc.BSCNetworkID:
-			nativeTokenName = "BNB"
-		case rpc.PLGNetworkID:
-			nativeTokenName = "MATIC"
-		}
-		_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
+
+	for {
+		evmTokenBalance, err := acc.checkSufficientBalance(tokenAddress, shieldAmount, evmNetworkID)
+		err = checkAndChangeRPCEndPoint(evmNetworkID, err)
 		if err != nil {
 			return err
 		}
-		nativeBalance, _ := tmpNativeBalance.Float64()
-		log.Printf("Your %v address: %v, %v: %v, %v: %v\n",
-			evmNetwork,
-			acc.address.String(), nativeTokenName, nativeBalance, tokenSymbol, evmTokenBalance)
+		if tokenAddress.String() == nativeToken {
+			log.Printf("Your %v address: %v, %v: %v\n", evmNetwork, acc.address.String(), tokenName, evmTokenBalance)
+		} else {
+			nativeTokenName := "ETH"
+			switch evmNetworkID {
+			case rpc.BSCNetworkID:
+				nativeTokenName = "BNB"
+			case rpc.PLGNetworkID:
+				nativeTokenName = "MATIC"
+			}
+			_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
+			if err != nil {
+				return err
+			}
+			nativeBalance, _ := tmpNativeBalance.Float64()
+			log.Printf("Your %v address: %v, %v: %v, %v: %v\n",
+				evmNetwork,
+				acc.address.String(), nativeTokenName, nativeBalance, tokenSymbol, evmTokenBalance)
+		}
+		break
 	}
+
 	log.Printf("[STEP 2] FINISHED!\n\n")
 
 	log.Println("[STEP 3] DEPOSIT PUBLIC TOKEN TO SC")
