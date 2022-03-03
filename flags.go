@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/incognito-cli/pdex_v3"
 	"github.com/urfave/cli/v2"
 )
 
@@ -11,7 +12,7 @@ var defaultFlags = map[string]cli.Flag{
 	networkFlag: &cli.StringFlag{
 		Name:        networkFlag,
 		Aliases:     aliases[networkFlag],
-		Usage:       "network environment (mainnet, testnet, testnet1, local)",
+		Usage:       "Network environment (mainnet, testnet, testnet1, local)",
 		Value:       "mainnet",
 		Destination: &network,
 	},
@@ -24,162 +25,216 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	clientVersionFlag: &cli.IntFlag{
 		Name:        clientVersionFlag,
-		Usage:       "version of the incclient",
+		Usage:       "Version of the incclient",
 		Value:       2,
 		Destination: &clientVersion,
 	},
 	debugFlag: &cli.IntFlag{
-		Name:        "debug",
-		Usage:       "whether to enable the debug mode (0 - disabled, <> 0 - enabled)",
+		Name:        debugFlag,
+		Aliases:     []string{"d"},
+		Usage:       "Whether to enable the debug mode (0 - disabled, <> 0 - enabled)",
 		Value:       0,
 		Destination: &debug,
 	},
-
+	cacheFlag: &cli.IntFlag{
+		Name:        cacheFlag,
+		Aliases:     []string{"c", "cache"},
+		Usage:       "Whether to use the UTXO cache (0 - disabled, <> 0 - enabled). See https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/utxo_cache.md for more information.",
+		Value:       0,
+		Destination: &cache,
+	},
 	privateKeyFlag: &cli.StringFlag{
 		Name:     privateKeyFlag,
 		Aliases:  aliases[privateKeyFlag],
-		Usage:    "a base58-encoded Incognito private key",
+		Usage:    "A base58-encoded Incognito private key",
 		Required: true,
 	},
 	addressFlag: &cli.StringFlag{
-		Name:     "address",
+		Name:     addressFlag,
 		Aliases:  []string{"addr"},
-		Usage:    "a base58-encoded payment address",
+		Usage:    "A base58-encoded payment address",
 		Required: true,
 	},
 	otaKeyFlag: &cli.StringFlag{
 		Name:     otaKeyFlag,
 		Aliases:  aliases[otaKeyFlag],
-		Usage:    "a base58-encoded ota key",
+		Usage:    "A base58-encoded ota key",
 		Required: true,
 	},
 	readonlyKeyFlag: &cli.StringFlag{
 		Name:    readonlyKeyFlag,
 		Aliases: aliases[readonlyKeyFlag],
-		Usage:   "a base58-encoded read-only key",
+		Usage:   "A base58-encoded read-only key",
 		Value:   "",
 	},
 
 	tokenIDFlag: &cli.StringFlag{
 		Name:    tokenIDFlag,
 		Aliases: aliases[tokenIDFlag],
-		Usage:   "the Incognito ID of the token",
+		Usage:   "The Incognito ID of the token",
 		Value:   common.PRVIDStr,
 	},
 	amountFlag: &cli.Uint64Flag{
 		Name:     amountFlag,
 		Aliases:  aliases[amountFlag],
-		Usage:    "the Incognito amount of the action",
+		Usage:    "The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000)",
 		Required: true,
 	},
 	feeFlag: &cli.Uint64Flag{
 		Name:  feeFlag,
-		Usage: "the PRV amount for paying the transaction fee",
+		Usage: "The PRV amount for paying the transaction fee",
 		Value: incclient.DefaultPRVFee,
 	},
 	versionFlag: &cli.IntFlag{
 		Name:    versionFlag,
 		Aliases: aliases[versionFlag],
-		Usage:   "version of the transaction (1 or 2)",
+		Usage:   "Version of the transaction (1 or 2)",
 		Value:   2,
 	},
 	numThreadsFlag: &cli.IntFlag{
 		Name:  numThreadsFlag,
-		Usage: "number of threads used in this action",
+		Usage: "Number of threads used in this action",
 		Value: 4,
 	},
 	enableLogFlag: &cli.BoolFlag{
 		Name:  enableLogFlag,
-		Usage: "enable log for this action",
+		Usage: "Enable log for this action",
 		Value: false,
 	},
 	logFileFlag: &cli.StringFlag{
 		Name:  logFileFlag,
-		Usage: "location of the log file",
+		Usage: "Location of the log file",
 		Value: "os.Stdout",
 	},
 	csvFileFlag: &cli.StringFlag{
 		Name:    csvFileFlag,
 		Aliases: aliases[csvFileFlag],
-		Usage:   "the csv file location to store the history",
+		Usage:   "The csv file location to store the history",
 	},
 	accessTokenFlag: &cli.StringFlag{
 		Name:  accessTokenFlag,
-		Usage: "a 64-character long hex-encoded authorized access token",
+		Usage: "A 64-character long hex-encoded authorized access token",
 		Value: "",
 	},
 	fromHeightFlag: &cli.Uint64Flag{
-		Name:  "fromHeight",
-		Usage: "the beacon height at which the full-node will sync from",
+		Name:  fromHeightFlag,
+		Usage: "The beacon height at which the full-node will sync from",
 		Value: 0,
 	},
 	isResetFlag: &cli.BoolFlag{
-		Name:  "isReset",
-		Usage: "whether the full-node should reset the cache for this ota key",
+		Name:  isResetFlag,
+		Usage: "Whether the full-node should reset the cache for this ota key",
 		Value: false,
 	},
 	txHashFlag: &cli.StringFlag{
 		Name:     txHashFlag,
 		Aliases:  aliases[txHashFlag],
-		Usage:    "an Incognito transaction hash",
+		Usage:    "An Incognito transaction hash",
 		Required: true,
 	},
 
 	tokenIDToSellFlag: &cli.StringFlag{
 		Name:     tokenIDToSellFlag,
+		Aliases:  aliases[tokenIDToSellFlag],
 		Usage:    "ID of the token to sell",
 		Required: true,
 	},
 	tokenIDToBuyFlag: &cli.StringFlag{
 		Name:     tokenIDToBuyFlag,
+		Aliases:  aliases[tokenIDToBuyFlag],
 		Usage:    "ID of the token to buy",
 		Required: true,
 	},
 	sellingAmountFlag: &cli.Uint64Flag{
 		Name:     sellingAmountFlag,
-		Usage:    fmt.Sprintf("the amount of %v wished to sell", tokenIDToSellFlag),
+		Aliases:  aliases[sellingAmountFlag],
+		Usage:    fmt.Sprintf("The amount of %v wished to sell", tokenIDToSellFlag),
 		Required: true,
 	},
 	minAcceptableAmountFlag: &cli.Uint64Flag{
-		Name:  minAcceptableAmountFlag,
-		Usage: fmt.Sprintf("the minimum acceptable amount of %v wished to receive", tokenIDToBuyFlag),
-		Value: 0,
+		Name:    minAcceptableAmountFlag,
+		Aliases: aliases[minAcceptableAmountFlag],
+		Usage:   fmt.Sprintf("The minimum acceptable amount of %v wished to receive", tokenIDToBuyFlag),
+		Value:   0,
 	},
 	tradingFeeFlag: &cli.Uint64Flag{
-		Name:  tradingFeeFlag,
-		Usage: "the trading fee (measured in nano PRV)",
-		Value: 0,
-	},
-	pairIDFlag: &cli.StringFlag{
-		Name:     pairIDFlag,
-		Usage:    "the ID of the contributing pair (see https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/pdex/contribute.md)",
+		Name:     tradingFeeFlag,
+		Usage:    "The trading fee",
 		Required: true,
 	},
 	tokenID1Flag: &cli.StringFlag{
 		Name:     tokenID1Flag,
+		Aliases:  aliases[tokenID1Flag],
 		Usage:    "ID of the first token",
 		Required: true,
 	},
 	tokenID2Flag: &cli.StringFlag{
-		Name:  tokenID2Flag,
-		Usage: "ID of the second token",
-		Value: common.PRVIDStr,
+		Name:    tokenID2Flag,
+		Aliases: aliases[tokenID2Flag],
+		Usage:   "ID of the second token",
+		Value:   common.PRVIDStr,
 	},
+	prvFeeFlag: &cli.IntFlag{
+		Name:  prvFeeFlag,
+		Usage: "Whether or not to pay fee in PRV (0 - no, <> 0 - yes)",
+		Value: 1,
+	},
+	tradingPathFlag: &cli.StringFlag{
+		Name: tradingPathFlag,
+		Usage: "A list of trading pair IDs seperated by a comma (Example: `pairID1,pairID2`). If none is given, the tool will automatically find " +
+			"a suitable path.",
+		Value: "",
+	},
+	maxTradingPathLengthFlag: &cli.UintFlag{
+		Name:  maxTradingPathLengthFlag,
+		Usage: "The maximum length of the trading path.",
+		Value: pdex_v3.MaxPaths,
+	},
+	nftIDFlag: &cli.StringFlag{
+		Name:     nftIDFlag,
+		Aliases:  aliases[nftIDFlag],
+		Usage:    "A pDEX NFT generated by the nft minting command",
+		Required: true,
+	},
+	orderIDFlag: &cli.StringFlag{
+		Name:     orderIDFlag,
+		Aliases:  aliases[orderIDFlag],
+		Usage:    "The ID of the order.",
+		Required: true,
+	},
+	pairHashFlag: &cli.StringFlag{
+		Name:     pairHashFlag,
+		Usage:    "A unique string representing the contributing pair",
+		Required: true,
+	},
+	pairIDFlag: &cli.StringFlag{
+		Name:     pairIDFlag,
+		Aliases:  aliases[pairIDFlag],
+		Usage:    "The ID of the target pool pair",
+		Required: true,
+	},
+	amplifierFlag: &cli.Uint64Flag{
+		Name:     amplifierFlag,
+		Aliases:  aliases[amplifierFlag],
+		Usage:    "The amplifier for the target contributing pool",
+		Required: true,
+	},
+
 	mnemonicFlag: &cli.StringFlag{
 		Name:     mnemonicFlag,
 		Aliases:  []string{"m"},
-		Usage:    "a 12-word mnemonic phrase, words are separated by a \"-\" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).",
+		Usage:    "A 12-word mnemonic phrase, words are separated by a \"-\" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).",
 		Required: true,
 	},
 	numShardsFlag: &cli.IntFlag{
 		Name:  numShardsFlag,
-		Usage: "the number of shard",
+		Usage: "The number of shard",
 		Value: 8,
 	},
 
 	evmAddressFlag: &cli.StringFlag{
 		Name:  evmAddressFlag,
-		Usage: "a hex-encoded address on ETH/BSC networks",
+		Usage: "A hex-encoded address on ETH/BSC networks",
 		Value: "",
 	},
 	tokenAddressFlag: &cli.StringFlag{
@@ -190,18 +245,18 @@ var defaultFlags = map[string]cli.Flag{
 	shieldAmountFlag: &cli.Float64Flag{
 		Name:     shieldAmountFlag,
 		Aliases:  aliases[shieldAmountFlag],
-		Usage:    "the shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01)",
+		Usage:    "The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01)",
 		Required: true,
 	},
 	evmFlag: &cli.StringFlag{
 		Name:  evmFlag,
-		Usage: "the EVM network (ETH or BSC)",
+		Usage: "The EVM network (ETH, BSC or PLG)",
 		Value: "ETH",
 	},
 	externalTxIDFlag: &cli.StringFlag{
 		Name:     externalTxIDFlag,
 		Aliases:  aliases[externalTxIDFlag],
-		Usage:    "the external transaction hash",
+		Usage:    "The external transaction hash",
 		Required: true,
 	},
 	externalAddressFlag: &cli.StringFlag{
@@ -209,5 +264,31 @@ var defaultFlags = map[string]cli.Flag{
 		Aliases: aliases[externalAddressFlag],
 		Usage:   "A valid remote address for the currently-processed tokenID. User MUST make sure this address is valid to avoid the loss of money.",
 		Value:   "",
+	},
+
+	miningKeyFlag: &cli.StringFlag{
+		Name:     miningKeyFlag,
+		Aliases:  aliases[miningKeyFlag],
+		Usage:    "An Incognito mining key of the committee candidate (default: the mining key associated with the privateKey)",
+		Required: false,
+	},
+	candidateAddressFlag: &cli.StringFlag{
+		Name:     candidateAddressFlag,
+		Aliases:  aliases[candidateAddressFlag],
+		Usage:    "The Incognito payment address of the committee candidate (default: the payment address of the privateKey)",
+		Required: false,
+	},
+	rewardReceiverFlag: &cli.StringFlag{
+		Name:     rewardReceiverFlag,
+		Aliases:  aliases[rewardReceiverFlag],
+		Usage:    "The Incognito payment address of the reward receiver (default: the payment address of the privateKey)",
+		Required: false,
+	},
+	autoReStakeFlag: &cli.IntFlag{
+		Name:     autoReStakeFlag,
+		Aliases:  aliases[autoReStakeFlag],
+		Usage:    "Whether or not to automatically re-stake (0 - false, <> 0 - true)",
+		Value:    1,
+		Required: false,
 	},
 }

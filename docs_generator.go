@@ -18,7 +18,7 @@ func generateDocsToFile(app *cli.App, file string) error {
 	if err != nil {
 		return err
 	}
-
+	write(f, "There are two options for you to run the Incognito CLI by:\n1. Downloading the pre-compiled executable binary file, you can find it in the [releases](https://github.com/incognitochain/incognito-cli/releases).\n2. Compiling your own executable binary file from source as in the Installation instruction above.\n\n")
 	write(f, "Then execute the binary file with the following commands.\n\n")
 	write(f, "```shell\n")
 	write(f, fmt.Sprintf("$ %v help\n", app.Name))
@@ -39,6 +39,10 @@ func generateDocsToFile(app *cli.App, file string) error {
 		for j := range commandsInCategory[cat] {
 			cmdName := commandsInCategory[cat][j].Name
 			write(f, fmt.Sprintf("\t* [`%v`](#%v)\n", cmdName, strings.ToLower(cmdName)))
+			for _, subCommand := range commandsInCategory[cat][j].Subcommands {
+				subCmdName := fmt.Sprintf("%v_%v", cmdName, subCommand.Name)
+				write(f, fmt.Sprintf("\t\t* [`%v %v`](#%v)\n", cmdName, subCommand.Name, strings.ToLower(subCmdName)))
+			}
 		}
 
 	}
@@ -47,9 +51,18 @@ func generateDocsToFile(app *cli.App, file string) error {
 		cat := categories[i]
 		write(f, fmt.Sprintf("## %v\n", cat))
 		for j := range commandsInCategory[cat] {
-			err = createDocsForCommand(app, commandsInCategory[cat][j], f)
+			cmd := commandsInCategory[cat][j]
+			err = createDocsForCommand(app, cmd, f)
 			if err != nil {
 				return err
+			}
+			if len(cmd.Subcommands) > 0 {
+				for _, subCmd := range cmd.Subcommands {
+					err = createDocsForCommand(app, subCmd, f, cmd.Name)
+					if err != nil {
+						return err
+					}
+				}
 			}
 		}
 	}
@@ -60,21 +73,43 @@ func generateDocsToFile(app *cli.App, file string) error {
 }
 
 // createDocsForCommand automatically creates a doc file for the application.
-func createDocsForCommand(app *cli.App, command *cli.Command, f *os.File) error {
-	write(f, fmt.Sprintf("### %v\n", command.Name))
-	usageString := command.Description
-	if usageString == "" {
-		usageString = command.Usage
+func createDocsForCommand(app *cli.App, command *cli.Command, f *os.File, parents ...string) error {
+	parent := ""
+	if len(parents) > 0 {
+		parent = parents[0]
 	}
-	write(f, fmt.Sprintf("%v\n", usageString))
-	write(f, "```shell\n")
 
-	// Write command name
-	write(f, fmt.Sprintf("$ %v help %v\n", app.Name, command.Name))
-	err := app.Run([]string{"help", "help", command.Name})
-	if err != nil {
+	if parent == "" {
+		write(f, fmt.Sprintf("### %v\n", command.Name))
+		usageString := command.Description
+		if usageString == "" {
+			usageString = command.Usage
+		}
+		write(f, fmt.Sprintf("%v\n", usageString))
+		write(f, "```shell\n")
+
+		// Write command name
+		write(f, fmt.Sprintf("$ %v help %v\n", app.Name, command.Name))
+		err := app.Run([]string{"help", "help", command.Name})
+		if err != nil {
+		}
+		write(f, "```\n\n")
+	} else {
+		write(f, fmt.Sprintf("#### %v_%v\n", parent, command.Name))
+		usageString := command.Description
+		if usageString == "" {
+			usageString = command.Usage
+		}
+		write(f, fmt.Sprintf("%v\n", usageString))
+		write(f, "```shell\n")
+
+		// Write command name
+		write(f, fmt.Sprintf("$ %v %v help %v\n", app.Name, parent, command.Name))
+		err := app.Run([]string{"help", parent, "help", command.Name})
+		if err != nil {
+		}
+		write(f, "```\n\n")
 	}
-	write(f, "```\n\n")
 
 	return nil
 }

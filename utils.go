@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
@@ -17,10 +18,15 @@ var (
 	network       string
 	host          string
 	debug         int
+	cache         int
 	askUser       = true
 	isMainNet     = false
 	clientVersion = 2
 )
+
+func defaultBeforeFunc(_ *cli.Context) error {
+	return initNetWork()
+}
 
 func initNetWork() error {
 	if debug != 0 {
@@ -63,7 +69,10 @@ func initClient(rpcHost string, version int) error {
 		return err
 	}
 
-	incClient, err := incclient.NewIncClientWithCache(rpcHost, ethNode, version, network)
+	incClient, err := incclient.NewIncClient(rpcHost, ethNode, version, network)
+	if cache != 0 {
+		incClient, err = incclient.NewIncClientWithCache(rpcHost, ethNode, version, network)
+	}
 	if err != nil {
 		return err
 	}
