@@ -44,11 +44,6 @@ func shield(c *cli.Context) error {
 	yesNoPrompt("Do you want to continue?")
 	fmt.Println()
 
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	log.Println("[STEP 0] PREPARE DATA")
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
@@ -202,11 +197,6 @@ func shield(c *cli.Context) error {
 
 // retryShield retries to shield a token with an already-deposited evm TxHash.
 func retryShield(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -268,11 +258,6 @@ func unShield(c *cli.Context) error {
 	fmt.Println(unShieldMessage)
 	yesNoPrompt("Do you want to continue?")
 	fmt.Println()
-
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
 
 	log.Println("[STEP 0] PREPARE DATA")
 	// get the private key
@@ -420,11 +405,6 @@ func unShield(c *cli.Context) error {
 
 // retryUnShield retries to un-shield a token with an already-burned Incognito TxHash.
 func retryUnShield(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	yesNoPrompt("Do you want to continue?")
 
 	incTxHash := c.String(txHashFlag)
