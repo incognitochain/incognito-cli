@@ -367,7 +367,11 @@ var evmBridgeCommands = &cli.Command{
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
 				defaultFlags[externalTxIDFlag],
-				defaultFlags[evmFlag],
+				&cli.StringFlag{
+					Name:  evmFlag,
+					Usage: "The EVM network (ETH or BSC)",
+					Value: "ETH",
+				},
 			},
 			Action: retryShieldPRV,
 			Before: prvInitFunc,
@@ -394,7 +398,11 @@ var evmBridgeCommands = &cli.Command{
 			Description: "This command tries to un-shield PRV from an already-been-burned Incognito transaction in case of prior failure.",
 			Flags: []cli.Flag{
 				defaultFlags[txHashFlag],
-				defaultFlags[evmFlag],
+				&cli.StringFlag{
+					Name:  evmFlag,
+					Usage: "The EVM network (ETH or BSC)",
+					Value: "ETH",
+				},
 			},
 			Action: retryUnShieldPRV,
 			Before: prvInitFunc,
