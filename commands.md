@@ -230,7 +230,7 @@ DESCRIPTION:
 
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
-   --tokenID value                               ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --tokenID value, --id value, --ID value       ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --numThreads value                            Number of threads used in this action (default: 4)
    --csvFile value, --csv value                  The csv file location to store the history
    
@@ -369,7 +369,7 @@ DESCRIPTION:
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --externalTxHash value, --eTxID value         The external transaction hash
-   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
+   --evm value                                   The EVM network (ETH, BSC or PLG) (default: "ETH")
    --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    
 ```
@@ -391,7 +391,7 @@ DESCRIPTION:
 
 OPTIONS:
    --txHash value, --iTxID value  An Incognito transaction hash
-   --evm value                    The EVM network (ETH or BSC) (default: "ETH")
+   --evm value                    The EVM network (ETH, BSC or PLG) (default: "ETH")
    
 ```
 
@@ -425,7 +425,7 @@ DESCRIPTION:
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --shieldAmount value, --amt value             The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
-   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
+   --evm value                                   The EVM network (ETH, BSC or PLG) (default: "ETH")
    --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
    
@@ -1311,7 +1311,7 @@ NAME:
    incognito-cli send - Send an amount of PRV or token from one wallet to another wallet.
 
 USAGE:
-   send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--fee FEE] [--version VERSION]
+   send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--version VERSION]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -1326,7 +1326,6 @@ OPTIONS:
    --address value, --addr value                 A base58-encoded payment address
    --amount value, --amt value                   The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
    --tokenID value, --id value, --ID value       The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --fee value                                   The PRV amount for paying the transaction fee (default: 100)
    --version value, -v value                     Version of the transaction (1 or 2) (default: 2)
    
 ```
