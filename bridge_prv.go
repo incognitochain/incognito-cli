@@ -12,6 +12,32 @@ import (
 	"time"
 )
 
+var shieldPRVMessage = "This function helps shield an EVM-pegged PRV token into the Incognito network. " +
+	"It will ask for users' EVM PRIVATE KEY to proceed. " +
+	"The shielding process consists of the following operations.\n" +
+	"\t 1. Deposit the EVM asset into the corresponding smart contract.\n" +
+	"\t\t 1.1. A PRV-approval transaction is performed (if needed) the before the " +
+	"actual deposit. For this operation, a prompt will be displayed to ask for user's approval.\n" +
+	"\t 2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. " +
+	"This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.\n\n" +
+	"Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. " +
+	"We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.\n" +
+	"DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS."
+
+var unShieldPRVMessage = "This function helps withdraw PRV to an EVM network. " +
+	"The un-shielding process consists the following operations.\n" +
+	"\t 1. Users burn the token inside the Incognito chain.\n" +
+	"\t 2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from " +
+	"the Incognito chain.\n" +
+	"\t 3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the " +
+	"corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, " +
+	"it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).\n\n" +
+	"Please be aware that EVM un-shielding is a complicated process; and once burned, there is NO WAY to recover the asset inside the " +
+	"Incognito network. Therefore, use this function IF ADN ONLY IF you understand the way un-shielding works. " +
+	"Otherwise, use the un-shielding function from the Incognito app. " +
+	"We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.\n" +
+	"DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE UN-SHIELDING PROCESS."
+
 var prv20AddressStr string
 
 func prvInitFunc(c *cli.Context) error {
@@ -57,7 +83,7 @@ func prvInitFunc(c *cli.Context) error {
 
 // shieldPRV deposits PRV tokens (on ETH/BSC) into the Incognito chain.
 func shieldPRV(c *cli.Context) error {
-	fmt.Println(shieldMessage)
+	fmt.Println(shieldPRVMessage)
 	yesNoPrompt("Do you want to continue?")
 	fmt.Println()
 
@@ -210,7 +236,7 @@ func retryShieldPRV(c *cli.Context) error {
 
 // unShieldPRV withdraws an amount of PRV on the Incognito network and mint to an EVM network.
 func unShieldPRV(c *cli.Context) error {
-	fmt.Println(unShieldMessage)
+	fmt.Println(unShieldPRVMessage)
 	yesNoPrompt("Do you want to continue?")
 	fmt.Println()
 
@@ -278,7 +304,7 @@ func unShieldPRV(c *cli.Context) error {
 	evmAddress := acc.address
 	var res string
 	resInBytes, err := promptInput(
-		fmt.Sprintf("Un-shield to the following address: %v? Continue? (y/n)", evmAddress.String()),
+		fmt.Sprintf("Un-shield to the following address: %v. Continue? (y/n)", evmAddress.String()),
 		&res)
 	if err != nil {
 		return err

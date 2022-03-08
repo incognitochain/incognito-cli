@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var shieldMessage = "This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. " +
+var shieldMessage = "This function helps shield an EVM (ETH/BNB/ERC20/BEP20, etc.) token into the Incognito network. " +
 	"It will ask for users' EVM PRIVATE KEY to proceed. " +
 	"The shielding process consists of the following operations.\n" +
 	"\t 1. Deposit the EVM asset into the corresponding smart contract.\n" +
@@ -24,7 +24,7 @@ var shieldMessage = "This function helps shield an EVM (ETH/BNB/ERC20/BEP20) tok
 	"We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.\n" +
 	"DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS."
 
-var unShieldMessage = "This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network." +
+var unShieldMessage = "This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20, etc.) token out of the Incognito network. " +
 	"The un-shielding process consists the following operations.\n" +
 	"\t 1. Users burn the token inside the Incognito chain.\n" +
 	"\t 2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from " +
@@ -351,7 +351,7 @@ func unShield(c *cli.Context) error {
 	evmAddress := acc.address
 	var res string
 	resInBytes, err := promptInput(
-		fmt.Sprintf("Un-shield to the following address: %v? Continue? (y/n)", evmAddress.String()),
+		fmt.Sprintf("Un-shield to the following address: %v. Continue? (y/n)", evmAddress.String()),
 		&res)
 	if err != nil {
 		return err

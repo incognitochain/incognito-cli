@@ -341,7 +341,7 @@ var evmBridgeCommands = &cli.Command{
 		},
 		{
 			Name:        "shieldprv",
-			Usage:       "Shield PRV from EVM networks into Incognito",
+			Usage:       "Shield PRV from EVM networks into Incognito.",
 			Description: "This command helps to burn an amount of PRV from a public EVM network and mint the corresponding amount inside the Incognito network.",
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
@@ -378,7 +378,7 @@ var evmBridgeCommands = &cli.Command{
 		},
 		{
 			Name:        "unshieldprv",
-			Usage:       "Withdraw PRV from Incognito to EVM networks",
+			Usage:       "Withdraw PRV from Incognito to EVM networks.",
 			Description: "This command helps to burn an amount of PRV from the Incognito network and mint the corresponding amount on an EVM network.",
 			Flags: []cli.Flag{
 				defaultFlags[privateKeyFlag],
