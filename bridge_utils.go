@@ -23,6 +23,7 @@ import (
 	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
 	"github.com/incognitochain/go-incognito-sdk-v2/transaction/tx_ver2"
 	"github.com/incognitochain/incognito-cli/bridge/evm/erc20"
+	"github.com/incognitochain/incognito-cli/bridge/evm/prv20"
 	"github.com/incognitochain/incognito-cli/bridge/evm/vault"
 	"io/ioutil"
 	"log"
@@ -1029,4 +1030,316 @@ func Shield(privateKey, pTokenID string, evmTxHashStr string, evmNetworkID int) 
 	log.Printf("%v ShieldedTx: %v\n", prefix, incTxHash)
 
 	return incTxHash, nil
+}
+
+// ====================== PRV FUNCTIONS ======================
+
+// estimateDepositGas estimates the gas for depositing a token.
+func (acc EVMAccount) estimatePRVDepositGas(depositedAmount *big.Int, incAddress string, evmNetworkID int) (uint64, error) {
+	if evmNetworkID == rpc.PLGNetworkID {
+		return 0, errEVMNetworkNotSupported(evmNetworkID)
+	}
+
+	evmClient := cfg.evmClients[evmNetworkID]
+	prv20Address := common.HexToAddress(prv20AddressStr)
+
+	var gasLimit uint64
+	prvABI, err := abi.JSON(strings.NewReader(prv20.Prv20ABI))
+	if err != nil {
+		return 0, fmt.Errorf("cannot create prvABI from file")
+	}
+
+	var data []byte
+	data, err = prvABI.Pack(
+		"burn",
+		incAddress,
+		depositedAmount,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	gasLimit, err = evmClient.EstimateGas(context.Background(),
+		ethereum.CallMsg{From: acc.address, To: &prv20Address, Data: data})
+	if err != nil {
+		return 0, err
+	}
+
+	return gasLimit, nil
+}
+
+// estimatePRVWithdrawalGas estimates the gas for withdrawing PRV.
+func (acc EVMAccount) estimatePRVWithdrawalGas(burnProof *incclient.BurnProof, evmNetworkID int) (uint64, error) {
+	if evmNetworkID == rpc.PLGNetworkID {
+		return 0, errEVMNetworkNotSupported(evmNetworkID)
+	}
+
+	evmClient := cfg.evmClients[evmNetworkID]
+	prv20Address := common.HexToAddress(prv20AddressStr)
+
+	prvABI, err := abi.JSON(strings.NewReader(prv20.Prv20ABI))
+	if err != nil {
+		return 0, fmt.Errorf("cannot create vaultABI from file")
+	}
+
+	var data []byte
+	data, err = prvABI.Pack(
+		"mint",
+		burnProof.Instruction,
+		burnProof.Heights[0],
+		burnProof.InstPaths[0],
+		burnProof.InstPathIsLefts[0],
+		burnProof.InstRoots[0],
+		burnProof.BlkData[0],
+		burnProof.SigIndices[0],
+		burnProof.SigVs[0],
+		burnProof.SigRs[0],
+		burnProof.SigSs[0],
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	gasLimit, err := evmClient.EstimateGas(context.Background(),
+		ethereum.CallMsg{From: acc.address, To: &prv20Address, Data: data})
+	if err != nil {
+		return 0, fmt.Errorf("estimateGas for withdrawal error: %v", err)
+	}
+
+	return gasLimit, nil
+}
+
+// BurnPRVOnEVM burns an amount of PRV on an EVM network to shield to the Incognito network.
+func (acc EVMAccount) BurnPRVOnEVM(incAddress string, depositedAmount float64, gasLimit, gasPrice uint64, evmNetworkID int) (*common.Hash, error) {
+	if evmNetworkID == rpc.PLGNetworkID {
+		return nil, errEVMNetworkNotSupported(evmNetworkID)
+	}
+
+	evmClient := cfg.evmClients[evmNetworkID]
+	prefix := "[DepositPRVERC20]"
+	switch evmNetworkID {
+	case rpc.BSCNetworkID:
+		prefix = "[DepositPRVBEP20]"
+	}
+
+	prv20Address := common.HexToAddress(prv20AddressStr)
+
+	// load the vault instance
+	prvEVM20, err := prv20.NewPrv20(prv20Address, evmClient)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = acc.checkSufficientBalance(prv20Address, depositedAmount, evmNetworkID)
+	if err != nil {
+		return nil, err
+	}
+
+	tokenDecimals, err := getDecimals(prv20Address, evmNetworkID)
+	if err != nil {
+		return nil, err
+	}
+
+	// calculate gas price
+	var gasPriceBigInt *big.Int
+	if gasPrice == 0 {
+		gasPriceBigInt, err = estimateGasPrice(evmNetworkID)
+		if err != nil {
+			return nil, fmt.Errorf("cannot get gasPriceBigInt price")
+		}
+	} else {
+		gasPriceBigInt = new(big.Int).SetUint64(gasPrice)
+	}
+
+	// estimate gasLimit
+	amountBigInt := new(big.Int).SetUint64(uint64(depositedAmount * math.Pow10(int(tokenDecimals))))
+	gasLimit, err = acc.estimatePRVDepositGas(amountBigInt, incAddress, evmNetworkID)
+	if err != nil {
+		return nil, err
+	}
+
+	txFee, _ := getSynthesizedAmount(new(big.Int).Mul(new(big.Int).SetUint64(gasLimit), gasPriceBigInt), uint64(nativeTokenDecimals)).Float64()
+	_, err = acc.checkSufficientBalance(common.HexToAddress(nativeToken), txFee, evmNetworkID)
+	if err != nil {
+		return nil, err
+	}
+	if askUser {
+		yesNoPrompt(fmt.Sprintf("%v DepositAmount: %v, GasPrice: %v gWei, TxFee: %v. Do you want to continue?",
+			prefix, depositedAmount, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee))
+	}
+
+	auth, err := acc.newTransactionOpts(prv20Address, gasPriceBigInt.Uint64(), gasLimit, 0, nil, evmNetworkID)
+	if err != nil {
+		return nil, err
+	}
+
+	// create the depositing transaction
+	tx, err := prvEVM20.Burn(auth, incAddress, amountBigInt)
+	if err != nil {
+		return nil, err
+	}
+	txHash := tx.Hash()
+	log.Printf("%v Deposited tx: %v\n", prefix, txHash)
+
+	if err := wait(txHash, evmNetworkID); err != nil {
+		return nil, err
+	}
+
+	return &txHash, nil
+}
+
+// ShieldPRV shields an amount of PRV tokens from EVM chains to the Incognito network.
+// This function should be called after the BurnPRVOnEVM has finished.
+func ShieldPRV(privateKey, evmTxHashStr string, evmNetworkID int) (string, error) {
+	if evmNetworkID == rpc.PLGNetworkID {
+		return "", errEVMNetworkNotSupported(evmNetworkID)
+	}
+
+	prefix := "[ShieldPRV]"
+
+	evmClient := cfg.evmClients[evmNetworkID]
+	if evmClient == nil {
+		return "", errEVMNetworkNotSupported(evmNetworkID)
+	}
+
+	evmTxHash := common.HexToHash(evmTxHashStr)
+	receipt, err := evmClient.TransactionReceipt(context.Background(), evmTxHash)
+	if err != nil {
+		return "", err
+	}
+	blockNumber := receipt.BlockNumber.Uint64()
+	log.Printf("%v ShieldedBlock: %v\n", prefix, blockNumber)
+
+	numCfms := 15
+	log.Printf("%v Wait for %v confirmations\n", prefix, numCfms)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
+	defer cancel()
+	for {
+		header, err := evmClient.HeaderByNumber(ctx, nil)
+		if err != nil {
+			return "", err
+		}
+
+		if header.Number.Uint64() > blockNumber+uint64(numCfms) {
+			log.Println(prefix, "Enough confirmations!!")
+			break
+		}
+		log.Printf("%v CurrentEVMBlock: %v\n", prefix, header.Number.Uint64())
+		time.Sleep(30 * time.Second)
+	}
+
+	depositProof, _, err := cfg.incClient.GetEVMDepositProof(evmTxHash.String(), evmNetworkID)
+	if err != nil {
+		return "", err
+	}
+
+	encodedTx, incTxHash, err := cfg.incClient.CreateIssuingPRVPeggingRequestTransaction(privateKey, *depositProof, evmNetworkID)
+	if err != nil {
+		return "", err
+	}
+
+	tx := new(tx_ver2.Tx)
+	rawTxData, _, err := base58.Base58Check{}.Decode(string(encodedTx))
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(rawTxData, &tx)
+	if err != nil {
+		return "", err
+	}
+
+	md := tx.GetMetadata().(*metadata.IssuingEVMRequest)
+	_, err = verifyProofAndParseReceipt(md, evmNetworkID)
+	if err != nil {
+		return "", err
+	}
+	log.Println(prefix + " Verify proof locally SUCCEEDED!!!")
+
+	err = cfg.incClient.SendRawTx(encodedTx)
+	if err != nil {
+		return "", err
+	}
+	log.Println(prefix + " SendRawTx SUCCEEDED!!")
+	log.Printf("%v ShieldedTx: %v\n", prefix, incTxHash)
+
+	return incTxHash, nil
+}
+
+// UnShieldPRV submits a PRV burn proof of the given incTxHash to the smart contract to obtain PRV on a public EVM chain.
+func (acc EVMAccount) UnShieldPRV(incTxHash string, gasLimit, gasPrice uint64, evmNetworkID int) (*common.Hash, error) {
+	if evmNetworkID == rpc.PLGNetworkID {
+		return nil, errEVMNetworkNotSupported(evmNetworkID)
+	}
+
+	prefix := "[UnShieldPRV]"
+
+	evmClient := cfg.evmClients[evmNetworkID]
+	if evmClient == nil {
+		return nil, errEVMNetworkNotSupported(evmNetworkID)
+	}
+	prvToken, err := prv20.NewPrv20(common.HexToAddress(prv20AddressStr), evmClient)
+	if err != nil {
+		return nil, err
+	}
+
+	// retrieve the burn proof from the incTxHash
+	burnProofResult, err := cfg.incClient.GetBurnPRVPeggingProof(incTxHash, evmNetworkID)
+	if err != nil {
+		return nil, err
+	}
+	burnProof, err := incclient.DecodeBurnProof(burnProofResult)
+	if err != nil {
+		return nil, err
+	}
+
+	// calculate gas price
+	var gasPriceBigInt *big.Int
+	if gasPrice == 0 {
+		gasPriceBigInt, err = estimateGasPrice(evmNetworkID)
+		if err != nil {
+			return nil, fmt.Errorf("cannot get gasPriceBigInt price")
+		}
+	} else {
+		gasPriceBigInt = new(big.Int).SetUint64(gasPrice)
+	}
+	if gasLimit == 0 {
+		gasLimit, err = acc.estimatePRVWithdrawalGas(burnProof, evmNetworkID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	txFee, _ := getSynthesizedAmount(new(big.Int).Mul(new(big.Int).SetUint64(gasLimit), gasPriceBigInt), uint64(nativeTokenDecimals)).Float64()
+	_, err = acc.checkSufficientBalance(common.HexToAddress(nativeToken), txFee, evmNetworkID)
+	if err != nil {
+		return nil, err
+	}
+	if askUser {
+		yesNoPrompt(fmt.Sprintf("%v GasPrice: %v gWei, TxFee: %v. Do you want to continue?",
+			prefix, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee))
+	}
+
+	auth, err := acc.newTransactionOpts(common.HexToAddress(prv20AddressStr), gasPriceBigInt.Uint64(), gasLimit, 0, []byte{}, evmNetworkID)
+	tx, err := prvToken.Mint(auth,
+		burnProof.Instruction,
+		burnProof.Heights[0],
+		burnProof.InstPaths[0],
+		burnProof.InstPathIsLefts[0],
+		burnProof.InstRoots[0],
+		burnProof.BlkData[0],
+		burnProof.SigIndices[0],
+		burnProof.SigVs[0],
+		burnProof.SigRs[0],
+		burnProof.SigSs[0])
+	if err != nil {
+		return nil, err
+	}
+
+	txHash := tx.Hash()
+	log.Printf("%v WithdrawalTx: %v\n", prefix, txHash.String())
+
+	if err := wait(txHash, evmNetworkID); err != nil {
+		return nil, err
+	}
+	return &txHash, nil
 }
