@@ -70,9 +70,13 @@ COPYRIGHT:
 * [`BRIDGE`](#bridge)
 	* [`evm`](#evm)
 		* [`evm retryshield`](#evm_retryshield)
+		* [`evm retryshieldprv`](#evm_retryshieldprv)
 		* [`evm retryunshield`](#evm_retryunshield)
+		* [`evm retryunshieldprv`](#evm_retryunshieldprv)
 		* [`evm shield`](#evm_shield)
+		* [`evm shieldprv`](#evm_shieldprv)
 		* [`evm unshield`](#evm_unshield)
+		* [`evm unshieldprv`](#evm_unshieldprv)
 	* [`portal`](#portal)
 		* [`portal shield`](#portal_shield)
 		* [`portal shieldaddress`](#portal_shieldaddress)
@@ -230,7 +234,7 @@ DESCRIPTION:
 
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
-   --tokenID value                               ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --tokenID value, --id value, --ID value       ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --numThreads value                            Number of threads used in this action (default: 4)
    --csvFile value, --csv value                  The csv file location to store the history
    
@@ -369,8 +373,30 @@ DESCRIPTION:
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --externalTxHash value, --eTxID value         The external transaction hash
-   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
+   --evm value                                   The EVM network (ETH, BSC or PLG) (default: "ETH")
    --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   
+```
+
+#### evm_retryshieldprv
+This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.
+```shell
+$ incognito-cli evm help retryshieldprv
+NAME:
+   incognito-cli evm retryshieldprv - Retry a PRV shield from the given already-been-deposited-to-sc EVM transaction.
+
+USAGE:
+   evm retryshieldprv --privateKey PRIVATE_KEY --externalTxHash EXTERNAL_TX_HASH [--evm EVM]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --externalTxHash value, --eTxID value         The external transaction hash
+   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
    
 ```
 
@@ -391,12 +417,33 @@ DESCRIPTION:
 
 OPTIONS:
    --txHash value, --iTxID value  An Incognito transaction hash
+   --evm value                    The EVM network (ETH, BSC or PLG) (default: "ETH")
+   
+```
+
+#### evm_retryunshieldprv
+This command tries to un-shield PRV from an already-been-burned Incognito transaction in case of prior failure.
+```shell
+$ incognito-cli evm help retryunshieldprv
+NAME:
+   incognito-cli evm retryunshieldprv - Retry a PRV un-shielding request from the given already-been-burned Incognito transaction.
+
+USAGE:
+   evm retryunshieldprv --txHash TX_HASH [--evm EVM]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command tries to un-shield PRV from an already-been-burned Incognito transaction in case of prior failure.
+
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
    --evm value                    The EVM network (ETH or BSC) (default: "ETH")
    
 ```
 
 #### evm_shield
-This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+This function helps shield an EVM (ETH/BNB/ERC20/BEP20, etc.) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
 	 1. Deposit the EVM asset into the corresponding smart contract.
 		 1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
 	 2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
@@ -414,7 +461,7 @@ USAGE:
    OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+   This function helps shield an EVM (ETH/BNB/ERC20/BEP20, etc.) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
       1. Deposit the EVM asset into the corresponding smart contract.
         1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
       2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
@@ -425,14 +472,37 @@ DESCRIPTION:
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --shieldAmount value, --amt value             The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
-   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
+   --evm value                                   The EVM network (ETH, BSC or PLG) (default: "ETH")
    --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
    
 ```
 
+#### evm_shieldprv
+This command helps to burn an amount of PRV from a public EVM network and mint the corresponding amount inside the Incognito network.
+```shell
+$ incognito-cli evm help shieldprv
+NAME:
+   incognito-cli evm shieldprv - Shield PRV from EVM networks into Incognito.
+
+USAGE:
+   evm shieldprv --privateKey PRIVATE_KEY --shieldAmount SHIELD_AMOUNT [--evm EVM] [--address ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command helps to burn an amount of PRV from a public EVM network and mint the corresponding amount inside the Incognito network.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --shieldAmount value, --amt value             The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
+   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
+   --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
+   
+```
+
 #### evm_unshield
-This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
+This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20, etc.) token out of the Incognito network. The un-shielding process consists the following operations.
 	 1. Users burn the token inside the Incognito chain.
 	 2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
 	 3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
@@ -448,7 +518,7 @@ USAGE:
    evm unshield --privateKey PRIVATE_KEY --tokenID TOKEN_ID --amount AMOUNT
 
 DESCRIPTION:
-   This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
+   This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20, etc.) token out of the Incognito network. The un-shielding process consists the following operations.
       1. Users burn the token inside the Incognito chain.
       2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
       3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
@@ -460,6 +530,28 @@ OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --tokenID value, --id value, --ID value       The Incognito tokenID of the un-shielding asset
    --amount value, --amt value                   The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
+   
+```
+
+#### evm_unshieldprv
+This command helps to burn an amount of PRV from the Incognito network and mint the corresponding amount on an EVM network.
+```shell
+$ incognito-cli evm help unshieldprv
+NAME:
+   incognito-cli evm unshieldprv - Withdraw PRV from Incognito to EVM networks.
+
+USAGE:
+   evm unshieldprv --privateKey PRIVATE_KEY --amount AMOUNT [--evm EVM]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command helps to burn an amount of PRV from the Incognito network and mint the corresponding amount on an EVM network.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --amount value, --amt value                   The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
+   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
    
 ```
 
