@@ -30,11 +30,6 @@ func send(c *cli.Context) error {
 		return fmt.Errorf("amount cannot be zero")
 	}
 
-	fee := c.Uint64("fee")
-	if fee == 0 {
-		return fmt.Errorf("fee cannot be zero")
-	}
-
 	version := c.Int("version")
 	if !isSupportedVersion(int8(version)) {
 		return fmt.Errorf("version is not supported")

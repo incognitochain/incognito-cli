@@ -219,7 +219,6 @@ var txCommands = []*cli.Command{
 			defaultFlags[addressFlag],
 			defaultFlags[amountFlag],
 			defaultFlags[tokenIDFlag],
-			defaultFlags[feeFlag],
 			defaultFlags[versionFlag],
 		},
 		Action: send,

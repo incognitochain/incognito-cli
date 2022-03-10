@@ -222,7 +222,6 @@ func retryShield(c *cli.Context) error {
 		} else {
 			return err
 		}
-		return err
 	}
 
 	evmTxHashStr := c.String(externalTxIDFlag)

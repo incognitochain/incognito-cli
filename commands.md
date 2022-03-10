@@ -1403,7 +1403,7 @@ NAME:
    incognito-cli send - Send an amount of PRV or token from one wallet to another wallet.
 
 USAGE:
-   send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--fee FEE] [--version VERSION]
+   send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--version VERSION]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -1418,7 +1418,6 @@ OPTIONS:
    --address value, --addr value                 A base58-encoded payment address
    --amount value, --amt value                   The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
    --tokenID value, --id value, --ID value       The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --fee value                                   The PRV amount for paying the transaction fee (default: 100)
    --version value, -v value                     Version of the transaction (1 or 2) (default: 2)
    
 ```
