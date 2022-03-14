@@ -453,8 +453,8 @@ func pDEXWithdrawLPFee(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if len(lpValue.TradingFee) == 0 {
-		return fmt.Errorf("not enough LP fee to withdraw")
+	if len(lpValue.PoolReward) == 0 {
+		return fmt.Errorf("not enough reward to withdraw")
 	}
 
 	txHash, err := cfg.incClient.CreateAndSendPdexv3WithdrawLPFeeTransaction(
