@@ -60,6 +60,7 @@ COPYRIGHT:
 		* [`account balance`](#account_balance)
 		* [`account balanceall`](#account_balanceall)
 		* [`account consolidate`](#account_consolidate)
+		* [`account financialexport`](#account_financialexport)
 		* [`account generate`](#account_generate)
 		* [`account history`](#account_history)
 		* [`account importaccount`](#account_importaccount)
@@ -194,6 +195,28 @@ OPTIONS:
    --tokenID value, --id value, --ID value       The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --version value, -v value                     Version of the transaction (1 or 2) (default: 2)
    --numThreads value                            Number of threads used in this action (default: 4)
+   
+```
+
+#### account_financialexport
+This command helps export the financial history of an account. Please note that this process is time-consuming and requires a considerable amount of CPU. The more transactions you have, the more time it takes to build up the report. If you want to see the log, use the global `debug` flag `--d 1`. Use this command with the main-net network for the best result.
+```shell
+$ incognito-cli account help financialexport
+NAME:
+   incognito-cli account financialexport - Export the financial history of an account.
+
+USAGE:
+   account financialexport --privateKey PRIVATE_KEY [--numThreads NUM_THREADS] [--csvFile CSV_FILE]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command helps export the financial history of an account. Please note that this process is time-consuming and requires a considerable amount of CPU. The more transactions you have, the more time it takes to build up the report. If you want to see the log, use the global `debug` flag `--d 1`. Use this command with the main-net network for the best result.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --numThreads value                            Number of threads used in this action (default: 4)
+   --csvFile value, --csv value                  The csv file location to store the history (default: "txHistory.csv")
    
 ```
 
