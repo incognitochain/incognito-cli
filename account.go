@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/bridge-eth/common/base58"
@@ -9,7 +10,12 @@ import (
 	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
+	"log"
+	"math"
+	"os"
+	"sort"
 	"strings"
+	"time"
 )
 
 func checkBalance(c *cli.Context) error {
@@ -249,6 +255,148 @@ func getHistory(c *cli.Context) error {
 
 		fmt.Printf("TotalIn: %v, TotalOut: %v\n", totalIn, totalOut)
 	}
+
+	return nil
+}
+
+func financialExport(c *cli.Context) error {
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	numThreads := c.Int(numThreadsFlag)
+	if numThreads == 0 {
+		return fmt.Errorf("%v in invalid", numThreadsFlag)
+	}
+
+	csvFile := c.String(csvFileFlag)
+	if len(csvFile) == 0 {
+		csvFile = incclient.DefaultTxHistory
+	}
+
+	historyProcessor := incclient.NewTxHistoryProcessor(cfg.incClient, numThreads)
+
+	historyMap, err := historyProcessor.GetAllHistory(privateKey)
+	if err != nil {
+		return err
+	}
+
+	history := new(incclient.TxHistory)
+	history.TxInList = make([]incclient.TxIn, 0)
+	history.TxOutList = make([]incclient.TxOut, 0)
+	for tokenID, h := range historyMap {
+		if tokenID == common.ConfidentialAssetID.String() || tokenID == common.PRVIDStr {
+			continue
+		}
+
+		history.TxInList = append(history.TxInList, h.TxInList...)
+		history.TxOutList = append(history.TxOutList, h.TxOutList...)
+	}
+
+	if historyMap[common.PRVIDStr] != nil {
+		history.TxInList = append(history.TxInList, historyMap[common.PRVIDStr].TxInList...)
+
+	}
+
+	for _, txOut := range historyMap[common.PRVIDStr].TxOutList {
+		if txOut.Amount == 0 {
+			continue
+		}
+		history.TxOutList = append(history.TxOutList, txOut)
+	}
+
+	//fmt.Println(historyMap[common.PRVIDStr].TxOutList)
+
+	sort.Slice(history.TxInList, func(i, j int) bool {
+		return history.TxInList[i].LockTime > history.TxInList[j].LockTime
+	})
+	sort.Slice(history.TxOutList, func(i, j int) bool {
+		return history.TxOutList[i].LockTime > history.TxOutList[j].LockTime
+	})
+
+	f, err := os.OpenFile(csvFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	w := csv.NewWriter(f)
+	defer w.Flush()
+
+	_ = f.Truncate(0)
+
+	log.Println("Building up the history file...")
+
+	var dateTimeFormat = "2006/01/02 15:04:05"
+	historyPattern := []string{"Date", "TxHash", "Received Quantity", "Received Currency", "Sent Quantity", "Sent Currency", "Fee Amount", "Fee Currency", "Tag"}
+	err = w.Write(historyPattern)
+	if err != nil {
+		return err
+	}
+
+	writtenData := make(map[string]bool)
+	for _, txIn := range history.TxInList {
+		if writtenData[common.HashH([]byte(txIn.String())).String()] {
+			continue
+		} else {
+			writtenData[common.HashH([]byte(txIn.String())).String()] = true
+		}
+		toBeWritten := make([]string, 0)
+		toBeWritten = append(toBeWritten, time.Unix(txIn.GetLockTime(), 0).Format(dateTimeFormat))
+		toBeWritten = append(toBeWritten, txIn.TxHash)
+		toBeWritten = append(toBeWritten, fmt.Sprintf("%v", float64(txIn.Amount)/math.Pow10(getTokenDecimals(txIn.TokenID))))
+		toBeWritten = append(toBeWritten, getTokenName(txIn.TokenID))
+		toBeWritten = append(toBeWritten, "")
+		toBeWritten = append(toBeWritten, "")
+		toBeWritten = append(toBeWritten, "")
+		toBeWritten = append(toBeWritten, "")
+		toBeWritten = append(toBeWritten, txIn.Note)
+
+		err = w.Write(toBeWritten)
+		if err != nil {
+			return fmt.Errorf("write txHash %v error: %v", txIn.GetTxHash(), err)
+		}
+	}
+
+	for _, txOut := range history.TxOutList {
+		if writtenData[common.HashH([]byte(txOut.String())).String()] {
+			continue
+		} else {
+			writtenData[common.HashH([]byte(txOut.String())).String()] = true
+		}
+		fee := txOut.PRVFee
+		tokenFee := common.PRVIDStr
+		if fee == 0 {
+			fee = txOut.TokenFee
+			tokenFee = txOut.TokenID
+		}
+		if fee == 0 {
+			tokenFee = ""
+		}
+
+		toBeWritten := make([]string, 0)
+		toBeWritten = append(toBeWritten, time.Unix(txOut.GetLockTime(), 0).Format(dateTimeFormat))
+		toBeWritten = append(toBeWritten, txOut.TxHash)
+		toBeWritten = append(toBeWritten, "")
+		toBeWritten = append(toBeWritten, "")
+		toBeWritten = append(toBeWritten, fmt.Sprintf("%v", float64(txOut.Amount)/math.Pow10(getTokenDecimals(txOut.TokenID))))
+		toBeWritten = append(toBeWritten, getTokenName(txOut.TokenID))
+		toBeWritten = append(toBeWritten, fmt.Sprintf("%v", float64(fee)/math.Pow10(getTokenDecimals(tokenFee))))
+		toBeWritten = append(toBeWritten, getTokenName(tokenFee))
+		toBeWritten = append(toBeWritten, txOut.Note)
+
+		err = w.Write(toBeWritten)
+		if err != nil {
+			return fmt.Errorf("write txHash %v error: %v", txOut.GetTxHash(), err)
+		}
+	}
+	log.Printf("Report written to file `%v`\n", csvFile)
 
 	return nil
 }

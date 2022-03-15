@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
+	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 )
 
@@ -106,6 +107,27 @@ var accountCommands = []*cli.Command{
 				},
 				Action: getHistory,
 				Before: defaultBeforeFunc,
+			},
+			{
+				Name:    "financialexport",
+				Aliases: []string{"finext"},
+				Usage:   "Export the financial history of an account.",
+				Description: "This command helps export the financial history of an account. " +
+					"Please note that this process is time-consuming and requires a considerable amount of CPU. The more " +
+					"transactions you have, the more time it takes to build up the report. If you want to see the log, " +
+					"use the global `debug` flag `--d 1`. Use this command with the main-net network for the best result.",
+				Flags: []cli.Flag{
+					defaultFlags[privateKeyFlag],
+					defaultFlags[numThreadsFlag],
+					&cli.StringFlag{
+						Name:    csvFileFlag,
+						Aliases: aliases[csvFileFlag],
+						Usage:   "The csv file location to store the history",
+						Value:   incclient.DefaultTxHistory,
+					},
+				},
+				Action: financialExport,
+				Before: initForFinancialReport,
 			},
 			{
 				Name:        "generate",
