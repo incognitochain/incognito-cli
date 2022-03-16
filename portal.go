@@ -156,7 +156,7 @@ func portalShieldWithDepositKey(c *cli.Context) error {
 		return err
 	}
 
-	depositParams := incclient.DepositParams{
+	depositParams := incclient.PortalDepositParams{
 		TokenID:           tokenIDStr,
 		ShieldProof:       shieldingProof,
 		DepositPrivateKey: depositPrivateKeyStr,
