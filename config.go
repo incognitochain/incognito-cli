@@ -4,36 +4,33 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
 	"github.com/incognitochain/incognito-cli/bridge/portal"
 )
 
 // Config represents the config of an environment of the CLI tool.
 type Config struct {
 	incClient *incclient.IncClient
-	ethClient *ethclient.Client
-	bscClient *ethclient.Client
+
+	evmClients map[int]*ethclient.Client
+
 	btcClient *portal.BTCClient
 
-	ethVaultAddress common.Address
-	bscVaultAddress common.Address
+	evmVaultAddresses map[int]common.Address
 }
 
 // NewConfig returns a new Config from given parameters.
 func NewConfig(
 	incClient *incclient.IncClient,
-	ethClient, bscClient *ethclient.Client,
+	evmClients map[int]*ethclient.Client,
 	btcClient *portal.BTCClient,
-	ethVaultAddressStr, bscVaultAddressStr string,
+	evmVaultAddresses map[int]common.Address,
 ) *Config {
-	ethVaultAddress := common.HexToAddress(ethVaultAddressStr)
-	bscVaultAddress := common.HexToAddress(bscVaultAddressStr)
 	return &Config{
-		incClient:       incClient,
-		ethClient:       ethClient,
-		bscClient:       bscClient,
-		btcClient:       btcClient,
-		ethVaultAddress: ethVaultAddress,
-		bscVaultAddress: bscVaultAddress,
+		incClient:         incClient,
+		evmClients:        evmClients,
+		evmVaultAddresses: evmVaultAddresses,
+		btcClient:         btcClient,
 	}
 }
 
@@ -61,12 +58,29 @@ func NewTestNetConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
+	plgClient, err := ethclient.Dial(incclient.TestNetPLGHost)
+	if err != nil {
+		return err
+	}
+
+	evmClients := map[int]*ethclient.Client{
+		rpc.ETHNetworkID: ethClient,
+		rpc.BSCNetworkID: bscClient,
+		rpc.PLGNetworkID: plgClient,
+	}
+
+	evmVaultAddresses := map[int]common.Address{
+		rpc.ETHNetworkID: common.HexToAddress(incclient.TestNetETHContractAddressStr),
+		rpc.BSCNetworkID: common.HexToAddress(incclient.TestNetBSCContractAddressStr),
+		rpc.PLGNetworkID: common.HexToAddress(incclient.TestNetPLGContractAddressStr),
+	}
+
 	btcClient, err := portal.NewBTCTestNetClient()
 	if err != nil {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.TestNetETHContractAddressStr, incclient.TestNetBSCContractAddressStr)
+	cfg = NewConfig(incClient, evmClients, btcClient, evmVaultAddresses)
 
 	return nil
 }
@@ -95,12 +109,29 @@ func NewTestNet1Config(incClient *incclient.IncClient) error {
 		return err
 	}
 
+	plgClient, err := ethclient.Dial(incclient.TestNet1PLGHost)
+	if err != nil {
+		return err
+	}
+
+	evmClients := map[int]*ethclient.Client{
+		rpc.ETHNetworkID: ethClient,
+		rpc.BSCNetworkID: bscClient,
+		rpc.PLGNetworkID: plgClient,
+	}
+
+	evmVaultAddresses := map[int]common.Address{
+		rpc.ETHNetworkID: common.HexToAddress(incclient.TestNet1ETHContractAddressStr),
+		rpc.BSCNetworkID: common.HexToAddress(incclient.TestNet1BSCContractAddressStr),
+		rpc.PLGNetworkID: common.HexToAddress(incclient.TestNet1PLGContractAddressStr),
+	}
+
 	btcClient, err := portal.NewBTCTestNetClient()
 	if err != nil {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.TestNet1ETHContractAddressStr, incclient.TestNet1BSCContractAddressStr)
+	cfg = NewConfig(incClient, evmClients, btcClient, evmVaultAddresses)
 	return nil
 }
 
@@ -129,12 +160,29 @@ func NewMainNetConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
+	plgClient, err := ethclient.Dial(incclient.MainNetPLGHost)
+	if err != nil {
+		return err
+	}
+
+	evmClients := map[int]*ethclient.Client{
+		rpc.ETHNetworkID: ethClient,
+		rpc.BSCNetworkID: bscClient,
+		rpc.PLGNetworkID: plgClient,
+	}
+
+	evmVaultAddresses := map[int]common.Address{
+		rpc.ETHNetworkID: common.HexToAddress(incclient.MainNetETHContractAddressStr),
+		rpc.BSCNetworkID: common.HexToAddress(incclient.MainNetBSCContractAddressStr),
+		rpc.PLGNetworkID: common.HexToAddress(incclient.MainNetPLGContractAddressStr),
+	}
+
 	btcClient, err := portal.NewBTCMainNetClient()
 	if err != nil {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.MainNetETHContractAddressStr, incclient.MainNetBSCContractAddressStr)
+	cfg = NewConfig(incClient, evmClients, btcClient, evmVaultAddresses)
 	return nil
 }
 
@@ -162,11 +210,28 @@ func NewLocalConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
+	plgClient, err := ethclient.Dial(incclient.LocalETHHost)
+	if err != nil {
+		return err
+	}
+
+	evmClients := map[int]*ethclient.Client{
+		rpc.ETHNetworkID: ethClient,
+		rpc.BSCNetworkID: bscClient,
+		rpc.PLGNetworkID: plgClient,
+	}
+
+	evmVaultAddresses := map[int]common.Address{
+		rpc.ETHNetworkID: common.HexToAddress(incclient.LocalETHContractAddressStr),
+		rpc.BSCNetworkID: common.HexToAddress(incclient.LocalETHContractAddressStr),
+		rpc.PLGNetworkID: common.HexToAddress(incclient.LocalETHContractAddressStr),
+	}
+
 	btcClient, err := portal.NewBTCTestNetClient()
 	if err != nil {
 		return err
 	}
 
-	cfg = NewConfig(incClient, ethClient, bscClient, btcClient, incclient.LocalETHContractAddressStr, incclient.LocalETHContractAddressStr)
+	cfg = NewConfig(incClient, evmClients, btcClient, evmVaultAddresses)
 	return nil
 }

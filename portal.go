@@ -10,11 +10,6 @@ import (
 
 // getPortalDepositAddress generates the portal depositing (i.e, shielding) address for a chain-code and a tokenID.
 func getPortalDepositAddress(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	chainCode := c.String(chainCodeFlag)
 
 	tokenIDStr := c.String(tokenIDFlag)
@@ -66,10 +61,6 @@ func getNextDepositAddress(c *cli.Context) error {
 
 // portalShield deposits a portal token (e.g, BTC) into the Incognito chain.
 func portalShield(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
 	if cfg.btcClient == nil {
 		return fmt.Errorf("portal shielding is not supported by this CLI configuration")
 	}
@@ -190,11 +181,6 @@ func portalShieldWithDepositKey(c *cli.Context) error {
 
 // getPortalShieldStatus returns the status of a portal shielding request.
 func getPortalShieldStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	if txHash == "" {
 		return fmt.Errorf("%v is invalid", txHashFlag)
@@ -210,11 +196,6 @@ func getPortalShieldStatus(c *cli.Context) error {
 
 // portalUnShield creates and sends a port un-shielding transaction.
 func portalUnShield(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -260,11 +241,6 @@ func portalUnShield(c *cli.Context) error {
 
 // getPortalUnShieldStatus returns the status of a portal un-shielding request.
 func getPortalUnShieldStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	if txHash == "" {
 		return fmt.Errorf("%v is invalid", txHashFlag)

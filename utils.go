@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
@@ -22,6 +23,10 @@ var (
 	isMainNet     = false
 	clientVersion = 2
 )
+
+func defaultBeforeFunc(_ *cli.Context) error {
+	return initNetWork()
+}
 
 func initNetWork() error {
 	if debug != 0 {

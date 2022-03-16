@@ -15,11 +15,6 @@ import (
 )
 
 func checkBalance(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if privateKey == "" {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -40,11 +35,6 @@ func checkBalance(c *cli.Context) error {
 }
 
 func getAllBalanceV2(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if privateKey == "" {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -62,30 +52,6 @@ func getAllBalanceV2(c *cli.Context) error {
 
 	return nil
 }
-
-//func checkBalanceAll(c *cli.Context) error {
-//	err := initNetWork()
-//	if err != nil {
-//		return err
-//	}
-//
-//	privateKey := c.String("privateKey")
-//	if privateKey == "" {
-//		return fmt.Errorf("private key is invalid")
-//	}
-//
-//	balances, err := cfg.incClient.GetBalanceAll(privateKey)
-//	if err != nil {
-//		return err
-//	}
-//	jsb, err := json.MarshalIndent(balances, "", "\t")
-//	if err != nil {
-//		return err
-//	}
-//	fmt.Println(string(jsb))
-//
-//	return nil
-//}
 
 func keyInfo(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
@@ -108,11 +74,6 @@ func keyInfo(c *cli.Context) error {
 }
 
 func consolidateUTXOs(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if privateKey == "" {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -146,11 +107,6 @@ func consolidateUTXOs(c *cli.Context) error {
 }
 
 func checkUTXOs(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if privateKey == "" {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -194,11 +150,6 @@ func checkUTXOs(c *cli.Context) error {
 }
 
 func getOutCoins(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	address := c.String(addressFlag)
 	if !isValidAddress(address) {
 		return fmt.Errorf("%v is invalid", addressFlag)
@@ -252,62 +203,56 @@ func getOutCoins(c *cli.Context) error {
 }
 
 func getHistory(c *cli.Context) error {
-	return fmt.Errorf("getting history hasn't been supported for Privacy V2")
-	//err := initClient("https://beta-fullnode.incognito.org/fullnode", 1)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//privateKey := c.String("privateKey")
-	//if privateKey == "" {
-	//	return fmt.Errorf("private key is invalid")
-	//}
-	//
-	//tokenIDStr := c.String("tokenID")
-	//if tokenIDStr == "" {
-	//	return fmt.Errorf("tokenID is invalid")
-	//}
-	//
-	//numThreads := c.Int("numThreads")
-	//if numThreads == 0 {
-	//	return fmt.Errorf("numThreads in invalid")
-	//}
-	//
-	//csvFile := c.String("csvFile")
-	//
-	//historyProcessor := incclient.NewTxHistoryProcessor(cfg.incClient, numThreads)
-	//
-	//h, err := historyProcessor.GetTokenHistory(privateKey, tokenIDStr)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//if len(csvFile) > 0 {
-	//	err = incclient.SaveTxHistory(h, csvFile)
-	//	if err != nil {
-	//		return err
-	//	}
-	//} else {
-	//	totalIn := uint64(0)
-	//	fmt.Printf("#TxIns %v\n", len(h.TxInList))
-	//	for _, txIn := range h.TxInList {
-	//		totalIn += txIn.GetAmount()
-	//		fmt.Println(txIn.String())
-	//	}
-	//	fmt.Printf("END TxIns\n\n")
-	//
-	//	totalOut := uint64(0)
-	//	fmt.Printf("#TxOuts %v\n", len(h.TxOutList))
-	//	for _, txOut := range h.TxOutList {
-	//		totalOut += txOut.GetAmount()
-	//		fmt.Println(txOut.String())
-	//	}
-	//	fmt.Printf("END TxOuts\n")
-	//
-	//	fmt.Printf("TotalIn: %v, TotalOut: %v\n", totalIn, totalOut)
-	//}
-	//
-	//return nil
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	}
+
+	tokenIDStr := c.String(tokenIDFlag)
+	if !isValidTokenID(tokenIDStr) {
+		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	}
+
+	numThreads := c.Int(numThreadsFlag)
+	if numThreads == 0 {
+		return fmt.Errorf("%v in invalid", numThreadsFlag)
+	}
+
+	csvFile := c.String("csvFile")
+
+	historyProcessor := incclient.NewTxHistoryProcessor(cfg.incClient, numThreads)
+
+	h, err := historyProcessor.GetTokenHistory(privateKey, tokenIDStr)
+	if err != nil {
+		return err
+	}
+
+	if len(csvFile) > 0 {
+		err = incclient.SaveTxHistory(h, csvFile)
+		if err != nil {
+			return err
+		}
+	} else {
+		totalIn := uint64(0)
+		fmt.Printf("#TxIns %v\n", len(h.TxInList))
+		for _, txIn := range h.TxInList {
+			totalIn += txIn.GetAmount()
+			fmt.Println(txIn.String())
+		}
+		fmt.Printf("END TxIns\n\n")
+
+		totalOut := uint64(0)
+		fmt.Printf("#TxOuts %v\n", len(h.TxOutList))
+		for _, txOut := range h.TxOutList {
+			totalOut += txOut.GetAmount()
+			fmt.Println(txOut.String())
+		}
+		fmt.Printf("END TxOuts\n")
+
+		fmt.Printf("TotalIn: %v, TotalOut: %v\n", totalIn, totalOut)
+	}
+
+	return nil
 }
 
 func genKeySet(c *cli.Context) error {
@@ -379,11 +324,7 @@ func importMnemonic(c *cli.Context) error {
 }
 
 func submitKey(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
+	var err error
 	otaKey := c.String(otaKeyFlag)
 	if otaKey == "" {
 		return fmt.Errorf("%v is invalid", otaKeyFlag)

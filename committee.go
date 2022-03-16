@@ -8,11 +8,6 @@ import (
 
 // stake creates a staking transaction.
 func stake(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -52,11 +47,6 @@ func stake(c *cli.Context) error {
 
 // unStake creates an un-staking transaction.
 func unStake(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return fmt.Errorf("%v is invalid", privateKeyFlag)
@@ -87,11 +77,6 @@ func unStake(c *cli.Context) error {
 
 // checkRewards gets all rewards of a payment address.
 func checkRewards(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	addr := c.String("address")
 	if addr == "" {
 		return fmt.Errorf("payment address is invalid")
@@ -116,11 +101,6 @@ func checkRewards(c *cli.Context) error {
 
 // withdrawReward withdraws the reward of a privateKey w.r.t to a tokenID.
 func withdrawReward(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String("privateKey")
 	if privateKey == "" {
 		return fmt.Errorf("private key is invalid")

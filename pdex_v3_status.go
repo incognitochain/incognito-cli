@@ -8,11 +8,6 @@ import (
 
 // pDEXTradeStatus retrieves the status of a pDEX trade.
 func pDEXTradeStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckTradeStatus(txHash)
 	if err != nil {
@@ -30,11 +25,6 @@ func pDEXTradeStatus(c *cli.Context) error {
 
 // pDEXContributionStatus retrieves the status of a pDEX liquidity contribution.
 func pDEXContributionStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXLiquidityContributionStatus(txHash)
 	if err != nil {
@@ -52,11 +42,6 @@ func pDEXContributionStatus(c *cli.Context) error {
 
 // pDEXOrderAddingStatus retrieves the status of an order-book adding transaction.
 func pDEXOrderAddingStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckOrderAddingStatus(txHash)
 	if err != nil {
@@ -74,11 +59,6 @@ func pDEXOrderAddingStatus(c *cli.Context) error {
 
 // pDEXWithdrawalStatus retrieves the status of a pDEX liquidity withdrawal.
 func pDEXWithdrawalStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXLiquidityWithdrawalStatus(txHash)
 	if err != nil {
@@ -96,11 +76,6 @@ func pDEXWithdrawalStatus(c *cli.Context) error {
 
 // pDEXOrderWithdrawalStatus retrieves the status of an order-book withdrawal.
 func pDEXOrderWithdrawalStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckOrderWithdrawalStatus(txHash)
 	if err != nil {
@@ -118,11 +93,6 @@ func pDEXOrderWithdrawalStatus(c *cli.Context) error {
 
 // pDEXStakingStatus retrieves the status of a staking transaction.
 func pDEXStakingStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXStakingStatus(txHash)
 	if err != nil {
@@ -140,11 +110,6 @@ func pDEXStakingStatus(c *cli.Context) error {
 
 // pDEXUnStakingStatus retrieves the status of a pDEX un-staking transaction.
 func pDEXUnStakingStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXUnStakingStatus(txHash)
 	if err != nil {
@@ -162,11 +127,6 @@ func pDEXUnStakingStatus(c *cli.Context) error {
 
 // pDEXWithdrawStakingRewardStatus retrieves the status of a pDEX staking reward withdrawal transaction.
 func pDEXWithdrawStakingRewardStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXStakingRewardWithdrawalStatus(txHash)
 	if err != nil {
@@ -184,11 +144,6 @@ func pDEXWithdrawStakingRewardStatus(c *cli.Context) error {
 
 // pDEXWithdrawLPFeeStatus retrieves the status of a pDEX LP fee withdrawal transaction.
 func pDEXWithdrawLPFeeStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXLPFeeWithdrawalStatus(txHash)
 	if err != nil {
@@ -206,11 +161,6 @@ func pDEXWithdrawLPFeeStatus(c *cli.Context) error {
 
 // pDEXMintNFTStatus gets the status of a pDEx NFT minting transaction.
 func pDEXMintNFTStatus(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckNFTMintingStatus(txHash)
 	if err != nil {
