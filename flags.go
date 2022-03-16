@@ -239,12 +239,12 @@ var defaultFlags = map[string]cli.Flag{
 
 	evmAddressFlag: &cli.StringFlag{
 		Name:  evmAddressFlag,
-		Usage: "A hex-encoded address on ETH/BSC networks",
+		Usage: "A hex-encoded address on ETH/BSC/PLG networks",
 		Value: "",
 	},
 	tokenAddressFlag: &cli.StringFlag{
 		Name:  tokenAddressFlag,
-		Usage: "ID of the token on ETH/BSC networks",
+		Usage: "ID of the token on ETH/BSC/PLG networks",
 		Value: nativeToken,
 	},
 	shieldAmountFlag: &cli.Float64Flag{
@@ -330,6 +330,6 @@ var defaultFlags = map[string]cli.Flag{
 	receiverFlag: &cli.StringFlag{
 		Name:    receiverFlag,
 		Aliases: aliases[receiverFlag],
-		Usage:   "An base58-encoded OTA receiver (default: generated from the privateKey).",
+		Usage:   "A base58-encoded OTA receiver (default: generated from the privateKey).",
 	},
 }
