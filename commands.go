@@ -150,6 +150,27 @@ var accountCommands = []*cli.Command{
 				},
 				Action: newOTAReceiver,
 			},
+			{
+				Name:  "signreceiver",
+				Usage: "Sign to authorize the receiver of a shield request.",
+				Description: "This command helps generate a valid signature that authorizes an OTAReceiver to be the recipient " +
+					"of a shield request.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     depositPrivateKeyFlag,
+						Aliases:  aliases[depositPrivateKeyFlag],
+						Usage:    "A base58-encoded deposit private key.",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     receiverFlag,
+						Aliases:  aliases[receiverFlag],
+						Usage:    "An base58-encoded OTA receiver.",
+						Required: true,
+					},
+				},
+				Action: signDepositOTAReceiver,
+			},
 		},
 	},
 }
@@ -374,27 +395,6 @@ var portalCommands = &cli.Command{
 				},
 			},
 			Action: getNextDepositAddress,
-		},
-		{
-			Name:  "signreceiver",
-			Usage: "Sign to authorize the receiver of a shield request.",
-			Description: "This command helps generate a valid signature that authorizes an OTAReceiver to be the recipient " +
-				"of a shield request.",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:     depositPrivateKeyFlag,
-					Aliases:  aliases[depositPrivateKeyFlag],
-					Usage:    "A base58-encoded deposit private key.",
-					Required: true,
-				},
-				&cli.StringFlag{
-					Name:     receiverFlag,
-					Aliases:  aliases[receiverFlag],
-					Usage:    "An base58-encoded OTA receiver.",
-					Required: true,
-				},
-			},
-			Action: signDepositOTAReceiver,
 		},
 		{
 			Name:  "shield",

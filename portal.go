@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/incognitochain/go-incognito-sdk-v2/coin"
-	"github.com/incognitochain/go-incognito-sdk-v2/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/incognitochain/go-incognito-sdk-v2/key"
 	"github.com/urfave/cli/v2"
@@ -64,42 +62,6 @@ func getNextDepositAddress(c *cli.Context) error {
 	}
 
 	return jsonPrint(Result{OTDepositKey: depositKey, DepositAddress: depositAddress})
-}
-
-// signDepositOTAReceiver ...
-func signDepositOTAReceiver(c *cli.Context) error {
-	depositPrivateKeyStr := c.String(depositPrivateKeyFlag)
-	if depositPrivateKeyStr == "" {
-		return fmt.Errorf("%v is invalid", depositPrivateKeyFlag)
-	}
-	depositPrivateKey, _, err := base58.Base58Check{}.Decode(depositPrivateKeyStr)
-	if err != nil {
-		return fmt.Errorf("decode %v error: %v", depositPrivateKeyFlag, err)
-	}
-	depositKey := key.OTDepositKey{
-		PrivateKey: depositPrivateKey,
-	}
-
-	otaReceiverStr := c.String(receiverFlag)
-	if !isValidOTAReceiver(otaReceiverStr) {
-		return fmt.Errorf("%v is invalid", receiverFlag)
-	}
-	otaReceiver := new(coin.OTAReceiver)
-	err = otaReceiver.FromString(otaReceiverStr)
-	if err != nil {
-		return fmt.Errorf("decode OTAReceiver error %v: %v", otaReceiverStr, err)
-	}
-
-	sig, err := incclient.SignDepositData(&depositKey, otaReceiver.Bytes())
-	if err != nil {
-		return fmt.Errorf("signDepositData error: %v", err)
-	}
-
-	type Result struct {
-		Signature string
-	}
-
-	return jsonPrint(Result{Signature: base58.Base58Check{}.NewEncode(sig, 0)})
 }
 
 // portalShield deposits a portal token (e.g, BTC) into the Incognito chain.
