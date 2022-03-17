@@ -373,6 +373,23 @@ var evmBridgeCommands = &cli.Command{
 			Before: defaultBeforeFunc,
 		},
 		{
+			Name:        "shieldwithota",
+			Usage:       "Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network using one-time deposit key.",
+			Description: shieldMessage,
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[shieldAmountFlag],
+				defaultFlags[evmFlag],
+				defaultFlags[tokenAddressFlag],
+				defaultFlags[depositPrivateKeyFlag],
+				defaultFlags[depositIndexFlag],
+				defaultFlags[receiverFlag],
+				defaultFlags[signatureFlag],
+			},
+			Action: shieldWithDepositKey,
+			Before: defaultBeforeFunc,
+		},
+		{
 			Name:        "shieldprv",
 			Usage:       "Shield PRV from EVM networks into Incognito.",
 			Description: "This command helps to burn an amount of PRV from a public EVM network and mint the corresponding amount inside the Incognito network.",

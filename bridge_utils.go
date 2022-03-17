@@ -711,8 +711,8 @@ func (acc EVMAccount) DepositNative(incAddress string, depositedAmount float64, 
 		return nil, err
 	}
 	if askUser {
-		yesNoPrompt(fmt.Sprintf("%v DepositAmount: %v, GasPrice: %v gWei, DepositFee: %v, TotalAmount: %v. Do you want to continue?",
-			prefix, depositedAmount, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee, requiredAmount))
+		yesNoPrompt(fmt.Sprintf("%v DepositInput: %v, DepositAmount: %v, GasPrice: %v gWei, DepositFee: %v, TotalAmount: %v. Do you want to continue?",
+			prefix, incAddress, depositedAmount, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee, requiredAmount))
 	}
 
 	auth, err := acc.newTransactionOpts(vaultAddress, gasPriceBigInt.Uint64(), gasLimit, amountBigInt.Uint64(), nil, evmNetworkID)
@@ -788,8 +788,8 @@ func (acc EVMAccount) DepositToken(incAddress, tokenAddressStr string, deposited
 		return nil, err
 	}
 	if askUser {
-		yesNoPrompt(fmt.Sprintf("%v DepositAmount: %v, GasPrice: %v gWei, TxFee: %v. Do you want to continue?",
-			prefix, depositedAmount, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee))
+		yesNoPrompt(fmt.Sprintf("%v DepositInput: %v, DepositAmount: %v, GasPrice: %v gWei, TxFee: %v. Do you want to continue?",
+			prefix, incAddress, depositedAmount, float64(gasPriceBigInt.Uint64())/math.Pow10(9), txFee))
 	}
 
 	auth, err := acc.newTransactionOpts(vaultAddress, gasPriceBigInt.Uint64(), gasLimit, 0, nil, evmNetworkID)
@@ -1001,6 +1001,84 @@ func Shield(privateKey, pTokenID string, evmTxHashStr string, evmNetworkID int) 
 	}
 
 	encodedTx, incTxHash, err := cfg.incClient.CreateIssuingEVMRequestTransaction(privateKey, pTokenID, *depositProof, evmNetworkID)
+	if err != nil {
+		return "", err
+	}
+
+	tx := new(tx_ver2.Tx)
+	rawTxData, _, err := base58.Base58Check{}.Decode(string(encodedTx))
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(rawTxData, &tx)
+	if err != nil {
+		return "", err
+	}
+
+	md := tx.GetMetadata().(*metadata.IssuingEVMRequest)
+	_, err = verifyProofAndParseReceipt(md, evmNetworkID)
+	if err != nil {
+		return "", err
+	}
+	log.Println(prefix + " Verify proof locally SUCCEEDED!!!")
+
+	err = cfg.incClient.SendRawTx(encodedTx)
+	if err != nil {
+		return "", err
+	}
+	log.Println(prefix + " SendRawTx SUCCEEDED!!")
+	log.Printf("%v ShieldedTx: %v\n", prefix, incTxHash)
+
+	return incTxHash, nil
+}
+
+// ShieldWithDepositKey shields an amount of EVM tokens to the Incognito network using deposit keys.
+// This function should be called after the DepositNative or DepositToken has finished.
+func ShieldWithDepositKey(privateKey, evmTxHashStr string, evmNetworkID int, dp incclient.EVMDepositParams) (string, error) {
+	prefix := "[Shield]"
+
+	evmClient := cfg.evmClients[evmNetworkID]
+	if evmClient == nil {
+		return "", errEVMNetworkNotSupported(evmNetworkID)
+	}
+
+	evmTxHash := common.HexToHash(evmTxHashStr)
+	receipt, err := evmClient.TransactionReceipt(context.Background(), evmTxHash)
+	if err != nil {
+		return "", err
+	}
+	blockNumber := receipt.BlockNumber.Uint64()
+	log.Printf("%v ShieldedBlock: %v\n", prefix, blockNumber)
+
+	numCfms := 15
+	if evmNetworkID == rpc.PLGNetworkID {
+		numCfms = 35
+	}
+	log.Printf("%v Wait for %v confirmations\n", prefix, numCfms)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
+	defer cancel()
+	for {
+		header, err := evmClient.HeaderByNumber(ctx, nil)
+		if err != nil {
+			return "", err
+		}
+
+		if header.Number.Uint64() > blockNumber+uint64(numCfms) {
+			log.Println(prefix, "Enough confirmations!!")
+			break
+		}
+		log.Printf("%v CurrentEVMBlock: %v\n", prefix, header.Number.Uint64())
+		time.Sleep(30 * time.Second)
+	}
+
+	depositProof, _, err := cfg.incClient.GetEVMDepositProof(evmTxHash.String(), evmNetworkID)
+	if err != nil {
+		return "", err
+	}
+
+	dp.DepositProof = depositProof
+	encodedTx, incTxHash, err := cfg.incClient.CreateEVMDepositTxWithDepositKey(privateKey, dp)
 	if err != nil {
 		return "", err
 	}

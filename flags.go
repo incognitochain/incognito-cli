@@ -306,7 +306,7 @@ var defaultFlags = map[string]cli.Flag{
 	depositPrivateKeyFlag: &cli.StringFlag{
 		Name:    depositPrivateKeyFlag,
 		Aliases: aliases[depositPrivateKeyFlag],
-		Usage:   "A base58-encoded deposit private key.",
+		Usage:   fmt.Sprintf("A base58-encoded deposit private key; it will be generated from \"%v\" if not provided", depositIndexFlag),
 		Value:   "",
 	},
 	depositPubKeyFlag: &cli.StringFlag{
@@ -324,12 +324,12 @@ var defaultFlags = map[string]cli.Flag{
 	signatureFlag: &cli.StringFlag{
 		Name:    signatureFlag,
 		Aliases: aliases[signatureFlag],
-		Usage:   "A base58-encoded signature.",
+		Usage:   "A base58-encoded signature",
 		Value:   "",
 	},
 	receiverFlag: &cli.StringFlag{
 		Name:    receiverFlag,
 		Aliases: aliases[receiverFlag],
-		Usage:   "A base58-encoded OTA receiver (default: generated from the privateKey).",
+		Usage:   "A base58-encoded OTA receiver (default: generated from the privateKey)",
 	},
 }
