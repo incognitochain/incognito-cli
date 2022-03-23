@@ -85,6 +85,7 @@ var aliases = map[string][]string{
 	csvFileFlag:          {"csv"},
 	shieldAmountFlag:     {"amt"},
 	externalAddressFlag:  {"eAddr"},
+	tokenAddressFlag:     {"evmTokenAddr"},
 	txHashFlag:           {"iTxID"},
 	externalTxIDFlag:     {"eTxID"},
 	miningKeyFlag:        {"mKey", "vKey"},
