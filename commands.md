@@ -394,10 +394,10 @@ DESCRIPTION:
    This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.
 
 OPTIONS:
-   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
-   --externalTxHash value, --eTxID value         The external transaction hash
-   --evm value                                   The EVM network (ETH, BSC or PLG) (default: "ETH")
-   --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   --privateKey value, -p value, --prvKey value        A base58-encoded Incognito private key
+   --externalTxHash value, --eTxID value               The external transaction hash
+   --evm value                                         The EVM network (ETH, BSC, PLG or FTM) (default: "ETH")
+   --externalTokenAddress value, --evmTokenAddr value  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    
 ```
 
@@ -440,7 +440,7 @@ DESCRIPTION:
 
 OPTIONS:
    --txHash value, --iTxID value  An Incognito transaction hash
-   --evm value                    The EVM network (ETH, BSC or PLG) (default: "ETH")
+   --evm value                    The EVM network (ETH, BSC, PLG or FTM) (default: "ETH")
    
 ```
 
@@ -493,11 +493,11 @@ DESCRIPTION:
    DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
 
 OPTIONS:
-   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
-   --shieldAmount value, --amt value             The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
-   --evm value                                   The EVM network (ETH, BSC or PLG) (default: "ETH")
-   --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
-   --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
+   --privateKey value, -p value, --prvKey value        A base58-encoded Incognito private key
+   --shieldAmount value, --amt value                   The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
+   --evm value                                         The EVM network (ETH, BSC, PLG or FTM) (default: "ETH")
+   --externalTokenAddress value, --evmTokenAddr value  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   --address value, --addr value                       The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
    
 ```
 
