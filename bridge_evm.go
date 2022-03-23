@@ -89,6 +89,9 @@ func shield(c *cli.Context) error {
 		case rpc.PLGNetworkID:
 			tokenName = "Matic"
 			tokenSymbol = "MATIC"
+		case rpc.FTMNetworkID:
+			tokenName = "Fantom"
+			tokenSymbol = "FTM"
 		}
 	} else {
 		tokenInfo, err := getEVMTokenInfo(tokenAddress.String(), evmNetworkID)
@@ -143,6 +146,8 @@ func shield(c *cli.Context) error {
 				nativeTokenName = "BNB"
 			case rpc.PLGNetworkID:
 				nativeTokenName = "MATIC"
+			case rpc.FTMNetworkID:
+				nativeTokenName = "FTM"
 			}
 			_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 			if err != nil {
@@ -290,6 +295,9 @@ func unShield(c *cli.Context) error {
 	case rpc.PLGNetworkID:
 		evmNetwork = "PLG"
 		nativeTokenName = "MATIC"
+	case rpc.FTMNetworkID:
+		evmNetwork = "FTM"
+		nativeTokenName = "FTM"
 	}
 	var tokenName, tokenSymbol string
 	if evmTokenAddress.String() == nativeToken {
@@ -302,6 +310,9 @@ func unShield(c *cli.Context) error {
 		case rpc.PLGNetworkID:
 			tokenName = "Matic"
 			tokenSymbol = "MATIC"
+		case rpc.FTMNetworkID:
+			tokenName = "Fantom"
+			tokenSymbol = "FTM"
 		}
 	} else {
 		tokenInfo, err := getEVMTokenInfo(evmTokenAddress.String(), evmNetworkID)
@@ -420,6 +431,8 @@ func retryUnShield(c *cli.Context) error {
 		nativeTokenName = "BNB"
 	case rpc.PLGNetworkID:
 		nativeTokenName = "MATIC"
+	case rpc.FTMNetworkID:
+		nativeTokenName = "FTM"
 	}
 
 	log.Printf("[STEP 1] IMPORT %v ACCOUNT\n", evmNetwork)
