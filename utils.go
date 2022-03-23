@@ -29,6 +29,9 @@ func defaultBeforeFunc(_ *cli.Context) error {
 }
 
 func initNetWork() error {
+	if cache != 0 {
+		incclient.MaxGetCoinThreads = 20
+	}
 	if debug != 0 {
 		incclient.Logger.IsEnable = true
 	}

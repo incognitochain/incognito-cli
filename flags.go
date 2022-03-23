@@ -250,7 +250,7 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	evmFlag: &cli.StringFlag{
 		Name:  evmFlag,
-		Usage: "The EVM network (ETH, BSC or PLG)",
+		Usage: "The EVM network (ETH, BSC, PLG or FTM)",
 		Value: "ETH",
 	},
 	externalTxIDFlag: &cli.StringFlag{

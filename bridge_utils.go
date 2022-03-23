@@ -81,6 +81,8 @@ func getEVMTokenInfo(tokenAddressStr string, evmNetworkID int) (*EVMTokenInfo, e
 		res.network = "BSC"
 	case rpc.PLGNetworkID:
 		res.network = "PLG"
+	case rpc.FTMNetworkID:
+		res.network = "FTM"
 	}
 
 	erc20Instance, err := erc20.NewErc20(tokenAddress, evmClient)
@@ -549,6 +551,8 @@ func getIncTokenIDFromEVMTokenID(evmTokenID string, evmNetworkID int) (string, e
 		evmTokenID = "425343" + evmTokenID
 	case rpc.PLGNetworkID:
 		evmTokenID = "504c47" + evmTokenID
+	case rpc.FTMNetworkID:
+		evmTokenID = "46544d" + evmTokenID
 	}
 
 	evmTokenID = strings.ToLower(evmTokenID)
@@ -582,8 +586,10 @@ func getEVMTokenIDIncTokenID(incTokenIDStr string) (string, int, error) {
 				return evmTokenIDStr[6:], rpc.BSCNetworkID, nil
 			} else if strings.Contains(evmTokenIDStr, "504c47") {
 				return evmTokenIDStr[6:], rpc.PLGNetworkID, nil
+			} else if strings.Contains(evmTokenIDStr, "46544d") {
+				return evmTokenIDStr[6:], rpc.FTMNetworkID, nil
 			} else if len(evmTokenIDStr) == 40 {
-				return evmTokenIDStr, 0, nil
+				return evmTokenIDStr, rpc.ETHNetworkID, nil
 			}
 		}
 	}
@@ -628,6 +634,8 @@ func getEVMNetworkIDFromName(networkName string) (int, error) {
 		evmNetworkID = rpc.BSCNetworkID
 	case "PLG":
 		evmNetworkID = rpc.PLGNetworkID
+	case "FTM":
+		evmNetworkID = rpc.FTMNetworkID
 	default:
 		return 0, fmt.Errorf("evmNetwork `%v` not supported", networkName)
 	}
@@ -645,6 +653,8 @@ func checkAndChangeRPCEndPoint(evmNetworkID int, err error) error {
 		evmNetwork = "BSC"
 	case rpc.PLGNetworkID:
 		evmNetwork = "PLG"
+	case rpc.FTMNetworkID:
+		evmNetwork = "FTM"
 	}
 
 	if strings.Contains(err.Error(), "504 Gateway Timeout") {
@@ -680,6 +690,8 @@ func (acc EVMAccount) DepositNative(incAddress string, depositedAmount float64, 
 		prefix = "[DepositBNB]"
 	case rpc.PLGNetworkID:
 		prefix = "[DepositMATIC]"
+	case rpc.FTMNetworkID:
+		prefix = "[DepositFTM]"
 	}
 
 	v, err := vault.NewVault(vaultAddress, evmClient)
@@ -743,6 +755,8 @@ func (acc EVMAccount) DepositToken(incAddress, tokenAddressStr string, deposited
 		prefix = "[DepositBEP20]"
 	case rpc.PLGNetworkID:
 		prefix = "[DepositPLG20]"
+	case rpc.FTMNetworkID:
+		prefix = "[DepositFTM20]"
 	}
 
 	// load the vault instance
@@ -820,6 +834,8 @@ func (acc EVMAccount) ApproveERC20(tokenAddress, approved common.Address, approv
 		prefix = "[ApproveBEP20]"
 	case rpc.PLGNetworkID:
 		prefix = "[ApprovePLG20]"
+	case rpc.FTMNetworkID:
+		prefix = "[ApproveFTM20]"
 	}
 	evmClient, _ := getEVMClientAndVaultAddress(evmNetworkID)
 
@@ -976,6 +992,8 @@ func Shield(privateKey, pTokenID string, evmTxHashStr string, evmNetworkID int) 
 	numCfms := 15
 	if evmNetworkID == rpc.PLGNetworkID {
 		numCfms = 35
+	} else if evmNetworkID == rpc.FTMNetworkID {
+		numCfms = 5
 	}
 	log.Printf("%v Wait for %v confirmations\n", prefix, numCfms)
 
@@ -1036,7 +1054,7 @@ func Shield(privateKey, pTokenID string, evmTxHashStr string, evmNetworkID int) 
 
 // estimateDepositGas estimates the gas for depositing a token.
 func (acc EVMAccount) estimatePRVDepositGas(depositedAmount *big.Int, incAddress string, evmNetworkID int) (uint64, error) {
-	if evmNetworkID == rpc.PLGNetworkID {
+	if evmNetworkID == rpc.PLGNetworkID || evmNetworkID == rpc.FTMNetworkID {
 		return 0, errEVMNetworkNotSupported(evmNetworkID)
 	}
 
@@ -1070,7 +1088,7 @@ func (acc EVMAccount) estimatePRVDepositGas(depositedAmount *big.Int, incAddress
 
 // estimatePRVWithdrawalGas estimates the gas for withdrawing PRV.
 func (acc EVMAccount) estimatePRVWithdrawalGas(burnProof *incclient.BurnProof, evmNetworkID int) (uint64, error) {
-	if evmNetworkID == rpc.PLGNetworkID {
+	if evmNetworkID == rpc.PLGNetworkID || evmNetworkID == rpc.FTMNetworkID {
 		return 0, errEVMNetworkNotSupported(evmNetworkID)
 	}
 
@@ -1111,7 +1129,7 @@ func (acc EVMAccount) estimatePRVWithdrawalGas(burnProof *incclient.BurnProof, e
 
 // BurnPRVOnEVM burns an amount of PRV on an EVM network to shield to the Incognito network.
 func (acc EVMAccount) BurnPRVOnEVM(incAddress string, depositedAmount float64, gasLimit, gasPrice uint64, evmNetworkID int) (*common.Hash, error) {
-	if evmNetworkID == rpc.PLGNetworkID {
+	if evmNetworkID == rpc.PLGNetworkID || evmNetworkID == rpc.FTMNetworkID {
 		return nil, errEVMNetworkNotSupported(evmNetworkID)
 	}
 
@@ -1191,7 +1209,7 @@ func (acc EVMAccount) BurnPRVOnEVM(incAddress string, depositedAmount float64, g
 // ShieldPRV shields an amount of PRV tokens from EVM chains to the Incognito network.
 // This function should be called after the BurnPRVOnEVM has finished.
 func ShieldPRV(privateKey, evmTxHashStr string, evmNetworkID int) (string, error) {
-	if evmNetworkID == rpc.PLGNetworkID {
+	if evmNetworkID == rpc.PLGNetworkID || evmNetworkID == rpc.FTMNetworkID {
 		return "", errEVMNetworkNotSupported(evmNetworkID)
 	}
 
@@ -1268,7 +1286,7 @@ func ShieldPRV(privateKey, evmTxHashStr string, evmNetworkID int) (string, error
 
 // UnShieldPRV submits a PRV burn proof of the given incTxHash to the smart contract to obtain PRV on a public EVM chain.
 func (acc EVMAccount) UnShieldPRV(incTxHash string, gasLimit, gasPrice uint64, evmNetworkID int) (*common.Hash, error) {
-	if evmNetworkID == rpc.PLGNetworkID {
+	if evmNetworkID == rpc.PLGNetworkID || evmNetworkID == rpc.FTMNetworkID {
 		return nil, errEVMNetworkNotSupported(evmNetworkID)
 	}
 

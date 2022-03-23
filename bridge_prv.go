@@ -51,7 +51,7 @@ func prvInitFunc(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if evmNetworkID == rpc.PLGNetworkID {
+	if evmNetworkID == rpc.PLGNetworkID || evmNetworkID == rpc.FTMNetworkID {
 		return errEVMNetworkNotSupported(evmNetworkID)
 	}
 
@@ -147,6 +147,8 @@ func shieldPRV(c *cli.Context) error {
 			nativeTokenName = "BNB"
 		case rpc.PLGNetworkID:
 			nativeTokenName = "MATIC"
+		case rpc.FTMNetworkID:
+			nativeTokenName = "FTM"
 		}
 		_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 		if err != nil {
@@ -293,6 +295,8 @@ func unShieldPRV(c *cli.Context) error {
 		nativeTokenName = "BNB"
 	case rpc.PLGNetworkID:
 		nativeTokenName = "MATIC"
+	case rpc.FTMNetworkID:
+		nativeTokenName = "FTM"
 	}
 
 	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
@@ -372,6 +376,10 @@ func retryUnShieldPRV(c *cli.Context) error {
 	switch evmNetworkID {
 	case rpc.BSCNetworkID:
 		nativeTokenName = "BNB"
+	case rpc.PLGNetworkID:
+		nativeTokenName = "MATIC"
+	case rpc.FTMNetworkID:
+		nativeTokenName = "FTM"
 	}
 
 	log.Printf("[STEP 1] IMPORT %v ACCOUNT\n", evmNetwork)

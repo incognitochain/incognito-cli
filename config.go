@@ -63,16 +63,23 @@ func NewTestNetConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
+	ftmClient, err := ethclient.Dial(incclient.TestNetFTMHost)
+	if err != nil {
+		return err
+	}
+
 	evmClients := map[int]*ethclient.Client{
 		rpc.ETHNetworkID: ethClient,
 		rpc.BSCNetworkID: bscClient,
 		rpc.PLGNetworkID: plgClient,
+		rpc.FTMNetworkID: ftmClient,
 	}
 
 	evmVaultAddresses := map[int]common.Address{
 		rpc.ETHNetworkID: common.HexToAddress(incclient.TestNetETHContractAddressStr),
 		rpc.BSCNetworkID: common.HexToAddress(incclient.TestNetBSCContractAddressStr),
 		rpc.PLGNetworkID: common.HexToAddress(incclient.TestNetPLGContractAddressStr),
+		rpc.FTMNetworkID: common.HexToAddress(incclient.TestNetFTMContractAddressStr),
 	}
 
 	btcClient, err := portal.NewBTCTestNetClient()
@@ -114,16 +121,23 @@ func NewTestNet1Config(incClient *incclient.IncClient) error {
 		return err
 	}
 
+	ftmClient, err := ethclient.Dial(incclient.TestNet1FTMHost)
+	if err != nil {
+		return err
+	}
+
 	evmClients := map[int]*ethclient.Client{
 		rpc.ETHNetworkID: ethClient,
 		rpc.BSCNetworkID: bscClient,
 		rpc.PLGNetworkID: plgClient,
+		rpc.FTMNetworkID: ftmClient,
 	}
 
 	evmVaultAddresses := map[int]common.Address{
 		rpc.ETHNetworkID: common.HexToAddress(incclient.TestNet1ETHContractAddressStr),
 		rpc.BSCNetworkID: common.HexToAddress(incclient.TestNet1BSCContractAddressStr),
 		rpc.PLGNetworkID: common.HexToAddress(incclient.TestNet1PLGContractAddressStr),
+		rpc.FTMNetworkID: common.HexToAddress(incclient.TestNet1FTMContractAddressStr),
 	}
 
 	btcClient, err := portal.NewBTCTestNetClient()
@@ -165,16 +179,23 @@ func NewMainNetConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
+	ftmClient, err := ethclient.Dial(incclient.MainNetFTMHost)
+	if err != nil {
+		return err
+	}
+
 	evmClients := map[int]*ethclient.Client{
 		rpc.ETHNetworkID: ethClient,
 		rpc.BSCNetworkID: bscClient,
 		rpc.PLGNetworkID: plgClient,
+		rpc.FTMNetworkID: ftmClient,
 	}
 
 	evmVaultAddresses := map[int]common.Address{
 		rpc.ETHNetworkID: common.HexToAddress(incclient.MainNetETHContractAddressStr),
 		rpc.BSCNetworkID: common.HexToAddress(incclient.MainNetBSCContractAddressStr),
 		rpc.PLGNetworkID: common.HexToAddress(incclient.MainNetPLGContractAddressStr),
+		rpc.FTMNetworkID: common.HexToAddress(incclient.MainNetFTMContractAddressStr),
 	}
 
 	btcClient, err := portal.NewBTCMainNetClient()
@@ -215,16 +236,23 @@ func NewLocalConfig(incClient *incclient.IncClient) error {
 		return err
 	}
 
+	fmtClient, err := ethclient.Dial(incclient.LocalETHHost)
+	if err != nil {
+		return err
+	}
+
 	evmClients := map[int]*ethclient.Client{
 		rpc.ETHNetworkID: ethClient,
 		rpc.BSCNetworkID: bscClient,
 		rpc.PLGNetworkID: plgClient,
+		rpc.FTMNetworkID: fmtClient,
 	}
 
 	evmVaultAddresses := map[int]common.Address{
 		rpc.ETHNetworkID: common.HexToAddress(incclient.LocalETHContractAddressStr),
 		rpc.BSCNetworkID: common.HexToAddress(incclient.LocalETHContractAddressStr),
 		rpc.PLGNetworkID: common.HexToAddress(incclient.LocalETHContractAddressStr),
+		rpc.FTMNetworkID: common.HexToAddress(incclient.LocalETHContractAddressStr),
 	}
 
 	btcClient, err := portal.NewBTCTestNetClient()
