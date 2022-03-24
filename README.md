@@ -15,7 +15,7 @@ A command line tool for the Incognito network
 ## Installation
 To install, for Linux and macOS users, try the following command:
 ```shell
-$ make clean && make install
+$ make linux # or make macos
 ```
 To install with a custom name, try:
 ```shell
