@@ -7,7 +7,7 @@ while getopts 'n:' flag; do
   esac
 done
 
-BASH_COMPLETION_DIR=$(brew --prefix)/bash_completion.d
+BASH_COMPLETION_DIR=$(brew --prefix)/etc/bash_completion.d
 CURRENT_DIR=$PWD
 
 # Find the GOPATH
