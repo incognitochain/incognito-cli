@@ -55,9 +55,12 @@ func main() {
 	sort.Sort(cli.CommandsByName(app.Commands))
 
 	for _, command := range app.Commands {
+		if len(command.Subcommands) == 0 && command.BashComplete == nil {
+			command.BashComplete = defaultCommandCompletion
+		}
 		for _, subCommand := range command.Subcommands {
 			if subCommand.BashComplete == nil {
-				subCommand.BashComplete = defaultSubCommandCompletion
+				subCommand.BashComplete = defaultCommandCompletion
 			}
 		}
 	}
