@@ -54,6 +54,14 @@ func main() {
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
 
+	for _, command := range app.Commands {
+		for _, subCommand := range command.Subcommands {
+			if subCommand.BashComplete == nil {
+				subCommand.BashComplete = defaultSubCommandCompletion
+			}
+		}
+	}
+
 	//_ = generateDocsToFile(app, "commands.md") // un-comment this line to generate docs for the app's commands.
 
 	err := app.Run(os.Args)
