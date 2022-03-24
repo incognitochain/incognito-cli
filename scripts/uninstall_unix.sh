@@ -39,4 +39,3 @@ if test -f "${BASH_COMPLETION_DIR}/${FILE_NAME}";
     sudo rm ${BASH_COMPLETION_DIR}/${FILE_NAME}
     echo "Old bash completion file removed."
   fi
-  exec bash
