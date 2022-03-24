@@ -15,11 +15,11 @@ A command line tool for the Incognito network
 ## Installation
 To install, for Linux and macOS users, try the following command:
 ```shell
-$ make clean && make linux # or make clean && make macos
+$ make clean && make install
 ```
 To install with a custom name, try:
 ```shell
-$ bash ./scripts/install_unix.sh -n APP_NAME -a
+$ bash ./scripts/install_unix.sh -n CUSTOM_APP_NAME -a
 ```
 
 For Windows user, try:
