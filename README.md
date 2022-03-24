@@ -7,18 +7,28 @@ A command line tool for the Incognito network
 
 <!-- toc -->
 * [Usage](#usage)
-* [Commands](#commands)
+* [Commands](./commands.md)
 <!-- tocstop -->
 
 # Usage
 <!-- usage -->
 ## Installation
-Install to the `$GOPATH` folder.
+To install, for Linux and macOS users, try the following command:
+```shell
+$ make clean && make linux # or make clean && make macos
+```
+To install with a custom name, try:
+```shell
+$ bash ./scripts/install_unix.sh -n APP_NAME -a
+```
+
+For Windows user, try:
 ```shell
 $ go install
 ```
-This command will install the CLI application into your `GOPATH` folder. Alternatively, you can build and install the binary file
-into a desired folder by the following command.
+The first two commands will install the CLI application into your `$GOPATH` folder and also enable bash completion, make sure
+that you have added `$GOPATH` to the global environment `$PATH`; while the last command will only install the CLI to your `$GOPATH$`.
+Alternatively, you can build and install the binary file into a desired folder by the following command.
 ```shell
 $ go build -o PATH/TO/YOUR/FOLDER/appName
 ```

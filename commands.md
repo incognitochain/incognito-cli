@@ -13,7 +13,7 @@ USAGE:
    incognito-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   v1.0.0
+   v1.0.1
 
 DESCRIPTION:
    A simple CLI application for the Incognito network. With this tool, you can run some basic functions on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens, consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding ETH/BNB/ERC20/BEP20, etc.
