@@ -13,7 +13,7 @@ USAGE:
    incognito-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   v1.0.0
+   v1.0.1
 
 DESCRIPTION:
    A simple CLI application for the Incognito network. With this tool, you can run some basic functions on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens, consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding ETH/BNB/ERC20/BEP20, etc.
@@ -1332,3 +1332,49 @@ OPTIONS:
 ```
 
 <!-- commandsstop -->
+NAME:
+   incognito-cli - A simple CLI application for the Incognito network
+
+USAGE:
+   incognito-cli [global options] command [command options] [arguments...]
+
+VERSION:
+   v1.0.1
+
+DESCRIPTION:
+   A simple CLI application for the Incognito network. With this tool, you can run some basic functions on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens, consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding ETH/BNB/ERC20/BEP20, etc.
+
+AUTHOR:
+   Incognito Devs Team
+
+COMMANDS:
+   help, h  Shows a list of commands or help for one command
+   ACCOUNTS:
+     account, acc  Manage an Incognito account.
+   BRIDGE:
+     evm     Perform an EVM action (e.g, shield, unshield, etc.).
+     portal  Perform a portal action (e.g, shield, unshield, etc.).
+   COMMITTEES:
+     checkrewards    Get all rewards of a payment address.
+     stake           Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
+     unstake         Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).
+     withdrawreward  Withdraw the reward of a privateKey w.r.t to a tokenID.
+   DEX:
+     pdeaction  Perform a pDEX action.
+     pdeinfo    Retrieve pDEX information.
+     pdestatus  Retrieve the status of a pDEX action.
+   TRANSACTIONS:
+     checkreceiver  Check if an OTA key is a receiver of a transaction.
+     convert        Convert UTXOs of an account w.r.t a tokenID.
+     send           Send an amount of PRV or token from one wallet to another wallet.
+
+GLOBAL OPTIONS:
+   --debug value, -d value                     Whether to enable the debug mode (0 - disabled, <> 0 - enabled) (default: 0)
+   --host network                              Custom full-node host. This flag is combined with the network flag to initialize the environment in which the custom host points to.
+   --network value, --net value                Network environment (mainnet, testnet, testnet1, local) (default: "mainnet")
+   --utxoCache value, -c value, --cache value  Whether to use the UTXO cache (0 - disabled, <> 0 - enabled). See https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/accounts/utxo_cache.md for more information. (default: 0)
+   --help, -h                                  show help (default: false)
+   --version, -v                               print the version (default: false)
+
+COPYRIGHT:
+   This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any commercial usages should be acknowledged by the Incognito Devs Team.

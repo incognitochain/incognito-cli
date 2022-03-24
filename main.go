@@ -11,7 +11,7 @@ func main() {
 	app := &cli.App{
 		Name:    "incognito-cli",
 		Usage:   "A simple CLI application for the Incognito network",
-		Version: "v1.0.0",
+		Version: "v1.0.1",
 		Description: "A simple CLI application for the Incognito network. With this tool, you can run some basic functions" +
 			" on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens," +
 			" consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding " +
@@ -23,8 +23,8 @@ func main() {
 		},
 		Copyright: "This tool is developed and maintained by the Incognito Devs Team. It is free for anyone. However, any " +
 			"commercial usages should be acknowledged by the Incognito Devs Team.",
+		EnableBashCompletion: true,
 	}
-	app.EnableBashCompletion = true
 
 	// set app defaultFlags
 	app.Flags = []cli.Flag{
