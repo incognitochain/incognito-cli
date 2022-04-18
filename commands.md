@@ -64,7 +64,9 @@ COPYRIGHT:
 		* [`account history`](#account_history)
 		* [`account importaccount`](#account_importaccount)
 		* [`account keyinfo`](#account_keyinfo)
+		* [`account otareceiver`](#account_otareceiver)
 		* [`account outcoin`](#account_outcoin)
+		* [`account signreceiver`](#account_signreceiver)
 		* [`account submitkey`](#account_submitkey)
 		* [`account utxo`](#account_utxo)
 * [`BRIDGE`](#bridge)
@@ -75,12 +77,13 @@ COPYRIGHT:
 		* [`evm retryunshieldprv`](#evm_retryunshieldprv)
 		* [`evm shield`](#evm_shield)
 		* [`evm shieldprv`](#evm_shieldprv)
+		* [`evm shieldwithota`](#evm_shieldwithota)
 		* [`evm unshield`](#evm_unshield)
 		* [`evm unshieldprv`](#evm_unshieldprv)
 	* [`portal`](#portal)
+		* [`portal nextshieldaddress`](#portal_nextshieldaddress)
 		* [`portal shield`](#portal_shield)
 		* [`portal shieldaddress`](#portal_shieldaddress)
-		* [`portal shieldota`](#portal_shieldota)
 		* [`portal shieldstatus`](#portal_shieldstatus)
 		* [`portal shieldwithota`](#portal_shieldwithota)
 		* [`portal unshield`](#portal_unshield)
@@ -280,6 +283,24 @@ OPTIONS:
    
 ```
 
+#### account_otareceiver
+This command generates an OTAReceiver for a given payment address.
+```shell
+$ incognito-cli account help otareceiver
+NAME:
+   incognito-cli account otareceiver - Generate an OTAReceiver for a payment address.
+
+USAGE:
+   account otareceiver --address ADDRESS
+
+DESCRIPTION:
+   This command generates an OTAReceiver for a given payment address.
+
+OPTIONS:
+   --address value, --addr value  A base58-encoded payment address
+   
+```
+
 #### account_outcoin
 Print the output coins of an account.
 ```shell
@@ -297,6 +318,25 @@ OPTIONS:
    --otaKey value, --ota value              A base58-encoded ota key
    --readonlyKey value, --ro value          A base58-encoded read-only key
    --tokenID value, --id value, --ID value  The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   
+```
+
+#### account_signreceiver
+This command helps generate a valid signature that authorizes an OTAReceiver to be the recipient of a shield request.
+```shell
+$ incognito-cli account help signreceiver
+NAME:
+   incognito-cli account signreceiver - Sign to authorize the receiver of a shield request.
+
+USAGE:
+   account signreceiver --depositPrivateKey DEPOSIT_PRIVATE_KEY --receiver RECEIVER
+
+DESCRIPTION:
+   This command helps generate a valid signature that authorizes an OTAReceiver to be the recipient of a shield request.
+
+OPTIONS:
+   --depositPrivateKey value, --dPrivKey value, --dPrv value  A base58-encoded deposit private key.
+   --receiver value, --recv value, -r value                   An base58-encoded OTA receiver.
    
 ```
 
@@ -378,7 +418,7 @@ OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --externalTxHash value, --eTxID value         The external transaction hash
    --evm value                                   The EVM network (ETH, BSC or PLG) (default: "ETH")
-   --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   --externalTokenAddress value                  ID of the token on ETH/BSC/PLG networks (default: "0x0000000000000000000000000000000000000000")
    
 ```
 
@@ -477,7 +517,7 @@ OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --shieldAmount value, --amt value             The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
    --evm value                                   The EVM network (ETH, BSC or PLG) (default: "ETH")
-   --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   --externalTokenAddress value                  ID of the token on ETH/BSC/PLG networks (default: "0x0000000000000000000000000000000000000000")
    --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
    
 ```
@@ -502,6 +542,45 @@ OPTIONS:
    --shieldAmount value, --amt value             The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
    --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
    --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
+   
+```
+
+#### evm_shieldwithota
+This function helps shield an EVM (ETH/BNB/ERC20/BEP20, etc.) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+	 1. Deposit the EVM asset into the corresponding smart contract.
+		 1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
+	 2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
+
+Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
+```shell
+$ incognito-cli evm help shieldwithota
+NAME:
+   incognito-cli evm shieldwithota - Shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network using one-time deposit key.
+
+USAGE:
+   evm shieldwithota --privateKey PRIVATE_KEY --shieldAmount SHIELD_AMOUNT [--evm EVM] [--externalTokenAddress EXTERNAL_TOKEN_ADDRESS] [--depositPrivateKey DEPOSIT_PRIVATE_KEY] [--depositIndex DEPOSIT_INDEX] [--receiver RECEIVER] [--signature SIGNATURE]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This function helps shield an EVM (ETH/BNB/ERC20/BEP20, etc.) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+      1. Deposit the EVM asset into the corresponding smart contract.
+        1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
+      2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
+   
+   Note that EVM shielding is a complicated process, users MUST understand how the process works before using this function. We RECOMMEND users test the function with test networks BEFORE performing it on the live networks.
+   DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value               A base58-encoded Incognito private key
+   --shieldAmount value, --amt value                          The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
+   --evm value                                                The EVM network (ETH, BSC or PLG) (default: "ETH")
+   --externalTokenAddress value                               ID of the token on ETH/BSC/PLG networks (default: "0x0000000000000000000000000000000000000000")
+   --depositPrivateKey value, --dPrivKey value, --dPrv value  A base58-encoded deposit private key; it will be generated from "depositIndex" if not provided
+   --depositIndex value, --dIndex value, --dIdx value         The index of the corresponding OTDepositPubKey (default: 0)
+   --receiver value, --recv value, -r value                   A base58-encoded OTA receiver (default: generated from the privateKey)
+   --signature value, --sig value                             A base58-encoded signature
    
 ```
 
@@ -576,6 +655,27 @@ DESCRIPTION:
    This command helps perform a portal action (e.g, shield, unshield, etc.).
 ```
 
+#### portal_nextshieldaddress
+This command helps generate the next possible shielding address for a private key and a tokenID. Please AVOID sending multiple times to a shielding address.
+```shell
+$ incognito-cli portal help nextshieldaddress
+NAME:
+   incognito-cli portal nextshieldaddress - Generate the next possible shielding address.
+
+USAGE:
+   portal nextshieldaddress --privateKey PRIVATE_KEY [--tokenID TOKEN_ID]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command helps generate the next possible shielding address for a private key and a tokenID. Please AVOID sending multiple times to a shielding address.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --tokenID value, --id value, --ID value       The Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
+   
+```
+
 #### portal_shield
 This command helps shield a portal token into the Incognito network after the fund has been transferred to the depositing address (generated by `shieldaddress, shieldota`).
 ```shell
@@ -617,27 +717,6 @@ DESCRIPTION:
 OPTIONS:
    --chainCode value, --code value, --seed value  A chaincode (i.e, seed) for generating the depositing address. This chaincode can either be an Incognito payment address or a base58-encoded one-time deposit public key. Please check this filled carefully
    --tokenID value, --id value, --ID value        The Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
-   
-```
-
-#### portal_shieldota
-This command helps generate the next possible shielding address for a private key and a tokenID. Please AVOID sending multiple times to a shielding address.
-```shell
-$ incognito-cli portal help shieldota
-NAME:
-   incognito-cli portal shieldota - Generate the next possible shielding address.
-
-USAGE:
-   portal shieldota --privateKey PRIVATE_KEY [--tokenID TOKEN_ID]
-
-   OPTIONAL flags are denoted by a [] bracket.
-
-DESCRIPTION:
-   This command helps generate the next possible shielding address for a private key and a tokenID. Please AVOID sending multiple times to a shielding address.
-
-OPTIONS:
-   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
-   --tokenID value, --id value, --ID value       The Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
    
 ```
 
@@ -683,10 +762,10 @@ OPTIONS:
    --externalTxHash value, --eTxID value                      The external transaction hash
    --tokenID value, --id value, --ID value                    The Incognito tokenID of the shielding asset (default: "b832e5d3b1f01a4f0623f7fe91d6673461e1f5d37d91fe78c5c2e6183ff39696")
    --depositIndex value, --dIndex value, --dIdx value         The index of the corresponding OTDepositPubKey (default: 0)
-   --depositPrivateKey value, --dPrivKey value, --dPrv value  A base58-encoded deposit private key.
+   --depositPrivateKey value, --dPrivKey value, --dPrv value  A base58-encoded deposit private key; it will be generated from "depositIndex" if not provided
    --depositPubKey value, --dPubKey value, --dPub value       A base58-encoded deposit public key.
-   --signature value, --sig value                             A base58-encoded signature.
-   --receiver value, --recv value, -r value                   An base58-encoded OTA receiver (default: generated from the privateKey).
+   --signature value, --sig value                             A base58-encoded signature
+   --receiver value, --recv value, -r value                   A base58-encoded OTA receiver (default: generated from the privateKey)
    
 ```
 
