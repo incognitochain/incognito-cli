@@ -68,13 +68,7 @@ func keyInfo(c *cli.Context) error {
 		return err
 	}
 
-	jsb, err := json.MarshalIndent(info, "", "\t")
-	if err != nil {
-		return fmt.Errorf("marshalling key info error: %v", err)
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(info)
 }
 
 func consolidateUTXOs(c *cli.Context) error {
@@ -401,6 +395,11 @@ func financialExport(c *cli.Context) error {
 	return nil
 }
 
+type accountInfo struct {
+	Index int
+	*incclient.KeyInfo
+}
+
 func genKeySet(c *cli.Context) error {
 	w, mnemonic, err := wallet.NewMasterKey()
 	if err != nil {
@@ -413,10 +412,30 @@ func genKeySet(c *cli.Context) error {
 	}
 	common.MaxShardNumber = numShards
 
-	numAccounts := 5
+	shardID := c.Int(shardIDFlag)
+	if shardID < -1 || shardID >= common.MaxShardNumber {
+		return fmt.Errorf("expected shardID from -1 to %v", common.MaxShardNumber-1)
+	}
+	supportedShards := make(map[byte]bool)
+	if shardID == -1 {
+		for i := 0; i < common.MaxShardNumber; i++ {
+			supportedShards[byte(i)] = true
+		}
+	} else {
+		supportedShards[byte(shardID)] = true
+	}
+
+	numAccounts := c.Int(numAccountsFlag)
+
 	fmt.Printf("mnemonic: %v\n", mnemonic)
-	for i := 0; i < numAccounts; i++ {
-		childKey, err := w.DeriveChild(uint32(i))
+	accounts := make([]*accountInfo, 0)
+	genCount := 0
+	index := 1
+	for {
+		if genCount == numAccounts {
+			break
+		}
+		childKey, err := w.DeriveChild(uint32(index))
 		if err != nil {
 			return err
 		}
@@ -425,15 +444,14 @@ func genKeySet(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-
-		jsb, err := json.MarshalIndent(info, "", "\t")
-		if err != nil {
-			return fmt.Errorf("marshalling key info error: %v", err)
+		if supportedShards[info.ShardID] {
+			accounts = append(accounts, &accountInfo{Index: index, KeyInfo: info})
+			genCount++
 		}
-		fmt.Println(string(jsb))
-	}
 
-	return nil
+		index++
+	}
+	return jsonPrint(accounts)
 }
 
 func importMnemonic(c *cli.Context) error {
@@ -450,10 +468,30 @@ func importMnemonic(c *cli.Context) error {
 	}
 	common.MaxShardNumber = numShards
 
-	numAccounts := 5
+	shardID := c.Int(shardIDFlag)
+	if shardID < -1 || shardID >= common.MaxShardNumber {
+		return fmt.Errorf("expected shardID from -1 to %v", common.MaxShardNumber-1)
+	}
+	supportedShards := make(map[byte]bool)
+	if shardID == -1 {
+		for i := 0; i < common.MaxShardNumber; i++ {
+			supportedShards[byte(i)] = true
+		}
+	} else {
+		supportedShards[byte(shardID)] = true
+	}
+
+	numAccounts := c.Int(numAccountsFlag)
+
 	fmt.Printf("mnemonic: %v\n", mnemonic)
-	for i := 0; i < numAccounts; i++ {
-		childKey, err := w.DeriveChild(uint32(i))
+	accounts := make([]*accountInfo, 0)
+	genCount := 0
+	index := 1
+	for {
+		if genCount == numAccounts {
+			break
+		}
+		childKey, err := w.DeriveChild(uint32(index))
 		if err != nil {
 			return err
 		}
@@ -462,15 +500,14 @@ func importMnemonic(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-
-		jsb, err := json.MarshalIndent(info, "", "\t")
-		if err != nil {
-			return fmt.Errorf("marshalling key info error: %v", err)
+		if supportedShards[info.ShardID] {
+			accounts = append(accounts, &accountInfo{Index: index, KeyInfo: info})
+			genCount++
 		}
-		fmt.Println(string(jsb))
-	}
 
-	return nil
+		index++
+	}
+	return jsonPrint(accounts)
 }
 
 func submitKey(c *cli.Context) error {

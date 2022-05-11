@@ -136,6 +136,8 @@ var accountCommands = []*cli.Command{
 				Description: "This command helps generate a new mnemonic phrase and its Incognito accounts.",
 				Flags: []cli.Flag{
 					defaultFlags[numShardsFlag],
+					defaultFlags[shardIDFlag],
+					defaultFlags[numAccountsFlag],
 				},
 				Action: genKeySet,
 			},
@@ -147,6 +149,8 @@ var accountCommands = []*cli.Command{
 				Flags: []cli.Flag{
 					defaultFlags[mnemonicFlag],
 					defaultFlags[numShardsFlag],
+					defaultFlags[shardIDFlag],
+					defaultFlags[numAccountsFlag],
 				},
 				Action: importMnemonic,
 			},

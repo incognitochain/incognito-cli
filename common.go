@@ -53,8 +53,10 @@ const (
 	pairHashFlag             = "pairHash"
 	amplifierFlag            = "amplifier"
 
-	mnemonicFlag  = "mnemonic"
-	numShardsFlag = "numShards"
+	mnemonicFlag    = "mnemonic"
+	numShardsFlag   = "numShards"
+	numAccountsFlag = "numAccounts"
+	shardIDFlag     = "shardID"
 
 	evmAddressFlag      = "evmAddress"
 	tokenAddressFlag    = "externalTokenAddress"
