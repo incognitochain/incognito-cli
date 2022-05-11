@@ -228,7 +228,7 @@ NAME:
    incognito-cli account generate - Generate a new Incognito account.
 
 USAGE:
-   account generate [--numShards NUM_SHARDS]
+   account generate [--numShards NUM_SHARDS] [--shardID SHARD_ID] [--numAccounts NUM_ACCOUNTS]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -236,7 +236,9 @@ DESCRIPTION:
    This command helps generate a new mnemonic phrase and its Incognito accounts.
 
 OPTIONS:
-   --numShards value  The number of shard (default: 8)
+   --numShards value    The number of shards (default: 8)
+   --shardID value      A specific shardID (-1: any shard) (default: -1)
+   --numAccounts value  The number of accounts (default: 1)
    
 ```
 
@@ -271,7 +273,7 @@ NAME:
    incognito-cli account importaccount - Import a mnemonic of 12 words.
 
 USAGE:
-   account importaccount --mnemonic MNEMONIC [--numShards NUM_SHARDS]
+   account importaccount --mnemonic MNEMONIC [--numShards NUM_SHARDS] [--shardID SHARD_ID] [--numAccounts NUM_ACCOUNTS]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -279,8 +281,10 @@ DESCRIPTION:
    This command helps generate Incognito accounts given a mnemonic.
 
 OPTIONS:
-   --mnemonic value, -m value  A 12-word mnemonic phrase, words are separated by a "-" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).
-   --numShards value           The number of shard (default: 8)
+   --mnemonic value, -m value  A 12-word mnemonic phrase, words are separated by a "-", or put in "" (Examples: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake, "artist decline pepper spend good enemy caught sister sure opinion hundred lake").
+   --numShards value           The number of shards (default: 8)
+   --shardID value             A specific shardID (-1: any shard) (default: -1)
+   --numAccounts value         The number of accounts (default: 1)
    
 ```
 
