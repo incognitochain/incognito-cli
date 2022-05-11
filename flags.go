@@ -236,6 +236,11 @@ var defaultFlags = map[string]cli.Flag{
 		Usage: "The number of accounts",
 		Value: 1,
 	},
+	shardIDFlag: &cli.IntFlag{
+		Name:  shardIDFlag,
+		Usage: "A specific shardID (-1: any shard)",
+		Value: -1,
+	},
 
 	evmAddressFlag: &cli.StringFlag{
 		Name:  evmAddressFlag,

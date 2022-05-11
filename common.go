@@ -56,6 +56,7 @@ const (
 	mnemonicFlag    = "mnemonic"
 	numShardsFlag   = "numShards"
 	numAccountsFlag = "numAccounts"
+	shardIDFlag     = "shardID"
 
 	evmAddressFlag      = "evmAddress"
 	tokenAddressFlag    = "externalTokenAddress"
