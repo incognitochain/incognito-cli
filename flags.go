@@ -248,9 +248,10 @@ var defaultFlags = map[string]cli.Flag{
 		Value: "",
 	},
 	tokenAddressFlag: &cli.StringFlag{
-		Name:  tokenAddressFlag,
-		Usage: "ID of the token on ETH/BSC networks",
-		Value: nativeToken,
+		Name:    tokenAddressFlag,
+		Aliases: aliases[tokenAddressFlag],
+		Usage:   "ID of the token on ETH/BSC networks",
+		Value:   nativeToken,
 	},
 	shieldAmountFlag: &cli.Float64Flag{
 		Name:     shieldAmountFlag,
@@ -260,7 +261,7 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	evmFlag: &cli.StringFlag{
 		Name:  evmFlag,
-		Usage: "The EVM network (ETH or BSC)",
+		Usage: "The EVM network (ETH, BSC, PLG or FTM)",
 		Value: "ETH",
 	},
 	externalTxIDFlag: &cli.StringFlag{

@@ -87,6 +87,7 @@ var aliases = map[string][]string{
 	csvFileFlag:          {"csv"},
 	shieldAmountFlag:     {"amt"},
 	externalAddressFlag:  {"eAddr"},
+	tokenAddressFlag:     {"evmTokenAddr"},
 	txHashFlag:           {"iTxID"},
 	externalTxIDFlag:     {"eTxID"},
 	miningKeyFlag:        {"mKey", "vKey"},
@@ -244,6 +245,9 @@ func isValidDEXPairID(pairIDStr string) bool {
 
 // isValidEVMAddress checks if a string tokenAddress is valid or not.
 func isValidEVMAddress(tokenAddress string) bool {
+	if tokenAddress == "" {
+		return false
+	}
 	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
 	if !re.MatchString(tokenAddress) {
 		return false

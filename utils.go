@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
@@ -23,7 +24,14 @@ var (
 	clientVersion = 2
 )
 
+func defaultBeforeFunc(_ *cli.Context) error {
+	return initNetWork()
+}
+
 func initNetWork() error {
+	if cache != 0 {
+		incclient.MaxGetCoinThreads = 20
+	}
 	if debug != 0 {
 		incclient.Logger.IsEnable = true
 	}
