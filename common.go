@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/camelcase"
 	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
+	"github.com/incognitochain/go-incognito-sdk-v2/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
 	"regexp"
@@ -16,8 +18,8 @@ const (
 	networkFlag       = "network"
 	hostFlag          = "host"
 	clientVersionFlag = "clientVersion"
-	debugFlag         = "enableDebug"
-	yesToAllFlag      = "yesToAll"
+	debugFlag         = "debug"
+	cacheFlag         = "utxoCache"
 	privateKeyFlag    = "privateKey"
 	addressFlag       = "address"
 	otaKeyFlag        = "otaKey"
@@ -35,39 +37,72 @@ const (
 	isResetFlag       = "isReset"
 	txHashFlag        = "txHash"
 
-	tokenIDToSellFlag       = "sellTokenID"
-	tokenIDToBuyFlag        = "buyTokenID"
-	sellingAmountFlag       = "sellingAmount"
-	minAcceptableAmountFlag = "minAcceptAmount"
-	tradingFeeFlag          = "tradingFee"
-	pairIDFlag              = "pairId"
-	tokenID1Flag            = "tokenID1"
-	tokenID2Flag            = "tokenID2"
+	tokenIDToSellFlag        = "sellTokenID"
+	tokenIDToBuyFlag         = "buyTokenID"
+	sellingAmountFlag        = "sellingAmount"
+	minAcceptableAmountFlag  = "minAcceptAmount"
+	tradingFeeFlag           = "tradingFee"
+	pairIDFlag               = "pairID"
+	tokenID1Flag             = "tokenID1"
+	tokenID2Flag             = "tokenID2"
+	prvFeeFlag               = "prvFee"
+	tradingPathFlag          = "tradingPath"
+	maxTradingPathLengthFlag = "maxPaths"
+	nftIDFlag                = "nftID"
+	orderIDFlag              = "orderID"
+	pairHashFlag             = "pairHash"
+	amplifierFlag            = "amplifier"
 
-	numShardsFlags = "numShards"
+	mnemonicFlag    = "mnemonic"
+	numShardsFlag   = "numShards"
+	numAccountsFlag = "numAccounts"
+	shardIDFlag     = "shardID"
 
-	evmAddressFlag   = "evmAddress"
-	tokenAddressFlag = "tokenAddress"
-	shieldAmountFlag = "shieldAmount"
-	evmFlag          = "evm"
-	evmTxHash        = "evmTxHash"
+	evmAddressFlag      = "evmAddress"
+	tokenAddressFlag    = "externalTokenAddress"
+	shieldAmountFlag    = "shieldAmount"
+	evmFlag             = "evm"
+	externalTxIDFlag    = "externalTxHash"
+	externalAddressFlag = "externalAddress"
+
+	miningKeyFlag        = "miningKey"
+	candidateAddressFlag = "candidateAddress"
+	rewardReceiverFlag   = "rewardAddress"
+	autoReStakeFlag      = "autoReStake"
 )
 
 // aliases for defaultFlags
 var aliases = map[string][]string{
-	networkFlag:      {"net"},
-	debugFlag:        {"d"},
-	privateKeyFlag:   {"p"},
-	otaKeyFlag:       {"ota"},
-	readonlyKeyFlag:  {"ro"},
-	addressFlag:      {"addr"},
-	tokenIDFlag:      {"id"},
-	tokenID1Flag:     {"id1"},
-	tokenID2Flag:     {"id2"},
-	amountFlag:       {"amt"},
-	versionFlag:      {"v"},
-	csvFileFlag:      {"csv"},
-	shieldAmountFlag: {"amt"},
+	networkFlag:          {"net"},
+	debugFlag:            {"d"},
+	privateKeyFlag:       {"p", "prvKey"},
+	otaKeyFlag:           {"ota"},
+	readonlyKeyFlag:      {"ro"},
+	addressFlag:          {"addr"},
+	tokenIDFlag:          {"id", "ID"},
+	tokenID1Flag:         {"id1", "ID1"},
+	tokenID2Flag:         {"id2", "ID2"},
+	amountFlag:           {"amt"},
+	versionFlag:          {"v"},
+	csvFileFlag:          {"csv"},
+	shieldAmountFlag:     {"amt"},
+	externalAddressFlag:  {"eAddr"},
+	tokenAddressFlag:     {"evmTokenAddr"},
+	txHashFlag:           {"iTxID"},
+	externalTxIDFlag:     {"eTxID"},
+	miningKeyFlag:        {"mKey", "vKey"},
+	candidateAddressFlag: {"canAddr"},
+	rewardReceiverFlag:   {"rwdAddr"},
+	autoReStakeFlag:      {"reStake"},
+
+	tokenIDToSellFlag:       {"sellID", "sellId"},
+	tokenIDToBuyFlag:        {"buyID", "buyId"},
+	sellingAmountFlag:       {"sellAmt"},
+	minAcceptableAmountFlag: {"minAmt"},
+	pairIDFlag:              {"pairId"},
+	nftIDFlag:               {"nftId"},
+	orderIDFlag:             {"orderId"},
+	amplifierFlag:           {"amp"},
 }
 
 // category constants
@@ -75,8 +110,9 @@ const (
 	accountCat     = "ACCOUNTS"
 	committeeCat   = "COMMITTEES"
 	transactionCat = "TRANSACTIONS"
-	pDEXCat        = "PDEX"
-	bridgeCat      = "BRIDGE"
+	pDEXCat        = "DEX"
+	evmBridgeCat   = "BRIDGE"
+	portalCat      = "BRIDGE"
 )
 
 var cfg *Config
@@ -160,6 +196,20 @@ func isValidReadonlyKey(readonlyKeyStr string) bool {
 	return true
 }
 
+// isValidMiningKey checks if a base58-encoded mining key is valid or not.
+func isValidMiningKey(miningKeyStr string) bool {
+	if miningKeyStr == "" {
+		return false
+	}
+
+	_, _, err := base58.Base58Check{}.Decode(miningKeyStr)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
 // isValidTokenID checks if a string tokenIDStr is valid or not.
 func isValidTokenID(tokenIDStr string) bool {
 	if tokenIDStr == "" {
@@ -174,8 +224,30 @@ func isValidTokenID(tokenIDStr string) bool {
 	return true
 }
 
+// isValidDEXPairID checks if a string pairIDStr is valid or not.
+func isValidDEXPairID(pairIDStr string) bool {
+	if pairIDStr == "" {
+		return false
+	}
+	tmpStrings := strings.Split(pairIDStr, "-")
+	if len(tmpStrings) != 3 {
+		return false
+	}
+	for _, tmp := range tmpStrings {
+		_, err := iCommon.Hash{}.NewHashFromStr(tmp)
+		if err != nil {
+			return false
+		}
+	}
+
+	return true
+}
+
 // isValidEVMAddress checks if a string tokenAddress is valid or not.
 func isValidEVMAddress(tokenAddress string) bool {
+	if tokenAddress == "" {
+		return false
+	}
 	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
 	if !re.MatchString(tokenAddress) {
 		return false
@@ -198,6 +270,15 @@ func isSupportedVersion(version int8) bool {
 	return version == 1 || version == 2
 }
 
+func jsonPrint(val interface{}) error {
+	jsb, err := json.MarshalIndent(val, "", "\t")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsb))
+	return nil
+}
+
 // flagToVariable gets the variable representation for a flag.
 // The variable representation of a flag is a ALL_UPPER_CASE form of a flag.
 //
@@ -218,18 +299,30 @@ func flagToVariable(f string) string {
 	return res
 }
 
-func buildUsageTextFromCommand(command *cli.Command) {
+func buildUsageTextFromCommand(command *cli.Command, parents ...string) {
+	parent := ""
+	if len(parents) > 0 {
+		parent = parents[0]
+	}
 	res := command.Name
+	hasOptionalFlags := false
 	for _, f := range command.Flags {
 		flagString := fmt.Sprintf(" --%v %v", f.Names()[0], flagToVariable(f.Names()[0]))
 		if requiredFlag, ok := f.(cli.RequiredFlag); ok {
 			if !requiredFlag.IsRequired() {
 				// optional flag is put inside a [] symbol.
 				flagString = fmt.Sprintf(" [--%v %v]", f.Names()[0], flagToVariable(f.Names()[0]))
+				hasOptionalFlags = true
 			}
 		}
 		res += flagString
 	}
+	if parent != "" {
+		res = fmt.Sprintf("%v %v", parent, res)
+	}
 
-	command.UsageText = res + "\n\n\t OPTIONAL flags are denoted by a [] bracket."
+	command.UsageText = res
+	if hasOptionalFlags {
+		command.UsageText += "\n\n\t OPTIONAL flags are denoted by a [] bracket."
+	}
 }

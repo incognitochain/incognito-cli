@@ -3,17 +3,12 @@ package main
 import (
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
-	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 )
 
 // send creates and sends a transaction from one wallet to another w.r.t a tokenID.
 func send(c *cli.Context) error {
-	incclient.Logger.IsEnable = true
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
+	var err error
 
 	privateKey := c.String("privateKey")
 	if !isValidPrivateKey(privateKey) {
@@ -33,11 +28,6 @@ func send(c *cli.Context) error {
 	amount := c.Uint64("amount")
 	if amount == 0 {
 		return fmt.Errorf("amount cannot be zero")
-	}
-
-	fee := c.Uint64("fee")
-	if fee == 0 {
-		return fmt.Errorf("fee cannot be zero")
 	}
 
 	version := c.Int("version")
@@ -71,10 +61,7 @@ func send(c *cli.Context) error {
 
 // checkReceiver if a user is a receiver of a transaction.
 func checkReceiver(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
+	var err error
 
 	txHash := c.String(txHashFlag)
 	if txHash == "" {
@@ -104,9 +91,9 @@ func checkReceiver(c *cli.Context) error {
 	}
 
 	if !received {
-		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKeyFlag, txHash)
+		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKey, txHash)
 	} else {
-		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKeyFlag, txHash)
+		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKey, txHash)
 		fmt.Printf("Receiving info: %v\n", res)
 	}
 

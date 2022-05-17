@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
@@ -16,18 +17,26 @@ import (
 var (
 	network       string
 	host          string
-	clientVersion int
 	debug         int
+	cache         int
 	askUser       = true
 	isMainNet     = false
+	clientVersion = 2
 )
 
+func defaultBeforeFunc(_ *cli.Context) error {
+	return initNetWork()
+}
+
 func initNetWork() error {
+	if cache != 0 {
+		incclient.MaxGetCoinThreads = 20
+	}
 	if debug != 0 {
 		incclient.Logger.IsEnable = true
 	}
 	if host != "" {
-		fmt.Printf("host: %v\n", host)
+		fmt.Printf("host: %v, version: %v\n", host, clientVersion)
 		return initClient(host, clientVersion)
 	}
 	switch network {
@@ -37,8 +46,6 @@ func initNetWork() error {
 		return NewTestNetConfig(nil)
 	case "testnet1":
 		return NewTestNet1Config(nil)
-	case "devnet":
-		return NewDevNetConfig(nil)
 	case "local":
 		return NewLocalConfig(nil)
 	}
@@ -55,9 +62,6 @@ func initClient(rpcHost string, version int) error {
 	case "testnet1":
 		ethNode = incclient.TestNet1ETHHost
 		err = NewTestNet1Config(nil)
-	case "devnet":
-		ethNode = incclient.DevNetETHHost
-		err = NewDevNetConfig(nil)
 	case "local":
 		ethNode = incclient.LocalETHHost
 		err = NewLocalConfig(nil)
@@ -68,7 +72,10 @@ func initClient(rpcHost string, version int) error {
 		return err
 	}
 
-	incClient, err := incclient.NewIncClientWithCache(rpcHost, ethNode, version)
+	incClient, err := incclient.NewIncClient(rpcHost, ethNode, version, network)
+	if cache != 0 {
+		incClient, err = incclient.NewIncClientWithCache(rpcHost, ethNode, version, network)
+	}
 	if err != nil {
 		return err
 	}
