@@ -295,6 +295,33 @@ var txCommands = []*cli.Command{
 
 // bridgeCommands consists of all bridge-related commands
 var bridgeCommands = []*cli.Command{
+	{
+		Name:    "centralizedshield",
+		Aliases: []string{"cshield"},
+		Usage:   "Perform a centralized shielding operation.",
+		Description: "This command creates and sends a centralized shielding transaction into the Incognito network. Only" +
+			"the one with the admin account can perform this operation.",
+		Category: cenBridgeCat,
+		Flags: []cli.Flag{
+			defaultFlags[adminPrivateKeyFlag],
+			&cli.StringFlag{
+				Name:     addressFlag,
+				Aliases:  []string{"addr"},
+				Usage:    "The receiver's Incognito payment address",
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     tokenIDFlag,
+				Aliases:  aliases[tokenIDFlag],
+				Usage:    "The Incognito ID of the shielding token",
+				Required: true,
+			},
+			defaultFlags[tokenNameFlag],
+			defaultFlags[amountFlag],
+		},
+		Action: shieldCentralized,
+		Before: defaultBeforeFunc,
+	},
 	evmBridgeCommands, portalCommands,
 }
 
