@@ -413,8 +413,8 @@ func genKeySet(c *cli.Context) error {
 	common.MaxShardNumber = numShards
 
 	shardID := c.Int(shardIDFlag)
-	if shardID < -1 || shardID >= common.MaxShardNumber {
-		return fmt.Errorf("expected shardID from -1 to %v", common.MaxShardNumber-1)
+	if shardID < -2 || shardID >= common.MaxShardNumber {
+		return fmt.Errorf("expected shardID from -2 to %v", common.MaxShardNumber-1)
 	}
 	supportedShards := make(map[byte]bool)
 	if shardID == -1 {
@@ -443,6 +443,9 @@ func genKeySet(c *cli.Context) error {
 		info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
 		if err != nil {
 			return err
+		}
+		if index == 1 && shardID == -2 {
+			supportedShards[info.ShardID] = true
 		}
 		if supportedShards[info.ShardID] {
 			accounts = append(accounts, &accountInfo{Index: index, KeyInfo: info})
@@ -469,15 +472,15 @@ func importMnemonic(c *cli.Context) error {
 	common.MaxShardNumber = numShards
 
 	shardID := c.Int(shardIDFlag)
-	if shardID < -1 || shardID >= common.MaxShardNumber {
-		return fmt.Errorf("expected shardID from -1 to %v", common.MaxShardNumber-1)
+	if shardID < -2 || shardID >= common.MaxShardNumber {
+		return fmt.Errorf("expected shardID from -2 to %v", common.MaxShardNumber-1)
 	}
 	supportedShards := make(map[byte]bool)
 	if shardID == -1 {
 		for i := 0; i < common.MaxShardNumber; i++ {
 			supportedShards[byte(i)] = true
 		}
-	} else {
+	} else if shardID >= 0 {
 		supportedShards[byte(shardID)] = true
 	}
 
@@ -499,6 +502,9 @@ func importMnemonic(c *cli.Context) error {
 		info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
 		if err != nil {
 			return err
+		}
+		if index == 1 && shardID == -2 {
+			supportedShards[info.ShardID] = true
 		}
 		if supportedShards[info.ShardID] {
 			accounts = append(accounts, &accountInfo{Index: index, KeyInfo: info})

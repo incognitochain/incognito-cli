@@ -7,7 +7,7 @@ A command line tool for the Incognito network
 
 <!-- toc -->
 * [Usage](#usage)
-* [Commands](#commands)
+* [Commands](./commands.md)
 <!-- tocstop -->
 
 # Usage

@@ -238,8 +238,8 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	shardIDFlag: &cli.IntFlag{
 		Name:  shardIDFlag,
-		Usage: "A specific shardID (-1: any shard)",
-		Value: -1,
+		Usage: fmt.Sprintf("A specific shardID (-2: same shard as the first account (i.e, `Anon`); -1: any shard)"),
+		Value: -2,
 	},
 
 	evmAddressFlag: &cli.StringFlag{

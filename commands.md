@@ -237,7 +237,7 @@ DESCRIPTION:
 
 OPTIONS:
    --numShards value    The number of shards (default: 8)
-   --shardID value      A specific shardID (-1: any shard) (default: -1)
+   --shardID Anon       A specific shardID (-2: same shard as the first account (i.e, Anon); -1: any shard) (default: -2)
    --numAccounts value  The number of accounts (default: 1)
    
 ```
@@ -283,7 +283,7 @@ DESCRIPTION:
 OPTIONS:
    --mnemonic value, -m value  A 12-word mnemonic phrase, words are separated by a "-", or put in "" (Examples: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake, "artist decline pepper spend good enemy caught sister sure opinion hundred lake").
    --numShards value           The number of shards (default: 8)
-   --shardID value             A specific shardID (-1: any shard) (default: -1)
+   --shardID Anon              A specific shardID (-2: same shard as the first account (i.e, Anon); -1: any shard) (default: -2)
    --numAccounts value         The number of accounts (default: 1)
    
 ```
