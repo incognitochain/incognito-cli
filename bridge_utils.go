@@ -588,9 +588,9 @@ func getEVMTokenIDIncTokenID(incTokenIDStr string) (string, int, error) {
 				return evmTokenIDStr[6:], rpc.PLGNetworkID, nil
 			} else if strings.Contains(evmTokenIDStr, "46544d") {
 				return evmTokenIDStr[6:], rpc.FTMNetworkID, nil
-			} else if len(evmTokenIDStr) == 40 {
-				return evmTokenIDStr, rpc.ETHNetworkID, nil
 			}
+		} else if len(evmTokenIDStr) == 40 {
+			return evmTokenIDStr, rpc.ETHNetworkID, nil
 		}
 	}
 
