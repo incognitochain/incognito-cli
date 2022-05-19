@@ -28,6 +28,8 @@ COMMANDS:
    BRIDGE:
      evm     Perform an EVM action (e.g, shield, unshield, etc.).
      portal  Perform a portal action (e.g, shield, unshield, etc.).
+   CENTRALIZED BRIDGE:
+     centralizedshield, cshield  Perform a centralized shielding operation.
    COMMITTEES:
      checkrewards    Get all rewards of a payment address.
      stake           Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
@@ -84,6 +86,8 @@ COPYRIGHT:
 		* [`portal shieldstatus`](#portal_shieldstatus)
 		* [`portal unshield`](#portal_unshield)
 		* [`portal unshieldstatus`](#portal_unshieldstatus)
+* [`CENTRALIZED BRIDGE`](#centralized bridge)
+	* [`centralizedshield`](#centralizedshield)
 * [`COMMITTEES`](#committees)
 	* [`checkrewards`](#checkrewards)
 	* [`stake`](#stake)
@@ -707,6 +711,32 @@ DESCRIPTION:
 
 OPTIONS:
    --txHash value, --iTxID value  An Incognito transaction hash
+   
+```
+
+## CENTRALIZED BRIDGE
+### centralizedshield
+This command creates and sends a centralized shielding transaction into the Incognito network. Onlythe one with the admin account can perform this operation.
+```shell
+$ incognito-cli help centralizedshield
+NAME:
+   incognito-cli centralizedshield - Perform a centralized shielding operation.
+
+USAGE:
+   centralizedshield --adminPrivateKey ADMIN_PRIVATE_KEY --address ADDRESS --tokenID TOKEN_ID --tokenName TOKEN_NAME --amount AMOUNT
+
+CATEGORY:
+   CENTRALIZED BRIDGE
+
+DESCRIPTION:
+   This command creates and sends a centralized shielding transaction into the Incognito network. Onlythe one with the admin account can perform this operation.
+
+OPTIONS:
+   --adminPrivateKey value                  A base58-encoded Incognito private key of the admin account
+   --address value, --addr value            The receiver's Incognito payment address
+   --tokenID value, --id value, --ID value  The Incognito ID of the shielding token
+   --tokenName value                        The name of the shielding token
+   --amount value, --amt value              The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
    
 ```
 

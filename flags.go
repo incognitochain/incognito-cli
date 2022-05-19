@@ -302,4 +302,17 @@ var defaultFlags = map[string]cli.Flag{
 		Value:    1,
 		Required: false,
 	},
+
+	adminPrivateKeyFlag: &cli.StringFlag{
+		Name:     adminPrivateKeyFlag,
+		Aliases:  aliases[adminPrivateKeyFlag],
+		Usage:    "A base58-encoded Incognito private key of the admin account",
+		Required: true,
+	},
+	tokenNameFlag: &cli.StringFlag{
+		Name:     tokenNameFlag,
+		Aliases:  aliases[tokenNameFlag],
+		Usage:    "The name of the shielding token",
+		Required: true,
+	},
 }

@@ -69,6 +69,9 @@ const (
 	candidateAddressFlag = "candidateAddress"
 	rewardReceiverFlag   = "rewardAddress"
 	autoReStakeFlag      = "autoReStake"
+
+	adminPrivateKeyFlag = "adminPrivateKey"
+	tokenNameFlag       = "tokenName"
 )
 
 // aliases for defaultFlags
@@ -111,6 +114,7 @@ const (
 	committeeCat   = "COMMITTEES"
 	transactionCat = "TRANSACTIONS"
 	pDEXCat        = "DEX"
+	cenBridgeCat   = "CENTRALIZED BRIDGE"
 	evmBridgeCat   = "BRIDGE"
 	portalCat      = "BRIDGE"
 )
