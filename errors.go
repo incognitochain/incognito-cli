@@ -38,6 +38,17 @@ const (
 
 	CreateTransferTransactionError
 	GetReceivingInfoError
+
+	GenerateShieldingAddressError
+	BTCClientNotFoundError
+	GetBTCConfirmationError
+	NotEnoughBTCConfirmationError
+	BuildBTCProofError
+	CreatePortalShieldingTransactionError
+	CreatePortalUnShieldingTransactionError
+	GetPortalShieldingStatusError
+	GetPortalUnShieldingStatusError
+	InvalidExternalAddressError
 )
 
 var errCodeMessages = map[int]struct {
@@ -79,6 +90,17 @@ var errCodeMessages = map[int]struct {
 
 	CreateTransferTransactionError: {-5000, "Cannot create transfer transaction"},
 	GetReceivingInfoError:          {-5001, "Cannot get receiving info"},
+
+	GenerateShieldingAddressError:           {-6000, "Cannot generate shielding address"},
+	BTCClientNotFoundError:                  {-6001, "BTC client not found"},
+	GetBTCConfirmationError:                 {-6002, "Cannot get BTC confirmation"},
+	NotEnoughBTCConfirmationError:           {-6003, "Need at least 6 confirmations"},
+	BuildBTCProofError:                      {-6004, "Cannot build BTC proof"},
+	CreatePortalShieldingTransactionError:   {-6005, "Cannot create portal shielding transaction"},
+	CreatePortalUnShieldingTransactionError: {-6006, "Cannot create portal un-shielding transaction"},
+	GetPortalShieldingStatusError:           {-6007, "Cannot retrieve portal shielding status"},
+	GetPortalUnShieldingStatusError:         {-6008, "Cannot retrieve portal un-shielding status"},
+	InvalidExternalAddressError:             {-6009, "Invalid external address"},
 }
 
 type appError struct {
