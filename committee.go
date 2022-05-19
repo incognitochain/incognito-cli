@@ -41,7 +41,7 @@ func stake(c *cli.Context) error {
 		return newAppError(CreateStakingTransactionError, err)
 	}
 
-	return jsonPrint(map[string]interface{}{"TxHash": txHash})
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // unStake creates an un-staking transaction.
@@ -72,7 +72,7 @@ func unStake(c *cli.Context) error {
 		return newAppError(CreateUnStakingTransactionError, err)
 	}
 
-	return jsonPrint(map[string]interface{}{"TxHash": txHash})
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // checkRewards gets all rewards of a payment address.
@@ -90,10 +90,7 @@ func checkRewards(c *cli.Context) error {
 	if len(rewards) == 0 {
 		fmt.Printf("There is not rewards found for the address %v\n", addr)
 	} else {
-		fmt.Printf("Rewards of address %v:\n", addr)
-		for tokenID, amount := range rewards {
-			fmt.Printf("%v: %v\n", tokenID, amount)
-		}
+		return jsonPrint(rewards)
 	}
 
 	return nil
@@ -120,7 +117,7 @@ func withdrawReward(c *cli.Context) error {
 	}
 
 	version := c.Int(versionFlag)
-	if version != 1 && version != 2 {
+	if !isSupportedVersion(int8(version)) {
 		return newAppError(VersionError)
 	}
 
@@ -131,5 +128,5 @@ func withdrawReward(c *cli.Context) error {
 		return newAppError(CreateWithdrawRewardTransactionError, err)
 	}
 
-	return jsonPrint(map[string]interface{}{"TxHash": txHash})
+	return jsonPrintWithKey("TxHash", txHash)
 }
