@@ -33,7 +33,7 @@ func checkBalance(c *cli.Context) error {
 		return newAppError(GetBalanceError, err)
 	}
 
-	return jsonPrint(map[string]interface{}{"Balance": balance})
+	return jsonPrintWithKey("Balance", balance)
 }
 
 func getAllBalanceV2(c *cli.Context) error {
@@ -77,7 +77,7 @@ func consolidateUTXOs(c *cli.Context) error {
 
 	version := c.Int(versionFlag)
 	if version < 1 || version > 2 {
-		return newAppError(UTXOVersionError)
+		return newAppError(VersionError)
 	}
 
 	numThreads := c.Int(numThreadsFlag)
@@ -93,7 +93,7 @@ func consolidateUTXOs(c *cli.Context) error {
 	}
 	fmt.Println("CONSOLIDATING FINISHED!!")
 
-	return jsonPrint(map[string]interface{}{"TxList": txList})
+	return jsonPrintWithKey("TxList", txList)
 }
 
 func checkUTXOs(c *cli.Context) error {
