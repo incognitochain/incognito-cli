@@ -57,6 +57,10 @@ const (
 	EVMDepositError
 	EVMWithdrawError
 	GetEVMShieldingStatusError
+	CreatePRVShieldingTransactionError
+	CreatePRVUnShieldingTransactionError
+	EVMBurnPRVError
+	EVMMintPRVError
 
 	GenerateShieldingAddressError
 	BTCClientNotFoundError
@@ -120,14 +124,18 @@ var errCodeMessages = map[int]struct {
 	IncognitoTokenIDToEVMTokenIDError:    {-6103, "Cannot get EVM tokenID from Incognito tokenID"},
 	GetEVMTokenInfoError:                 {-6104, "Cannot get EVM token info"},
 	WrongEVMNetworkError:                 {-6105, "Wrong EVM network"},
-	GetEVMBalanceError:                   {-6016, "Cannot get EVM balance"},
-	NewEVMAccountError:                   {-6017, "Cannot create new EVM account"},
-	GetEVMBurnProofError:                 {-6018, "Cannot get EVM burn proof"},
-	CreateEVMShieldingTransactionError:   {-6019, "Cannot create EVM shielding transaction"},
-	CreateEVMUnShieldingTransactionError: {-6020, "Cannot create EVM un-shielding transaction"},
-	EVMDepositError:                      {-6021, "Cannot deposit to the smart contract"},
-	EVMWithdrawError:                     {-6022, "Cannot withdraw from the smart contract"},
-	GetEVMShieldingStatusError:           {-6023, "Cannot retrieve EVM shielding transaction"},
+	GetEVMBalanceError:                   {-6116, "Cannot get EVM balance"},
+	NewEVMAccountError:                   {-6117, "Cannot create new EVM account"},
+	GetEVMBurnProofError:                 {-6118, "Cannot get EVM burn proof"},
+	CreateEVMShieldingTransactionError:   {-6119, "Cannot create EVM shielding transaction"},
+	CreateEVMUnShieldingTransactionError: {-6120, "Cannot create EVM un-shielding transaction"},
+	EVMDepositError:                      {-6121, "Cannot deposit EVM token to the smart contract"},
+	EVMWithdrawError:                     {-6122, "Cannot withdraw EVM token from the smart contract"},
+	GetEVMShieldingStatusError:           {-6123, "Cannot retrieve EVM shielding transaction"},
+	CreatePRVShieldingTransactionError:   {-6124, "Cannot create PRV shielding transaction"},
+	CreatePRVUnShieldingTransactionError: {-6125, "Cannot create PRV un-shielding transaction"},
+	EVMBurnPRVError:                      {-6126, "Cannot burn PRV on EVM network"},
+	EVMMintPRVError:                      {-6127, "Cannot mint PRV on EVM network"},
 
 	GenerateShieldingAddressError:           {-6200, "Cannot generate shielding address"},
 	BTCClientNotFoundError:                  {-6201, "BTC client not found"},
