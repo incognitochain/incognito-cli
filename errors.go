@@ -39,6 +39,7 @@ const (
 	GetRewardAmountError
 
 	CreateTransferTransactionError
+	CreateConversionTransactionError
 	GetReceivingInfoError
 
 	CentralizedShieldError
@@ -113,8 +114,9 @@ var errCodeMessages = map[int]struct {
 	CreateWithdrawRewardTransactionError: {-4002, "Cannot create reward withdrawal transaction"},
 	GetRewardAmountError:                 {-4003, "Cannot get reward amount"},
 
-	CreateTransferTransactionError: {-5000, "Cannot create transfer transaction"},
-	GetReceivingInfoError:          {-5001, "Cannot get receiving info"},
+	CreateTransferTransactionError:   {-5000, "Cannot create transfer transaction"},
+	CreateConversionTransactionError: {-5001, "Cannot create conversion transaction"},
+	GetReceivingInfoError:            {-5002, "Cannot get receiving info"},
 
 	CentralizedShieldError: {-6000, "Cannot create centralized shielding transaction"},
 
