@@ -41,6 +41,8 @@ const (
 	CreateTransferTransactionError
 	CreateConversionTransactionError
 	GetReceivingInfoError
+	SendRawTxError
+	SendRawTxTokenError
 
 	CentralizedShieldError
 
@@ -73,6 +75,41 @@ const (
 	GetPortalShieldingStatusError
 	GetPortalUnShieldingStatusError
 	InvalidExternalAddressError
+
+	InvalidSellTokenIDError
+	InvalidBuyTokenIDError
+	InvalidSellAmountError
+	InvalidMinAcceptableAmountError
+	InvalidMaxTradingPathError
+	InvalidTradingPathError
+	InvalidPRVFeeError
+	InvalidTradingFeeError
+	InvalidPoolPairIDError
+	InvalidPairHashError
+	InvalidAmplifierError
+	InvalidNFTError
+	InvalidOrderIDError
+	GetAllDexPoolPairsError
+	GetDexPoolPairError
+
+	CreateDexTradeTransactionError
+	CreateMintNFTTransactionError
+	CreateDexContributionTransactionError
+	CreateDexWithdrawalTransactionError
+	CreateAddOrderTransactionError
+	CreateWithdrawOrderTransactionError
+	CreateDexStakingTransactionError
+	CreateDexUnStakingTransactionError
+	CreateDexStakingRewardWithdrawalTransactionError
+	CreateLPFeeWithdrawalTransactionError
+
+	EstimateDEXStakingRewardError
+	GetPoolShareError
+	GetEstimatedLPValueError
+	FindTradingPathError
+	DexPriceCheckingError
+	GetAllDexNFTsError
+	GetOrderByIDError
 )
 
 var errCodeMessages = map[int]struct {
@@ -117,6 +154,8 @@ var errCodeMessages = map[int]struct {
 	CreateTransferTransactionError:   {-5000, "Cannot create transfer transaction"},
 	CreateConversionTransactionError: {-5001, "Cannot create conversion transaction"},
 	GetReceivingInfoError:            {-5002, "Cannot get receiving info"},
+	SendRawTxError:                   {-5003, "Error while sendRawTx"},
+	SendRawTxTokenError:              {-5004, "Error while sendRawTxToken"},
 
 	CentralizedShieldError: {-6000, "Cannot create centralized shielding transaction"},
 
@@ -149,6 +188,41 @@ var errCodeMessages = map[int]struct {
 	GetPortalShieldingStatusError:           {-6207, "Cannot retrieve portal shielding status"},
 	GetPortalUnShieldingStatusError:         {-6208, "Cannot retrieve portal un-shielding status"},
 	InvalidExternalAddressError:             {-6209, "Invalid external address"},
+
+	InvalidSellTokenIDError:         {-7000, "Invalid selling tokenID"},
+	InvalidBuyTokenIDError:          {-7001, "Invalid buying tokenID"},
+	InvalidSellAmountError:          {-7002, "Invalid selling amount"},
+	InvalidMinAcceptableAmountError: {-7003, "Invalid min acceptable amount"},
+	InvalidMaxTradingPathError:      {-7004, "Invalid max trading path"},
+	InvalidTradingPathError:         {-7005, "Invalid trading path"},
+	InvalidPRVFeeError:              {-7006, "Invalid PRV fee"},
+	InvalidTradingFeeError:          {-7007, "Invalid trading fee"},
+	InvalidPoolPairIDError:          {-7008, "Invalid pool pair"},
+	InvalidPairHashError:            {-7009, "Invalid pair hash"},
+	InvalidAmplifierError:           {-7010, "Invalid amplifier"},
+	InvalidNFTError:                 {-7011, "Invalid NFT"},
+	InvalidOrderIDError:             {-7012, "Invalid NFT"},
+	GetAllDexPoolPairsError:         {-7013, "Cannot retrieve all pDEX pool pairs"},
+	GetDexPoolPairError:             {-7014, "Cannot retrieve DEX pool pair"},
+
+	CreateDexTradeTransactionError:                   {-7100, "Cannot create DEX trading transaction"},
+	CreateMintNFTTransactionError:                    {-7101, "Cannot create NFT-minting transaction"},
+	CreateDexContributionTransactionError:            {-7102, "Cannot create DEX contribution transaction"},
+	CreateDexWithdrawalTransactionError:              {-7103, "Cannot create DEX withdrawal transaction"},
+	CreateAddOrderTransactionError:                   {-7104, "Cannot create order adding transaction"},
+	CreateWithdrawOrderTransactionError:              {-7105, "Cannot create order withdrawal transaction"},
+	CreateDexStakingTransactionError:                 {-7106, "Cannot create DEX staking transaction"},
+	CreateDexUnStakingTransactionError:               {-7107, "Cannot create DEX un-staking transaction"},
+	CreateDexStakingRewardWithdrawalTransactionError: {-7108, "Cannot create DEX staking reward withdrawal transaction"},
+	CreateLPFeeWithdrawalTransactionError:            {-7109, "Cannot create LP fee withdrawal transaction"},
+
+	EstimateDEXStakingRewardError: {-7200, "Error while estimating DEX staking rewards"},
+	GetPoolShareError:             {-7201, "Cannot get pool shard"},
+	GetEstimatedLPValueError:      {-7202, "Cannot get estimated LP value"},
+	FindTradingPathError:          {-7203, "Cannot find trading path"},
+	DexPriceCheckingError:         {-7204, "Cannot check dex price"},
+	GetAllDexNFTsError:            {-7205, "Cannot get all DEX NFTs"},
+	GetOrderByIDError:             {-7206, "Cannot get order by ID"},
 }
 
 type appError struct {
