@@ -110,6 +110,17 @@ const (
 	DexPriceCheckingError
 	GetAllDexNFTsError
 	GetOrderByIDError
+
+	GetTradeStatusError
+	GetNFTMintingStatusError
+	GetDexContributionStatusError
+	GetDexWithdrawalStatusError
+	GetOrderAddingStatusError
+	GetOrderWithdrawalStatusError
+	GetDexStakingStatusError
+	GetDexUnStakingStatusError
+	GetDexStakingRewardWithdrawalStatusError
+	GetLPFeeWithdrawalStatusError
 )
 
 var errCodeMessages = map[int]struct {
@@ -223,6 +234,17 @@ var errCodeMessages = map[int]struct {
 	DexPriceCheckingError:         {-7204, "Cannot check dex price"},
 	GetAllDexNFTsError:            {-7205, "Cannot get all DEX NFTs"},
 	GetOrderByIDError:             {-7206, "Cannot get order by ID"},
+
+	GetTradeStatusError:                      {-7300, "Cannot get trade status"},
+	GetNFTMintingStatusError:                 {-7301, "Cannot get NFT-minting status"},
+	GetDexContributionStatusError:            {-7302, "Cannot get DEX contribution status"},
+	GetDexWithdrawalStatusError:              {-7303, "Cannot DEX withdrawal status"},
+	GetOrderAddingStatusError:                {-7304, "Cannot get order-adding status"},
+	GetOrderWithdrawalStatusError:            {-7305, "Cannot get order-withdrawal status"},
+	GetDexStakingStatusError:                 {-7306, "Cannot get DEX staking status"},
+	GetDexUnStakingStatusError:               {-7307, "Cannot get DEX un-staking status"},
+	GetDexStakingRewardWithdrawalStatusError: {-7308, "Cannot get staking reward withdrawal status"},
+	GetLPFeeWithdrawalStatusError:            {-7309, "Cannot get LP fee withdrawal status"},
 }
 
 type appError struct {

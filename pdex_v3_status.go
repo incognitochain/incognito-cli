@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/urfave/cli/v2"
 )
 
@@ -11,16 +9,10 @@ func pDEXTradeStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckTradeStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetTradeStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXContributionStatus retrieves the status of a pDEX liquidity contribution.
@@ -28,16 +20,10 @@ func pDEXContributionStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXLiquidityContributionStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetDexContributionStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXOrderAddingStatus retrieves the status of an order-book adding transaction.
@@ -45,16 +31,10 @@ func pDEXOrderAddingStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckOrderAddingStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetOrderAddingStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXWithdrawalStatus retrieves the status of a pDEX liquidity withdrawal.
@@ -62,16 +42,10 @@ func pDEXWithdrawalStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXLiquidityWithdrawalStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetDexWithdrawalStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXOrderWithdrawalStatus retrieves the status of an order-book withdrawal.
@@ -79,16 +53,10 @@ func pDEXOrderWithdrawalStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckOrderWithdrawalStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetOrderWithdrawalStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXStakingStatus retrieves the status of a staking transaction.
@@ -96,16 +64,10 @@ func pDEXStakingStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXStakingStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetDexStakingStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXUnStakingStatus retrieves the status of a pDEX un-staking transaction.
@@ -113,16 +75,10 @@ func pDEXUnStakingStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXUnStakingStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetDexUnStakingStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXWithdrawStakingRewardStatus retrieves the status of a pDEX staking reward withdrawal transaction.
@@ -130,16 +86,10 @@ func pDEXWithdrawStakingRewardStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXStakingRewardWithdrawalStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetDexStakingRewardWithdrawalStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXWithdrawLPFeeStatus retrieves the status of a pDEX LP fee withdrawal transaction.
@@ -147,16 +97,10 @@ func pDEXWithdrawLPFeeStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckDEXLPFeeWithdrawalStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetLPFeeWithdrawalStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
 
 // pDEXMintNFTStatus gets the status of a pDEx NFT minting transaction.
@@ -164,14 +108,8 @@ func pDEXMintNFTStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	status, err := cfg.incClient.CheckNFTMintingStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetNFTMintingStatusError, err)
 	}
 
-	jsb, err := json.MarshalIndent(status, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
-
-	return nil
+	return jsonPrint(status)
 }
