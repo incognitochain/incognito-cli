@@ -54,7 +54,7 @@ func send(c *cli.Context) error {
 		return newAppError(CreateTransferTransactionError, err)
 	}
 
-	return jsonPrint(map[string]interface{}{"TxHash": txHash})
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // checkReceiver if a user is a receiver of a transaction.
@@ -92,7 +92,7 @@ func checkReceiver(c *cli.Context) error {
 		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKey, txHash)
 	} else {
 		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKey, txHash)
-		return jsonPrint(map[string]interface{}{"ReceivingInfo": res})
+		return jsonPrintWithKey("ReceivingInfo", res)
 	}
 
 	return nil

@@ -274,6 +274,10 @@ func isSupportedVersion(version int8) bool {
 	return version == 1 || version == 2
 }
 
+func jsonPrintWithKey(key string, val interface{}) error {
+	return jsonPrint(map[string]interface{}{key: val})
+}
+
 func jsonPrint(val interface{}) error {
 	jsb, err := json.MarshalIndent(val, "", "\t")
 	if err != nil {
