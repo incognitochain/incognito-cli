@@ -11,6 +11,7 @@ const (
 	InvalidPaymentAddressError
 	InvalidReadonlyKeyError
 	InvalidOTAKeyError
+	InvalidMiningKeyError
 	InvalidTokenIDError
 
 	GetBalanceError
@@ -27,6 +28,11 @@ const (
 	DeriveChildError
 	ImportMnemonicError
 	SubmitKeyError
+
+	CreateStakingTransactionError
+	CreateUnStakingTransactionError
+	CreateWithdrawRewardTransactionError
+	GetRewardAmountError
 )
 
 var errCodeMessages = map[int]struct {
@@ -41,7 +47,8 @@ var errCodeMessages = map[int]struct {
 	InvalidPaymentAddressError: {-2001, "Invalid Incognito payment address"},
 	InvalidReadonlyKeyError:    {-2002, "Invalid Incognito readonly key"},
 	InvalidOTAKeyError:         {-2003, "Invalid Incognito ota key"},
-	InvalidTokenIDError:        {-2004, "Invalid Incognito tokenID"},
+	InvalidMiningKeyError:      {-2004, "Invalid Incognito mining key"},
+	InvalidTokenIDError:        {-2005, "Invalid Incognito tokenID"},
 
 	GetBalanceError:            {-3000, "Error when retrieving balance"},
 	GetAllBalancesError:        {-3001, "Error when retrieving all balances"},
@@ -57,6 +64,11 @@ var errCodeMessages = map[int]struct {
 	DeriveChildError:           {-3011, "Derive child error"},
 	ImportMnemonicError:        {-3012, "Cannot import mnemonic"},
 	SubmitKeyError:             {-3013, "Submit key error"},
+
+	CreateStakingTransactionError:        {-4000, "Cannot create staking transaction"},
+	CreateUnStakingTransactionError:      {-4001, "Cannot create un-staking transaction"},
+	CreateWithdrawRewardTransactionError: {-4002, "Cannot create reward withdrawal transaction"},
+	GetRewardAmountError:                 {-4003, "Cannot get reward amount"},
 }
 
 type appError struct {
