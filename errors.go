@@ -4,8 +4,10 @@ import "fmt"
 
 const (
 	UnexpectedError = iota
-	UTXOVersionError
+	VersionError
 	NumThreadsError
+	InvalidAmountError
+	InvalidIncognitoTxHashError
 
 	InvalidPrivateKeyError
 	InvalidPaymentAddressError
@@ -33,15 +35,20 @@ const (
 	CreateUnStakingTransactionError
 	CreateWithdrawRewardTransactionError
 	GetRewardAmountError
+
+	CreateTransferTransactionError
+	GetReceivingInfoError
 )
 
 var errCodeMessages = map[int]struct {
 	Code    int
 	Message string
 }{
-	UnexpectedError:  {-1000, "Unexpected error"},
-	UTXOVersionError: {-1001, "Expect version to be either 1 or 2"},
-	NumThreadsError:  {-1002, "Expect numThreads to be greater than 0"},
+	UnexpectedError:             {-1000, "Unexpected error"},
+	VersionError:                {-1001, "Expect version to be either 1 or 2"},
+	NumThreadsError:             {-1002, "Expect numThreads to be greater than 0"},
+	InvalidAmountError:          {-1003, "Invalid Incognito amount"},
+	InvalidIncognitoTxHashError: {-1004, "Invalid Incognito txHash"},
 
 	InvalidPrivateKeyError:     {-2000, "Invalid Incognito private key"},
 	InvalidPaymentAddressError: {-2001, "Invalid Incognito payment address"},
@@ -69,6 +76,9 @@ var errCodeMessages = map[int]struct {
 	CreateUnStakingTransactionError:      {-4001, "Cannot create un-staking transaction"},
 	CreateWithdrawRewardTransactionError: {-4002, "Cannot create reward withdrawal transaction"},
 	GetRewardAmountError:                 {-4003, "Cannot get reward amount"},
+
+	CreateTransferTransactionError: {-5000, "Cannot create transfer transaction"},
+	GetReceivingInfoError:          {-5001, "Cannot get receiving info"},
 }
 
 type appError struct {

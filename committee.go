@@ -121,7 +121,7 @@ func withdrawReward(c *cli.Context) error {
 
 	version := c.Int(versionFlag)
 	if version != 1 && version != 2 {
-		return newAppError(UTXOVersionError)
+		return newAppError(VersionError)
 	}
 
 	fmt.Printf("Withdrawing the reward for tokenID %v, using tx version %v\n", tokenIDStr, version)

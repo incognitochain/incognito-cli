@@ -10,29 +10,29 @@ import (
 func send(c *cli.Context) error {
 	var err error
 
-	privateKey := c.String("privateKey")
+	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("private key is invalid")
+		return newAppError(InvalidPrivateKeyError)
 	}
 
-	address := c.String("address")
+	address := c.String(addressFlag)
 	if !isValidAddress(address) {
-		return fmt.Errorf("receiver address is not valid")
+		return newAppError(InvalidPaymentAddressError)
 	}
 
-	tokenIDStr := c.String("tokenID")
+	tokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenIDStr) {
-		return fmt.Errorf("tokenID is invalid")
+		return newAppError(InvalidTokenIDError)
 	}
 
-	amount := c.Uint64("amount")
+	amount := c.Uint64(amountFlag)
 	if amount == 0 {
-		return fmt.Errorf("amount cannot be zero")
+		return newAppError(InvalidAmountError)
 	}
 
-	version := c.Int("version")
+	version := c.Int(versionFlag)
 	if !isSupportedVersion(int8(version)) {
-		return fmt.Errorf("version is not supported")
+		return newAppError(VersionError)
 	}
 
 	fmt.Printf("Send %v of token %v from %v to %v with version %v\n", amount, tokenIDStr, privateKey, address, version)
@@ -51,12 +51,10 @@ func send(c *cli.Context) error {
 			int8(version), nil)
 	}
 	if err != nil {
-		return err
+		return newAppError(CreateTransferTransactionError, err)
 	}
 
-	fmt.Printf("Success!! TxHash %v\n", txHash)
-
-	return nil
+	return jsonPrint(map[string]interface{}{"TxHash": txHash})
 }
 
 // checkReceiver if a user is a receiver of a transaction.
@@ -65,17 +63,17 @@ func checkReceiver(c *cli.Context) error {
 
 	txHash := c.String(txHashFlag)
 	if txHash == "" {
-		return fmt.Errorf("%v is invalid", txHashFlag)
+		return newAppError(InvalidIncognitoTxHashError)
 	}
 
 	otaKey := c.String(otaKeyFlag)
 	if !isValidOtaKey(otaKey) {
-		return fmt.Errorf("%v is invalid", otaKeyFlag)
+		return newAppError(InvalidOTAKeyError)
 	}
 
 	readonlyKey := c.String(readonlyKeyFlag)
 	if readonlyKey != "" && !isValidReadonlyKey(otaKey) {
-		return fmt.Errorf("%v is invalid", readonlyKeyFlag)
+		return newAppError(InvalidReadonlyKeyError)
 	}
 
 	var received bool
@@ -87,14 +85,14 @@ func checkReceiver(c *cli.Context) error {
 	}
 
 	if err != nil {
-		return err
+		return newAppError(GetReceivingInfoError, err)
 	}
 
 	if !received {
 		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKey, txHash)
 	} else {
 		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKey, txHash)
-		fmt.Printf("Receiving info: %v\n", res)
+		return jsonPrint(map[string]interface{}{"ReceivingInfo": res})
 	}
 
 	return nil
