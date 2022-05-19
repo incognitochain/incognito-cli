@@ -8,6 +8,7 @@ const (
 	NumThreadsError
 	InvalidAmountError
 	InvalidIncognitoTxHashError
+	UserInputError
 
 	InvalidPrivateKeyError
 	InvalidPaymentAddressError
@@ -30,6 +31,7 @@ const (
 	DeriveChildError
 	ImportMnemonicError
 	SubmitKeyError
+	InsufficientBalanceError
 
 	CreateStakingTransactionError
 	CreateUnStakingTransactionError
@@ -38,6 +40,23 @@ const (
 
 	CreateTransferTransactionError
 	GetReceivingInfoError
+
+	CentralizedShieldError
+
+	GetEVMNetworkError
+	InvalidEVMTokenAddressError
+	EVMTokenIDToIncognitoTokenIDError
+	IncognitoTokenIDToEVMTokenIDError
+	GetEVMTokenInfoError
+	WrongEVMNetworkError
+	GetEVMBalanceError
+	NewEVMAccountError
+	GetEVMBurnProofError
+	CreateEVMShieldingTransactionError
+	CreateEVMUnShieldingTransactionError
+	EVMDepositError
+	EVMWithdrawError
+	GetEVMShieldingStatusError
 
 	GenerateShieldingAddressError
 	BTCClientNotFoundError
@@ -60,6 +79,7 @@ var errCodeMessages = map[int]struct {
 	NumThreadsError:             {-1002, "Expect numThreads to be greater than 0"},
 	InvalidAmountError:          {-1003, "Invalid Incognito amount"},
 	InvalidIncognitoTxHashError: {-1004, "Invalid Incognito txHash"},
+	UserInputError:              {-1005, "User input error"},
 
 	InvalidPrivateKeyError:     {-2000, "Invalid Incognito private key"},
 	InvalidPaymentAddressError: {-2001, "Invalid Incognito payment address"},
@@ -82,6 +102,7 @@ var errCodeMessages = map[int]struct {
 	DeriveChildError:           {-3011, "Derive child error"},
 	ImportMnemonicError:        {-3012, "Cannot import mnemonic"},
 	SubmitKeyError:             {-3013, "Submit key error"},
+	InsufficientBalanceError:   {-3014, "Insufficient Incognito balance error"},
 
 	CreateStakingTransactionError:        {-4000, "Cannot create staking transaction"},
 	CreateUnStakingTransactionError:      {-4001, "Cannot create un-staking transaction"},
@@ -91,16 +112,33 @@ var errCodeMessages = map[int]struct {
 	CreateTransferTransactionError: {-5000, "Cannot create transfer transaction"},
 	GetReceivingInfoError:          {-5001, "Cannot get receiving info"},
 
-	GenerateShieldingAddressError:           {-6000, "Cannot generate shielding address"},
-	BTCClientNotFoundError:                  {-6001, "BTC client not found"},
-	GetBTCConfirmationError:                 {-6002, "Cannot get BTC confirmation"},
-	NotEnoughBTCConfirmationError:           {-6003, "Need at least 6 confirmations"},
-	BuildBTCProofError:                      {-6004, "Cannot build BTC proof"},
-	CreatePortalShieldingTransactionError:   {-6005, "Cannot create portal shielding transaction"},
-	CreatePortalUnShieldingTransactionError: {-6006, "Cannot create portal un-shielding transaction"},
-	GetPortalShieldingStatusError:           {-6007, "Cannot retrieve portal shielding status"},
-	GetPortalUnShieldingStatusError:         {-6008, "Cannot retrieve portal un-shielding status"},
-	InvalidExternalAddressError:             {-6009, "Invalid external address"},
+	CentralizedShieldError: {-6000, "Cannot create centralized shielding transaction"},
+
+	GetEVMNetworkError:                   {-6100, "Cannot get EVM network"},
+	InvalidEVMTokenAddressError:          {-6101, "Invalid EVM token address"},
+	EVMTokenIDToIncognitoTokenIDError:    {-6102, "Cannot get Incognito tokenID from EVM tokenID"},
+	IncognitoTokenIDToEVMTokenIDError:    {-6103, "Cannot get EVM tokenID from Incognito tokenID"},
+	GetEVMTokenInfoError:                 {-6104, "Cannot get EVM token info"},
+	WrongEVMNetworkError:                 {-6105, "Wrong EVM network"},
+	GetEVMBalanceError:                   {-6016, "Cannot get EVM balance"},
+	NewEVMAccountError:                   {-6017, "Cannot create new EVM account"},
+	GetEVMBurnProofError:                 {-6018, "Cannot get EVM burn proof"},
+	CreateEVMShieldingTransactionError:   {-6019, "Cannot create EVM shielding transaction"},
+	CreateEVMUnShieldingTransactionError: {-6020, "Cannot create EVM un-shielding transaction"},
+	EVMDepositError:                      {-6021, "Cannot deposit to the smart contract"},
+	EVMWithdrawError:                     {-6022, "Cannot withdraw from the smart contract"},
+	GetEVMShieldingStatusError:           {-6023, "Cannot retrieve EVM shielding transaction"},
+
+	GenerateShieldingAddressError:           {-6200, "Cannot generate shielding address"},
+	BTCClientNotFoundError:                  {-6201, "BTC client not found"},
+	GetBTCConfirmationError:                 {-6202, "Cannot get BTC confirmation"},
+	NotEnoughBTCConfirmationError:           {-6203, "Need at least 6 confirmations"},
+	BuildBTCProofError:                      {-6204, "Cannot build BTC proof"},
+	CreatePortalShieldingTransactionError:   {-6205, "Cannot create portal shielding transaction"},
+	CreatePortalUnShieldingTransactionError: {-6206, "Cannot create portal un-shielding transaction"},
+	GetPortalShieldingStatusError:           {-6207, "Cannot retrieve portal shielding status"},
+	GetPortalUnShieldingStatusError:         {-6208, "Cannot retrieve portal un-shielding status"},
+	InvalidExternalAddressError:             {-6209, "Invalid external address"},
 }
 
 type appError struct {

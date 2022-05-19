@@ -47,24 +47,27 @@ func shield(c *cli.Context) error {
 	log.Println("[STEP 0] PREPARE DATA")
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	incAddress := c.String(addressFlag)
 	if incAddress == "" {
 		incAddress = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
 	}
+	if !isValidAddress(incAddress) {
+		return newAppError(InvalidPaymentAddressError)
+	}
 
 	evmNetwork := c.String(evmFlag)
 	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
 	if err != nil {
-		return err
+		return newAppError(GetEVMNetworkError, err)
 	}
 
 	shieldAmount := c.Float64(shieldAmountFlag)
 	tokenAddressStr := c.String(tokenAddressFlag)
 	if !isValidEVMAddress(tokenAddressStr) {
-		return fmt.Errorf("%v is invalid", tokenAddressFlag)
+		return newAppError(InvalidEVMTokenAddressError)
 	}
 	tokenAddress := common.HexToAddress(tokenAddressStr)
 	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), evmNetworkID)
@@ -74,7 +77,7 @@ func shield(c *cli.Context) error {
 			incTokenID = fmt.Sprintf("%x", iCommon.RandBytes(32))
 			yesNoPrompt(fmt.Sprintf("Newly generated incTokenID: %v. Do you want to continue with this token?", incTokenID))
 		} else {
-			return err
+			return newAppError(EVMTokenIDToIncognitoTokenIDError, err)
 		}
 	}
 
@@ -96,12 +99,12 @@ func shield(c *cli.Context) error {
 	} else {
 		tokenInfo, err := getEVMTokenInfo(tokenAddress.String(), evmNetworkID)
 		if err != nil {
-			return err
+			return newAppError(GetEVMTokenInfoError, err)
 		}
 		tokenName = tokenInfo.name
 		tokenSymbol = tokenInfo.symbol
 		if tokenInfo.network != evmNetwork {
-			return fmt.Errorf("expect token to be on `%v` network, got `%v`", evmNetwork, tokenInfo.network)
+			return newAppError(WrongEVMNetworkError, fmt.Errorf("expect token to be on `%v` network, got `%v`", evmNetwork, tokenInfo.network))
 		}
 	}
 	log.Printf("Network: %v, TokenName: %v, TokenSymbol: %v, TokenAddress: %v, ShieldAmount: %v",
@@ -112,7 +115,7 @@ func shield(c *cli.Context) error {
 	log.Println("[STEP 1] CHECK INCOGNITO BALANCE")
 	prvBalance, err := checkSufficientIncBalance(privateKey, iCommon.PRVIDStr, incclient.DefaultPRVFee)
 	if err != nil {
-		return err
+		return newAppError(InsufficientBalanceError, err)
 	}
 	log.Printf("Current PRV balance: %v\n", prvBalance)
 	log.Printf("[STEP 1] FINISHED!\n\n")
@@ -123,12 +126,12 @@ func shield(c *cli.Context) error {
 	var privateEVMKey string
 	input, err := promptInput(fmt.Sprintf("Enter your %v private key", evmNetwork), &privateEVMKey, true)
 	if err != nil {
-		return err
+		return newAppError(UserInputError, err)
 	}
 	privateEVMKey = string(input)
 	acc, err := NewEVMAccount(privateEVMKey)
 	if err != nil {
-		return err
+		return newAppError(NewEVMAccountError, err)
 	}
 
 	for {
@@ -151,7 +154,7 @@ func shield(c *cli.Context) error {
 			}
 			_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 			if err != nil {
-				return err
+				return newAppError(GetEVMBalanceError, err)
 			}
 			nativeBalance, _ := tmpNativeBalance.Float64()
 			log.Printf("Your %v address: %v, %v: %v, %v: %v\n",
@@ -171,14 +174,14 @@ func shield(c *cli.Context) error {
 		evmHash, err = acc.DepositToken(incAddress, tokenAddressStr, shieldAmount, 0, 0, evmNetworkID)
 	}
 	if err != nil {
-		return err
+		return newAppError(EVMDepositError, err)
 	}
 	log.Printf("[STEP 3] FINISHED!\n\n")
 
 	log.Println("[STEP 4] SHIELD TO INCOGNITO")
 	incTxHash, err := Shield(privateKey, incTokenID, evmHash.String(), evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(CreateEVMShieldingTransactionError, err)
 	}
 	log.Printf("[STEP 4] FINISHED!\n\n")
 
@@ -204,18 +207,18 @@ func shield(c *cli.Context) error {
 func retryShield(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	evmNetwork := c.String(evmFlag)
 	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
 	if err != nil {
-		return err
+		return newAppError(GetEVMNetworkError, err)
 	}
 
 	tokenAddressStr := c.String(tokenAddressFlag)
 	if !isValidEVMAddress(tokenAddressStr) {
-		return fmt.Errorf("%v is invalid", tokenAddressFlag)
+		return newAppError(InvalidEVMTokenAddressError)
 	}
 	tokenAddress := common.HexToAddress(tokenAddressStr)
 	incTokenID, err := getIncTokenIDFromEVMTokenID(tokenAddress.String(), evmNetworkID)
@@ -225,7 +228,7 @@ func retryShield(c *cli.Context) error {
 			incTokenID = fmt.Sprintf("%x", iCommon.RandBytes(32))
 			yesNoPrompt(fmt.Sprintf("Newly generated incTokenID: %v. Do you want to continue with this token?", incTokenID))
 		} else {
-			return err
+			return newAppError(EVMTokenIDToIncognitoTokenIDError, err)
 		}
 	}
 
@@ -235,7 +238,7 @@ func retryShield(c *cli.Context) error {
 	log.Println("[STEP 1] SHIELD TO INCOGNITO")
 	incTxHash, err := Shield(privateKey, incTokenID, evmHash.String(), evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(CreateEVMShieldingTransactionError, err)
 	}
 	log.Printf("[STEP 1] FINISHED!\n\n")
 
@@ -267,23 +270,23 @@ func unShield(c *cli.Context) error {
 	// get the private key
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	// get the un-shield amount
 	unShieldAmount := c.Uint64(amountFlag)
 	if unShieldAmount == 0 {
-		return fmt.Errorf("%v is invalid", amountFlag)
+		return newAppError(InvalidAmountError)
 	}
 
 	// get the Incognito tokenID, evmTokenID, name and symbol.
 	incTokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(incTokenIDStr) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 	evmTokenIDStr, evmNetworkID, err := getEVMTokenIDIncTokenID(incTokenIDStr)
 	if err != nil {
-		return err
+		return newAppError(IncognitoTokenIDToEVMTokenIDError, err)
 	}
 	evmTokenAddress := common.HexToAddress(evmTokenIDStr)
 	evmNetwork := "ETH"
@@ -317,7 +320,7 @@ func unShield(c *cli.Context) error {
 	} else {
 		tokenInfo, err := getEVMTokenInfo(evmTokenAddress.String(), evmNetworkID)
 		if err != nil {
-			return err
+			return newAppError(GetEVMTokenInfoError, err)
 		}
 		tokenName = tokenInfo.name
 		tokenSymbol = tokenInfo.symbol
@@ -330,11 +333,11 @@ func unShield(c *cli.Context) error {
 	log.Println("[STEP 1] CHECK INCOGNITO BALANCE")
 	prvBalance, err := checkSufficientIncBalance(privateKey, iCommon.PRVIDStr, incclient.DefaultPRVFee)
 	if err != nil {
-		return err
+		return newAppError(InsufficientBalanceError, err)
 	}
 	incTokenBalance, err := checkSufficientIncBalance(privateKey, incTokenIDStr, unShieldAmount)
 	if err != nil {
-		return err
+		return newAppError(InsufficientBalanceError, err)
 	}
 	log.Printf("Current PRVBalance: %v, TokenBalance: %v\n", prvBalance, incTokenBalance)
 	log.Printf("[STEP 1] FINISHED!\n\n")
@@ -345,16 +348,16 @@ func unShield(c *cli.Context) error {
 	var privateEVMKey string
 	input, err := promptInput(fmt.Sprintf("Enter your %v private key", evmNetwork), &privateEVMKey, true)
 	if err != nil {
-		return err
+		return newAppError(UserInputError, err)
 	}
 	privateEVMKey = string(input)
 	acc, err := NewEVMAccount(privateEVMKey)
 	if err != nil {
-		return err
+		return newAppError(NewEVMAccountError, err)
 	}
 	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(GetEVMBalanceError, err)
 	}
 	nativeBalance, _ := tmpNativeBalance.Float64()
 	log.Printf("Your %v address: %v, %v: %v\n", evmNetwork, acc.address.String(), nativeTokenName, nativeBalance)
@@ -364,7 +367,7 @@ func unShield(c *cli.Context) error {
 		fmt.Sprintf("Un-shield to the following address: %v. Continue? (y/n)", evmAddress.String()),
 		&res)
 	if err != nil {
-		return err
+		return newAppError(UserInputError, err)
 	}
 	res = string(resInBytes)
 	if !strings.Contains(res, "y") && !strings.Contains(res, "Y") {
@@ -372,11 +375,11 @@ func unShield(c *cli.Context) error {
 			fmt.Sprintf("Enter the address you want to un-shield to"),
 			&res)
 		if err != nil {
-			return err
+			return newAppError(UserInputError, err)
 		}
 		res = string(resInBytes)
 		if !isValidEVMAddress(res) {
-			return fmt.Errorf("%v is not a valid EVM address", res)
+			return newAppError(InvalidExternalAddressError)
 		}
 		evmAddress = common.HexToAddress(res)
 	}
@@ -385,7 +388,7 @@ func unShield(c *cli.Context) error {
 	log.Println("[STEP 3] BURN INCOGNITO TOKEN")
 	incTxHash, err := cfg.incClient.CreateAndSendBurningRequestTransaction(privateKey, evmAddress.String(), incTokenIDStr, unShieldAmount, evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(CreateEVMUnShieldingTransactionError, err)
 	}
 	log.Printf("incTxHash: %v\n", incTxHash)
 	log.Printf("[STEP 3] FINISHED!\n\n")
@@ -406,7 +409,7 @@ func unShield(c *cli.Context) error {
 	log.Println("[STEP 5] SUBMIT THE BURN PROOF TO THE SC")
 	_, err = acc.UnShield(incTxHash, 0, 0, evmNetworkID)
 	if err != nil {
-		panic(err)
+		return newAppError(EVMWithdrawError, err)
 	}
 	log.Printf("[STEP 5] FINISHED!\n\n")
 
@@ -418,11 +421,14 @@ func retryUnShield(c *cli.Context) error {
 	yesNoPrompt("Do you want to continue?")
 
 	incTxHash := c.String(txHashFlag)
+	if incTxHash == "" {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 
 	evmNetwork := c.String(evmFlag)
 	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
 	if err != nil {
-		return err
+		return newAppError(GetEVMNetworkError, err)
 	}
 
 	nativeTokenName := "ETH"
@@ -440,16 +446,16 @@ func retryUnShield(c *cli.Context) error {
 	var privateEVMKey string
 	input, err := promptInput(fmt.Sprintf("Enter your %v private key", evmNetwork), &privateEVMKey, true)
 	if err != nil {
-		return err
+		return newAppError(UserInputError, err)
 	}
 	privateEVMKey = string(input)
 	acc, err := NewEVMAccount(privateEVMKey)
 	if err != nil {
-		return err
+		return newAppError(NewEVMAccountError, err)
 	}
 	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(GetEVMBalanceError, err)
 	}
 	nativeBalance, _ := tmpNativeBalance.Float64()
 	log.Printf("Your %v address: %v, %v: %v\n", evmNetwork, acc.address.String(), nativeTokenName, nativeBalance)
@@ -471,7 +477,7 @@ func retryUnShield(c *cli.Context) error {
 	log.Println("[STEP 3] SUBMIT THE BURN PROOF TO THE SC")
 	_, err = acc.UnShield(incTxHash, 0, 0, evmNetworkID)
 	if err != nil {
-		panic(err)
+		return newAppError(EVMWithdrawError, err)
 	}
 	log.Printf("[STEP 3] FINISHED!\n\n")
 
