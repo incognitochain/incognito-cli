@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"github.com/incognitochain/bridge-eth/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
@@ -20,52 +19,46 @@ import (
 
 func checkBalance(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
-	if privateKey == "" {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
-	if tokenIDStr == "" {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	if !isValidTokenID(tokenIDStr) {
+		return newAppError(InvalidTokenIDError)
 	}
 
 	balance, err := cfg.incClient.GetBalance(privateKey, tokenIDStr)
 	if err != nil {
-		return err
+		return newAppError(GetBalanceError, err)
 	}
-	fmt.Println(balance)
 
-	return nil
+	return jsonPrintWithKey("Balance", balance)
 }
 
 func getAllBalanceV2(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
-	if privateKey == "" {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	balances, err := cfg.incClient.GetAllBalancesV2(privateKey)
 	if err != nil {
-		return err
+		return newAppError(GetAllBalancesError, err)
 	}
-	jsb, err := json.MarshalIndent(balances, "", "\t")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsb))
 
-	return nil
+	return jsonPrint(balances)
 }
 
 func keyInfo(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
-	if privateKey == "" {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
 	if err != nil {
-		return err
+		return newAppError(GetAccountInfoError, err)
 	}
 
 	return jsonPrint(info)
@@ -73,51 +66,50 @@ func keyInfo(c *cli.Context) error {
 
 func consolidateUTXOs(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
-	if privateKey == "" {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
-	if tokenIDStr == "" {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	if !isValidTokenID(tokenIDStr) {
+		return newAppError(InvalidTokenIDError)
 	}
 
 	version := c.Int(versionFlag)
 	if version < 1 || version > 2 {
-		return fmt.Errorf("%v is invalid", versionFlag)
+		return newAppError(VersionError)
 	}
 
 	numThreads := c.Int(numThreadsFlag)
 	if numThreads == 0 {
-		return fmt.Errorf("%v in invalid", numThreadsFlag)
+		return newAppError(NumThreadsError)
 	}
 
 	fmt.Printf("CONSOLIDATING tokenID %v, version %v, numThreads %v\n", tokenIDStr, version, numThreads)
 
 	txList, err := cfg.incClient.Consolidate(privateKey, tokenIDStr, int8(version), numThreads)
 	if err != nil {
-		return err
+		return newAppError(ConsolidateAccountError, err)
 	}
 	fmt.Println("CONSOLIDATING FINISHED!!")
-	fmt.Println(txList)
 
-	return nil
+	return jsonPrintWithKey("TxList", txList)
 }
 
 func checkUTXOs(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
-	if privateKey == "" {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
-	if tokenIDStr == "" {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+	if !isValidTokenID(tokenIDStr) {
+		return newAppError(InvalidTokenIDError)
 	}
 
 	unSpentCoins, idxList, err := cfg.incClient.GetUnspentOutputCoins(privateKey, tokenIDStr, 0)
 	if err != nil {
-		return err
+		return newAppError(GetUnspentOutputCoinsError, err)
 	}
 
 	numUTXOsV1 := 0
@@ -150,22 +142,22 @@ func checkUTXOs(c *cli.Context) error {
 func getOutCoins(c *cli.Context) error {
 	address := c.String(addressFlag)
 	if !isValidAddress(address) {
-		return fmt.Errorf("%v is invalid", addressFlag)
+		return newAppError(InvalidPaymentAddressError)
 	}
 
 	otaKey := c.String(otaKeyFlag)
 	if !isValidOtaKey(otaKey) {
-		return fmt.Errorf("%v is invalid", otaKeyFlag)
+		return newAppError(InvalidOTAKeyError)
 	}
 
 	readonlyKey := c.String(readonlyKeyFlag)
 	if readonlyKey != "" && !isValidReadonlyKey(readonlyKey) {
-		return fmt.Errorf("%v is invalid", readonlyKeyFlag)
+		return newAppError(InvalidReadonlyKeyError)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenIDStr) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	outCoinKey := new(rpc.OutCoinKey)
@@ -175,7 +167,7 @@ func getOutCoins(c *cli.Context) error {
 
 	outCoins, idxList, err := cfg.incClient.GetOutputCoins(outCoinKey, tokenIDStr, 0)
 	if err != nil {
-		return err
+		return newAppError(GetOutputCoinsError, err)
 	}
 
 	v1Count := 0
@@ -203,17 +195,17 @@ func getOutCoins(c *cli.Context) error {
 func getHistory(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenIDStr) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	numThreads := c.Int(numThreadsFlag)
 	if numThreads == 0 {
-		return fmt.Errorf("%v in invalid", numThreadsFlag)
+		return newAppError(NumThreadsError)
 	}
 
 	csvFile := c.String("csvFile")
@@ -222,13 +214,13 @@ func getHistory(c *cli.Context) error {
 
 	h, err := historyProcessor.GetTokenHistory(privateKey, tokenIDStr)
 	if err != nil {
-		return err
+		return newAppError(GetHistoryError, err)
 	}
 
 	if len(csvFile) > 0 {
 		err = incclient.SaveTxHistory(h, csvFile)
 		if err != nil {
-			return err
+			return newAppError(SaveHistoryError, err)
 		}
 	} else {
 		totalIn := uint64(0)
@@ -256,12 +248,12 @@ func getHistory(c *cli.Context) error {
 func financialExport(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	numThreads := c.Int(numThreadsFlag)
 	if numThreads == 0 {
-		return fmt.Errorf("%v in invalid", numThreadsFlag)
+		return newAppError(NumThreadsError)
 	}
 
 	csvFile := c.String(csvFileFlag)
@@ -273,7 +265,7 @@ func financialExport(c *cli.Context) error {
 
 	historyMap, err := historyProcessor.GetAllHistory(privateKey)
 	if err != nil {
-		return err
+		return newAppError(GetHistoryError, err)
 	}
 
 	history := new(incclient.TxHistory)
@@ -311,7 +303,7 @@ func financialExport(c *cli.Context) error {
 
 	f, err := os.OpenFile(csvFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return err
+		return newAppError(UnexpectedError, fmt.Errorf("cannot open file %v: %v", csvFile, err))
 	}
 	defer func() {
 		err := f.Close()
@@ -331,7 +323,7 @@ func financialExport(c *cli.Context) error {
 	historyPattern := []string{"Date", "TxHash", "Received Quantity", "Received Currency", "Sent Quantity", "Sent Currency", "Fee Amount", "Fee Currency", "Tag"}
 	err = w.Write(historyPattern)
 	if err != nil {
-		return err
+		return newAppError(SaveHistoryError, err)
 	}
 
 	writtenData := make(map[string]bool)
@@ -354,7 +346,7 @@ func financialExport(c *cli.Context) error {
 
 		err = w.Write(toBeWritten)
 		if err != nil {
-			return fmt.Errorf("write txHash %v error: %v", txIn.GetTxHash(), err)
+			return newAppError(SaveHistoryError, fmt.Errorf("write txHash %v error: %v", txIn.GetTxHash(), err))
 		}
 	}
 
@@ -387,7 +379,7 @@ func financialExport(c *cli.Context) error {
 
 		err = w.Write(toBeWritten)
 		if err != nil {
-			return fmt.Errorf("write txHash %v error: %v", txOut.GetTxHash(), err)
+			return newAppError(SaveHistoryError, fmt.Errorf("write txHash %v error: %v", txOut.GetTxHash(), err))
 		}
 	}
 	log.Printf("Report written to file `%v`\n", csvFile)
@@ -400,21 +392,26 @@ type accountInfo struct {
 	*incclient.KeyInfo
 }
 
+type masterKeyInfo struct {
+	Mnemonic string `json:"Mnemonic,omitempty"`
+	Accounts []*accountInfo
+}
+
 func genKeySet(c *cli.Context) error {
 	w, mnemonic, err := wallet.NewMasterKey()
 	if err != nil {
-		return err
+		return newAppError(GenerateMasterKeyError, err)
 	}
 
 	numShards := c.Int(numShardsFlag)
 	if numShards == 0 {
-		return fmt.Errorf("%v is invalid", numShardsFlag)
+		return newAppError(InvalidNumberShardsError)
 	}
 	common.MaxShardNumber = numShards
 
 	shardID := c.Int(shardIDFlag)
 	if shardID < -2 || shardID >= common.MaxShardNumber {
-		return fmt.Errorf("expected shardID from -2 to %v", common.MaxShardNumber-1)
+		return newAppError(InvalidShardError, fmt.Errorf("expected shardID from -2 to %v", common.MaxShardNumber-1))
 	}
 	supportedShards := make(map[byte]bool)
 	if shardID == -1 {
@@ -427,7 +424,6 @@ func genKeySet(c *cli.Context) error {
 
 	numAccounts := c.Int(numAccountsFlag)
 
-	fmt.Printf("mnemonic: %v\n", mnemonic)
 	accounts := make([]*accountInfo, 0)
 	genCount := 0
 	index := 1
@@ -437,12 +433,12 @@ func genKeySet(c *cli.Context) error {
 		}
 		childKey, err := w.DeriveChild(uint32(index))
 		if err != nil {
-			return err
+			return newAppError(DeriveChildError, err)
 		}
 		privateKey := childKey.Base58CheckSerialize(wallet.PrivateKeyType)
 		info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
 		if err != nil {
-			return err
+			return newAppError(GetAccountInfoError, err)
 		}
 		if index == 1 && shardID == -2 {
 			supportedShards[info.ShardID] = true
@@ -454,7 +450,7 @@ func genKeySet(c *cli.Context) error {
 
 		index++
 	}
-	return jsonPrint(accounts)
+	return jsonPrint(masterKeyInfo{Mnemonic: mnemonic, Accounts: accounts})
 }
 
 func importMnemonic(c *cli.Context) error {
@@ -462,18 +458,18 @@ func importMnemonic(c *cli.Context) error {
 	mnemonic = strings.Replace(mnemonic, "-", " ", -1)
 	w, err := wallet.NewMasterKeyFromMnemonic(mnemonic)
 	if err != nil {
-		return err
+		return newAppError(ImportMnemonicError)
 	}
 
 	numShards := c.Int(numShardsFlag)
 	if numShards == 0 {
-		return fmt.Errorf("%v is invalid", numShardsFlag)
+		return newAppError(InvalidNumberShardsError)
 	}
 	common.MaxShardNumber = numShards
 
 	shardID := c.Int(shardIDFlag)
 	if shardID < -2 || shardID >= common.MaxShardNumber {
-		return fmt.Errorf("expected shardID from -2 to %v", common.MaxShardNumber-1)
+		return newAppError(InvalidShardError, fmt.Errorf("expected shardID from -2 to %v", common.MaxShardNumber-1))
 	}
 	supportedShards := make(map[byte]bool)
 	if shardID == -1 {
@@ -486,7 +482,6 @@ func importMnemonic(c *cli.Context) error {
 
 	numAccounts := c.Int(numAccountsFlag)
 
-	fmt.Printf("mnemonic: %v\n", mnemonic)
 	accounts := make([]*accountInfo, 0)
 	genCount := 0
 	index := 1
@@ -496,12 +491,12 @@ func importMnemonic(c *cli.Context) error {
 		}
 		childKey, err := w.DeriveChild(uint32(index))
 		if err != nil {
-			return err
+			return newAppError(DeriveChildError, err)
 		}
 		privateKey := childKey.Base58CheckSerialize(wallet.PrivateKeyType)
 		info, err := incclient.GetAccountInfoFromPrivateKey(privateKey)
 		if err != nil {
-			return err
+			return newAppError(GetAccountInfoError, err)
 		}
 		if index == 1 && shardID == -2 {
 			supportedShards[info.ShardID] = true
@@ -519,8 +514,8 @@ func importMnemonic(c *cli.Context) error {
 func submitKey(c *cli.Context) error {
 	var err error
 	otaKey := c.String(otaKeyFlag)
-	if otaKey == "" {
-		return fmt.Errorf("%v is invalid", otaKeyFlag)
+	if !isValidOtaKey(otaKey) {
+		return newAppError(InvalidOTAKeyError)
 	}
 
 	accessToken := c.String(accessTokenFlag)
@@ -533,7 +528,7 @@ func submitKey(c *cli.Context) error {
 	}
 
 	if err != nil {
-		return err
+		return newAppError(SubmitKeyError, err)
 	}
 
 	return nil

@@ -90,18 +90,21 @@ func shieldPRV(c *cli.Context) error {
 	log.Println("[STEP 0] PREPARE DATA")
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	incAddress := c.String(addressFlag)
 	if incAddress == "" {
 		incAddress = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
 	}
+	if !isValidAddress(incAddress) {
+		return newAppError(InvalidPaymentAddressError)
+	}
 
 	evmNetwork := c.String(evmFlag)
 	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
 	if err != nil {
-		return err
+		return newAppError(GetEVMNetworkError, err)
 	}
 	prvTokenAddress := common.HexToAddress(prv20AddressStr)
 
@@ -115,7 +118,7 @@ func shieldPRV(c *cli.Context) error {
 	log.Println("[STEP 1] CHECK INCOGNITO BALANCE")
 	prvBalance, err := checkSufficientIncBalance(privateKey, iCommon.PRVIDStr, incclient.DefaultPRVFee)
 	if err != nil {
-		return err
+		return newAppError(InsufficientBalanceError, err)
 	}
 	log.Printf("Current PRV balance: %v\n", prvBalance)
 	log.Printf("[STEP 1] FINISHED!\n\n")
@@ -126,12 +129,12 @@ func shieldPRV(c *cli.Context) error {
 	var privateEVMKey string
 	input, err := promptInput(fmt.Sprintf("Enter your %v private key", evmNetwork), &privateEVMKey, true)
 	if err != nil {
-		return err
+		return newAppError(UserInputError, err)
 	}
 	privateEVMKey = string(input)
 	acc, err := NewEVMAccount(privateEVMKey)
 	if err != nil {
-		return err
+		return newAppError(NewEVMAccountError, err)
 	}
 
 	for {
@@ -152,7 +155,7 @@ func shieldPRV(c *cli.Context) error {
 		}
 		_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 		if err != nil {
-			return err
+			return newAppError(GetEVMBalanceError, err)
 		}
 		nativeBalance, _ := tmpNativeBalance.Float64()
 
@@ -167,14 +170,14 @@ func shieldPRV(c *cli.Context) error {
 	log.Println("[STEP 3] DEPOSIT PUBLIC TOKEN TO SC")
 	evmHash, err := acc.BurnPRVOnEVM(incAddress, shieldAmount, 0, 0, evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(EVMBurnPRVError, err)
 	}
 	log.Printf("[STEP 3] FINISHED!\n\n")
 
 	log.Println("[STEP 4] SHIELD TO INCOGNITO")
 	incTxHash, err := ShieldPRV(privateKey, evmHash.String(), evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(CreatePRVShieldingTransactionError, err)
 	}
 	log.Printf("[STEP 4] FINISHED!\n\n")
 
@@ -200,13 +203,13 @@ func shieldPRV(c *cli.Context) error {
 func retryShieldPRV(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	evmNetwork := c.String(evmFlag)
 	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
 	if err != nil {
-		return err
+		return newAppError(GetEVMNetworkError, err)
 	}
 
 	evmTxHashStr := c.String(externalTxIDFlag)
@@ -214,7 +217,7 @@ func retryShieldPRV(c *cli.Context) error {
 	log.Println("[STEP 1] SHIELD TO INCOGNITO")
 	incTxHash, err := ShieldPRV(privateKey, evmTxHashStr, evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(CreatePRVShieldingTransactionError, err)
 	}
 	log.Printf("[STEP 1] FINISHED!\n\n")
 
@@ -246,19 +249,19 @@ func unShieldPRV(c *cli.Context) error {
 	// get the private key
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	// get the un-shield amount
 	unShieldAmount := c.Uint64(amountFlag)
 	if unShieldAmount == 0 {
-		return fmt.Errorf("%v is invalid", amountFlag)
+		return newAppError(InvalidAmountError)
 	}
 
 	evmNetwork := c.String(evmFlag)
 	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
 	if err != nil {
-		return err
+		return newAppError(GetEVMNetworkError, err)
 	}
 
 	log.Printf("Network: %v, Token: PRV, TokenAddress: %v, UnShieldAmount: %v",
@@ -269,7 +272,7 @@ func unShieldPRV(c *cli.Context) error {
 	log.Println("[STEP 1] CHECK INCOGNITO BALANCE")
 	prvBalance, err := checkSufficientIncBalance(privateKey, iCommon.PRVIDStr, incclient.DefaultPRVFee+unShieldAmount)
 	if err != nil {
-		return err
+		return newAppError(InsufficientBalanceError, err)
 	}
 
 	log.Printf("Current PRVBalance: %v\n", prvBalance)
@@ -281,12 +284,12 @@ func unShieldPRV(c *cli.Context) error {
 	var privateEVMKey string
 	input, err := promptInput(fmt.Sprintf("Enter your %v private key", evmNetwork), &privateEVMKey, true)
 	if err != nil {
-		return err
+		return newAppError(UserInputError, err)
 	}
 	privateEVMKey = string(input)
 	acc, err := NewEVMAccount(privateEVMKey)
 	if err != nil {
-		return err
+		return newAppError(NewEVMAccountError, err)
 	}
 
 	nativeTokenName := "ETH"
@@ -301,7 +304,7 @@ func unShieldPRV(c *cli.Context) error {
 
 	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(GetEVMBalanceError, err)
 	}
 	nativeBalance, _ := tmpNativeBalance.Float64()
 	log.Printf("Your %v address: %v, %v: %v\n", evmNetwork, acc.address.String(), nativeTokenName, nativeBalance)
@@ -311,7 +314,7 @@ func unShieldPRV(c *cli.Context) error {
 		fmt.Sprintf("Un-shield to the following address: %v. Continue? (y/n)", evmAddress.String()),
 		&res)
 	if err != nil {
-		return err
+		return newAppError(UnexpectedError, err)
 	}
 	res = string(resInBytes)
 	if !strings.Contains(res, "y") && !strings.Contains(res, "Y") {
@@ -319,11 +322,11 @@ func unShieldPRV(c *cli.Context) error {
 			fmt.Sprintf("Enter the address you want to un-shield to"),
 			&res)
 		if err != nil {
-			return err
+			return newAppError(UserInputError, err)
 		}
 		res = string(resInBytes)
 		if !isValidEVMAddress(res) {
-			return fmt.Errorf("%v is not a valid EVM address", res)
+			return newAppError(InvalidExternalAddressError)
 		}
 		evmAddress = common.HexToAddress(res)
 	}
@@ -332,7 +335,7 @@ func unShieldPRV(c *cli.Context) error {
 	log.Println("[STEP 3] BURN INCOGNITO TOKEN")
 	incTxHash, err := cfg.incClient.CreateAndSendBurningPRVPeggingRequestTransaction(privateKey, evmAddress.String(), unShieldAmount, evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(CreatePRVUnShieldingTransactionError, err)
 	}
 	log.Printf("incTxHash: %v\n", incTxHash)
 	log.Printf("[STEP 3] FINISHED!\n\n")
@@ -353,7 +356,7 @@ func unShieldPRV(c *cli.Context) error {
 	log.Println("[STEP 5] SUBMIT THE BURN PROOF TO THE SC")
 	_, err = acc.UnShieldPRV(incTxHash, 0, 0, evmNetworkID)
 	if err != nil {
-		panic(err)
+		return newAppError(EVMMintPRVError, err)
 	}
 	log.Printf("[STEP 5] FINISHED!\n\n")
 
@@ -365,11 +368,14 @@ func retryUnShieldPRV(c *cli.Context) error {
 	yesNoPrompt("Do you want to continue?")
 
 	incTxHash := c.String(txHashFlag)
+	if !isValidIncTxHash(incTxHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 
 	evmNetwork := c.String(evmFlag)
 	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
 	if err != nil {
-		return err
+		return newAppError(GetEVMNetworkError, err)
 	}
 
 	nativeTokenName := "ETH"
@@ -387,16 +393,16 @@ func retryUnShieldPRV(c *cli.Context) error {
 	var privateEVMKey string
 	input, err := promptInput(fmt.Sprintf("Enter your %v private key", evmNetwork), &privateEVMKey, true)
 	if err != nil {
-		return err
+		return newAppError(UserInputError, err)
 	}
 	privateEVMKey = string(input)
 	acc, err := NewEVMAccount(privateEVMKey)
 	if err != nil {
-		return err
+		return newAppError(NewEVMAccountError, err)
 	}
 	_, tmpNativeBalance, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 	if err != nil {
-		return err
+		return newAppError(GetEVMBalanceError, err)
 	}
 	nativeBalance, _ := tmpNativeBalance.Float64()
 	log.Printf("Your %v address: %v, %v: %v\n", evmNetwork, acc.address.String(), nativeTokenName, nativeBalance)
@@ -418,7 +424,7 @@ func retryUnShieldPRV(c *cli.Context) error {
 	log.Println("[STEP 3] SUBMIT THE BURN PROOF TO THE SC")
 	_, err = acc.UnShieldPRV(incTxHash, 0, 0, evmNetworkID)
 	if err != nil {
-		panic(err)
+		return newAppError(EVMMintPRVError, err)
 	}
 	log.Printf("[STEP 3] FINISHED!\n\n")
 

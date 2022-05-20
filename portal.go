@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 	"log"
@@ -11,32 +10,31 @@ import (
 func getPortalDepositAddress(c *cli.Context) error {
 	address := c.String(addressFlag)
 	if !isValidAddress(address) {
-		return fmt.Errorf("%v is invalid", addressFlag)
+		return newAppError(InvalidPaymentAddressError)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenIDStr) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	shieldAddress, err := cfg.incClient.GeneratePortalShieldingAddress(address, tokenIDStr)
 	if err != nil {
-		return err
+		return newAppError(GenerateShieldingAddressError, err)
 	}
 
-	log.Printf("ShieldingAddress: %v\n", shieldAddress)
-	return nil
+	return jsonPrintWithKey("ShieldAddress", shieldAddress)
 }
 
 // portalShield deposits a portal token (e.g, BTC) into the Incognito chain.
 func portalShield(c *cli.Context) error {
 	if cfg.btcClient == nil {
-		return fmt.Errorf("portal shielding is not supported by this CLI configuration")
+		return newAppError(BTCClientNotFoundError)
 	}
 
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	address := c.String(addressFlag)
@@ -44,50 +42,50 @@ func portalShield(c *cli.Context) error {
 		address = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
 	}
 	if !isValidAddress(address) {
-		return fmt.Errorf("%v is invalid", addressFlag)
+		return newAppError(InvalidPaymentAddressError)
 	}
 
 	portalTxHashStr := c.String(externalTxIDFlag)
 
 	tokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenIDStr) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	// check if the transaction has enough confirmations.
 	isConfirmed, blkHeight, err := cfg.btcClient.IsConfirmedTx(portalTxHashStr)
 	if err != nil {
-		return err
+		return newAppError(GetBTCConfirmationError, err)
 	}
 	if !isConfirmed {
-		return fmt.Errorf("tx %v does not have enough 6 confirmations", portalTxHashStr)
+		return newAppError(NotEnoughBTCConfirmationError)
 	}
 
 	// generate the shielding proof.
 	shieldingProof, err := cfg.btcClient.BuildProof(portalTxHashStr, blkHeight)
 	if err != nil {
-		return err
+		return newAppError(BuildBTCProofError, err)
 	}
 
 	// create an Incognito transaction to submit the proof.
 	txHash, err := cfg.incClient.CreateAndSendPortalShieldTransaction(privateKey, tokenIDStr, address, shieldingProof, nil, nil)
 	if err != nil {
-		return err
+		return newAppError(CreatePortalShieldingTransactionError, err)
 	}
-	log.Printf("TxHash: %v\n", txHash)
-	return nil
+
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // getPortalShieldStatus returns the status of a portal shielding request.
 func getPortalShieldStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
 	if txHash == "" {
-		return fmt.Errorf("%v is invalid", txHashFlag)
+		return newAppError(InvalidIncognitoTxHashError)
 	}
 
 	status, err := cfg.incClient.GetPortalShieldingRequestStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetPortalShieldingStatusError)
 	}
 
 	return jsonPrint(status)
@@ -97,22 +95,22 @@ func getPortalShieldStatus(c *cli.Context) error {
 func portalUnShield(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenIDStr) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	unShieldAmount := c.Uint64(amountFlag)
 	if unShieldAmount == 0 {
-		return fmt.Errorf("%v cannot be zero", amountFlag)
+		return newAppError(InvalidAmountError)
 	}
 
 	remoteAddress := c.String(externalAddressFlag)
 	if remoteAddress == "" {
-		return fmt.Errorf("%v is invalid", externalAddressFlag)
+		return newAppError(InvalidExternalAddressError)
 	}
 
 	// create a transaction to burn the Incognito token.
@@ -125,7 +123,7 @@ func portalUnShield(c *cli.Context) error {
 		nil,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreatePortalUnShieldingTransactionError, err)
 	}
 
 	log.Printf("TxHash: %v\n", txHash)
@@ -138,13 +136,13 @@ func portalUnShield(c *cli.Context) error {
 // getPortalUnShieldStatus returns the status of a portal un-shielding request.
 func getPortalUnShieldStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
-	if txHash == "" {
-		return fmt.Errorf("%v is invalid", txHashFlag)
+	if !isValidIncTxHash(txHash) {
+		return newAppError(InvalidIncognitoTxHashError)
 	}
 
 	status, err := cfg.incClient.GetPortalUnShieldingRequestStatus(txHash)
 	if err != nil {
-		return err
+		return newAppError(GetPortalUnShieldingStatusError, err)
 	}
 
 	return jsonPrint(status)

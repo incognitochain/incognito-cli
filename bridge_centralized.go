@@ -1,29 +1,28 @@
 package main
 
 import (
-	"fmt"
 	"github.com/urfave/cli/v2"
 )
 
 func shieldCentralized(c *cli.Context) error {
 	adminPrivateKey := c.String(adminPrivateKeyFlag)
 	if !isValidPrivateKey(adminPrivateKey) {
-		return fmt.Errorf("%v is invalid", adminPrivateKey)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	receiver := c.String(addressFlag)
 	if !isValidAddress(receiver) {
-		return fmt.Errorf("%v is invalid", addressFlag)
+		return newAppError(InvalidPaymentAddressError)
 	}
 
 	amt := c.Uint64(amountFlag)
 	if amt == 0 {
-		return fmt.Errorf("%v must not be 0", amountFlag)
+		return newAppError(InvalidAmountError)
 	}
 
 	tokenIDStr := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenIDStr) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	tokenName := c.String(tokenNameFlag)
@@ -31,8 +30,8 @@ func shieldCentralized(c *cli.Context) error {
 	txHash, err := cfg.incClient.CreateAndSendIssuingRequestTransaction(adminPrivateKey,
 		receiver, tokenIDStr, tokenName, amt)
 	if err != nil {
-		return err
+		return newAppError(CentralizedShieldError, err)
 	}
 
-	return jsonPrint(map[string]interface{}{"TxHash": txHash})
+	return jsonPrintWithKey("TxHash", txHash)
 }
