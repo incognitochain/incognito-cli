@@ -54,7 +54,7 @@ func main() {
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
 
-	//_ = generateDocsToFile(app, "commands.md") // un-comment this line to generate docs for the app's commands.
+	//_ = generateDocsToFile(app, "commands.md") // un-comment this line to generate docs for the app's commands (written to `commands.md`).
 
 	err := app.Run(os.Args)
 	if err != nil {
