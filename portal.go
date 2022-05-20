@@ -136,7 +136,7 @@ func portalUnShield(c *cli.Context) error {
 // getPortalUnShieldStatus returns the status of a portal un-shielding request.
 func getPortalUnShieldStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
-	if txHash == "" {
+	if !isValidIncTxHash(txHash) {
 		return newAppError(InvalidIncognitoTxHashError)
 	}
 

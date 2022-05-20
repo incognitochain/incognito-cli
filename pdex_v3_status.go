@@ -7,6 +7,9 @@ import (
 // pDEXTradeStatus retrieves the status of a pDEX trade.
 func pDEXTradeStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
+	if !isValidIncTxHash(txHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 	status, err := cfg.incClient.CheckTradeStatus(txHash)
 	if err != nil {
 		return newAppError(GetTradeStatusError, err)
@@ -29,6 +32,9 @@ func pDEXContributionStatus(c *cli.Context) error {
 // pDEXOrderAddingStatus retrieves the status of an order-book adding transaction.
 func pDEXOrderAddingStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
+	if !isValidIncTxHash(txHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 	status, err := cfg.incClient.CheckOrderAddingStatus(txHash)
 	if err != nil {
 		return newAppError(GetOrderAddingStatusError, err)
@@ -40,6 +46,9 @@ func pDEXOrderAddingStatus(c *cli.Context) error {
 // pDEXWithdrawalStatus retrieves the status of a pDEX liquidity withdrawal.
 func pDEXWithdrawalStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
+	if !isValidIncTxHash(txHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 	status, err := cfg.incClient.CheckDEXLiquidityWithdrawalStatus(txHash)
 	if err != nil {
 		return newAppError(GetDexWithdrawalStatusError, err)
@@ -51,6 +60,9 @@ func pDEXWithdrawalStatus(c *cli.Context) error {
 // pDEXOrderWithdrawalStatus retrieves the status of an order-book withdrawal.
 func pDEXOrderWithdrawalStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
+	if !isValidIncTxHash(txHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 	status, err := cfg.incClient.CheckOrderWithdrawalStatus(txHash)
 	if err != nil {
 		return newAppError(GetOrderWithdrawalStatusError, err)
@@ -73,6 +85,9 @@ func pDEXStakingStatus(c *cli.Context) error {
 // pDEXUnStakingStatus retrieves the status of a pDEX un-staking transaction.
 func pDEXUnStakingStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
+	if !isValidIncTxHash(txHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 	status, err := cfg.incClient.CheckDEXUnStakingStatus(txHash)
 	if err != nil {
 		return newAppError(GetDexUnStakingStatusError, err)
@@ -95,6 +110,9 @@ func pDEXWithdrawStakingRewardStatus(c *cli.Context) error {
 // pDEXWithdrawLPFeeStatus retrieves the status of a pDEX LP fee withdrawal transaction.
 func pDEXWithdrawLPFeeStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
+	if !isValidIncTxHash(txHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 	status, err := cfg.incClient.CheckDEXLPFeeWithdrawalStatus(txHash)
 	if err != nil {
 		return newAppError(GetLPFeeWithdrawalStatusError, err)
@@ -106,6 +124,9 @@ func pDEXWithdrawLPFeeStatus(c *cli.Context) error {
 // pDEXMintNFTStatus gets the status of a pDEx NFT minting transaction.
 func pDEXMintNFTStatus(c *cli.Context) error {
 	txHash := c.String(txHashFlag)
+	if !isValidIncTxHash(txHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 	status, err := cfg.incClient.CheckNFTMintingStatus(txHash)
 	if err != nil {
 		return newAppError(GetNFTMintingStatusError, err)

@@ -368,6 +368,9 @@ func retryUnShieldPRV(c *cli.Context) error {
 	yesNoPrompt("Do you want to continue?")
 
 	incTxHash := c.String(txHashFlag)
+	if !isValidIncTxHash(incTxHash) {
+		return newAppError(InvalidIncognitoTxHashError)
+	}
 
 	evmNetwork := c.String(evmFlag)
 	evmNetworkID, err := getEVMNetworkIDFromName(evmNetwork)
