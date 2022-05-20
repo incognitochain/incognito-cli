@@ -62,7 +62,7 @@ func checkReceiver(c *cli.Context) error {
 	var err error
 
 	txHash := c.String(txHashFlag)
-	if txHash == "" {
+	if !isValidIncTxHash(txHash) {
 		return newAppError(InvalidIncognitoTxHashError)
 	}
 
@@ -72,7 +72,7 @@ func checkReceiver(c *cli.Context) error {
 	}
 
 	readonlyKey := c.String(readonlyKeyFlag)
-	if readonlyKey != "" && !isValidReadonlyKey(otaKey) {
+	if readonlyKey != "" && !isValidReadonlyKey(readonlyKey) {
 		return newAppError(InvalidReadonlyKeyError)
 	}
 
@@ -88,12 +88,10 @@ func checkReceiver(c *cli.Context) error {
 		return newAppError(GetReceivingInfoError, err)
 	}
 
-	if !received {
-		fmt.Printf("OTAKey %v is not a receiver of tx %v\n", otaKey, txHash)
-	} else {
-		fmt.Printf("OTAKey %v is a receiver of tx %v\n", otaKey, txHash)
-		return jsonPrintWithKey("ReceivingInfo", res)
+	type receivingInfo struct {
+		Received      bool
+		ReceivingInfo map[string]uint64 `json:"ReceivingInfo"`
 	}
 
-	return nil
+	return jsonPrint(receivingInfo{Received: received, ReceivingInfo: res})
 }

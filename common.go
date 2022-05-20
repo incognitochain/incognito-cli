@@ -269,6 +269,20 @@ func isValidEVMAddress(tokenAddress string) bool {
 	return true
 }
 
+// isValidIncTxHash checks if an Incognito string txHash is valid or not.
+func isValidIncTxHash(txHash string) bool {
+	if txHash == "" {
+		return false
+	}
+
+	_, err := iCommon.Hash{}.NewHashFromStr(txHash)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
 // isSupportedVersion checks if the given version of transaction is supported or not.
 func isSupportedVersion(version int8) bool {
 	return version == 1 || version == 2
