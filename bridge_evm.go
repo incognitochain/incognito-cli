@@ -27,7 +27,7 @@ var shieldMessage = "This function helps shield an EVM (ETH/BNB/ERC20/BEP20, etc
 var unShieldMessage = "This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20, etc.) token out of the Incognito network. " +
 	"The un-shielding process consists the following operations.\n" +
 	"\t 1. Users burn the token inside the Incognito chain.\n" +
-	"\t 2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from " +
+	"\t 2. After the burning is successful, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from " +
 	"the Incognito chain.\n" +
 	"\t 3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the " +
 	"corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, " +
