@@ -418,7 +418,7 @@ func genKeySet(c *cli.Context) error {
 		for i := 0; i < common.MaxShardNumber; i++ {
 			supportedShards[byte(i)] = true
 		}
-	} else {
+	} else if shardID >= 0 {
 		supportedShards[byte(shardID)] = true
 	}
 
