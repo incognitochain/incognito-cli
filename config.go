@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/incclient/config"
 	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
 	"github.com/incognitochain/incognito-cli/bridge/portal"
+	"strings"
 )
 
 // Config represents the config of an environment of the CLI tool.
@@ -35,6 +38,8 @@ func NewConfig(
 }
 
 // NewTestNetConfig creates a new testnet Config.
+//
+// Deprecated: use initConfig instead.
 func NewTestNetConfig(incClient *incclient.IncClient) error {
 	var err error
 	if incClient == nil {
@@ -93,6 +98,8 @@ func NewTestNetConfig(incClient *incclient.IncClient) error {
 }
 
 // NewTestNet1Config creates a new testnet1 Config.
+//
+// Deprecated: use initConfig instead.
 func NewTestNet1Config(incClient *incclient.IncClient) error {
 	var err error
 	if incClient == nil {
@@ -150,6 +157,8 @@ func NewTestNet1Config(incClient *incclient.IncClient) error {
 }
 
 // NewMainNetConfig creates a new main-net Config.
+//
+// Deprecated: use initConfig instead.
 func NewMainNetConfig(incClient *incclient.IncClient) error {
 	var err error
 	if incClient == nil {
@@ -208,6 +217,8 @@ func NewMainNetConfig(incClient *incclient.IncClient) error {
 }
 
 // NewLocalConfig creates a new local Config.
+//
+// Deprecated: use initConfig instead.
 func NewLocalConfig(incClient *incclient.IncClient) error {
 	var err error
 	if incClient == nil {
@@ -261,5 +272,44 @@ func NewLocalConfig(incClient *incclient.IncClient) error {
 	}
 
 	cfg = NewConfig(incClient, evmClients, btcClient, evmVaultAddresses)
+	return nil
+}
+
+func initConfig(clientConfig *config.ClientConfig) error {
+	incClient, err := incclient.NewIncClientWithConfig(clientConfig)
+	if err != nil {
+		return err
+	}
+
+	evmClients := make(map[int]*ethclient.Client)
+	evmAddresses := make(map[int]common.Address)
+
+	for evmName, evmConfig := range clientConfig.EVMNetworks {
+		networkID, err := rpc.GetEVMNetworkIDByName(evmName)
+		if err != nil {
+			return err
+		}
+
+		evmClients[networkID], err = ethclient.Dial(evmConfig.FullNodeHost)
+		if err != nil {
+			return err
+		}
+
+		evmAddresses[networkID] = common.HexToAddress(evmConfig.ContractAddress)
+	}
+
+	var btcClient *portal.BTCClient
+	switch strings.ToLower(clientConfig.Network) {
+	case "mainnet", "main-net":
+		btcClient, err = portal.NewBTCMainNetClient()
+	default:
+		btcClient, err = portal.NewBTCTestNetClient()
+	}
+	if err != nil {
+		return fmt.Errorf("cannot connect to BTC client: %v", err)
+	}
+
+	cfg = NewConfig(incClient, evmClients, btcClient, evmAddresses)
+
 	return nil
 }

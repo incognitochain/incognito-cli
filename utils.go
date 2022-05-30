@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/incclient/config"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
 	"log"
@@ -15,13 +15,14 @@ import (
 )
 
 var (
-	network       string
-	host          string
-	debug         int
-	cache         int
-	askUser       = true
-	isMainNet     = false
-	clientVersion = 2
+	network              string
+	host                 string
+	debug                int
+	cache                int
+	askUser              = true
+	isMainNet            = false
+	clientVersion        = 2
+	clientCacheDirectory = "incognito-cli"
 )
 
 func defaultBeforeFunc(_ *cli.Context) error {
@@ -29,59 +30,37 @@ func defaultBeforeFunc(_ *cli.Context) error {
 }
 
 func initNetWork() error {
+	clientConfig := *config.MainNetConfig
+	switch strings.ToLower(network) {
+	case "mainnet", "main-net":
+	case "testnet", "test-net":
+		clientConfig = *config.TestNetConfig
+	case "testnet1", "test-net-1", "test-net1":
+		clientConfig = *config.TestNet1Config
+	case "local":
+		clientConfig = *config.LocalConfig
+	default:
+		return fmt.Errorf("network not found")
+	}
+
+	// if UTXO is enabled, use the CLI cache folder instead of the default.
 	if cache != 0 {
-		incclient.MaxGetCoinThreads = 20
+		clientConfig.UTXOCache.Enable = true
+		clientConfig.UTXOCache.MaxGetCoinThreads = 20
+		homeDirectory := os.Getenv("HOME")
+		if homeDirectory != "" {
+			clientConfig.UTXOCache.CacheLocation = fmt.Sprintf("%v/.cache/%v", homeDirectory, clientCacheDirectory)
+		}
 	}
 	if debug != 0 {
-		incclient.Logger.IsEnable = true
+		clientConfig.LogConfig.Enable = true
 	}
 	if host != "" {
-		fmt.Printf("host: %v, version: %v\n", host, clientVersion)
-		return initClient(host, clientVersion)
-	}
-	switch network {
-	case "mainnet":
-		return NewMainNetConfig(nil)
-	case "testnet":
-		return NewTestNetConfig(nil)
-	case "testnet1":
-		return NewTestNet1Config(nil)
-	case "local":
-		return NewLocalConfig(nil)
+		clientConfig.RPCHost = host
+		clientConfig.Version = clientVersion
 	}
 
-	return fmt.Errorf("network not found")
-}
-func initClient(rpcHost string, version int) error {
-	ethNode := incclient.MainNetETHHost
-	var err error
-	switch network {
-	case "testnet":
-		ethNode = incclient.TestNetETHHost
-		err = NewTestNetConfig(nil)
-	case "testnet1":
-		ethNode = incclient.TestNet1ETHHost
-		err = NewTestNet1Config(nil)
-	case "local":
-		ethNode = incclient.LocalETHHost
-		err = NewLocalConfig(nil)
-	default:
-		err = NewMainNetConfig(nil)
-	}
-	if err != nil {
-		return err
-	}
-
-	incClient, err := incclient.NewIncClient(rpcHost, ethNode, version, network)
-	if cache != 0 {
-		incClient, err = incclient.NewIncClientWithCache(rpcHost, ethNode, version, network)
-	}
-	if err != nil {
-		return err
-	}
-
-	cfg.incClient = incClient
-	return nil
+	return initConfig(&clientConfig)
 }
 
 // checkSufficientIncBalance checks if the Incognito balance is not less than the requiredAmount.
