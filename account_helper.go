@@ -23,7 +23,7 @@ type TokenInfo struct {
 }
 
 func initForFinancialReport(c *cli.Context) error {
-	err := initNetWork()
+	err := initCLI()
 	if err != nil {
 		return err
 	}

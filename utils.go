@@ -26,16 +26,18 @@ var (
 )
 
 func defaultBeforeFunc(_ *cli.Context) error {
-	return initNetWork()
+	return initCLI()
 }
 
-func initNetWork() error {
-	clientConfig := *config.MainNetConfig
+func initCLI() error {
+	var clientConfig config.ClientConfig
+
+	clientConfig = *config.MainNetConfig
 	switch strings.ToLower(network) {
 	case "mainnet", "main-net":
 	case "testnet", "test-net":
 		clientConfig = *config.TestNetConfig
-	case "testnet1", "test-net-1", "test-net1":
+	case "testnet1", "test-net-1":
 		clientConfig = *config.TestNet1Config
 	case "local":
 		clientConfig = *config.LocalConfig
@@ -43,15 +45,16 @@ func initNetWork() error {
 		return fmt.Errorf("network not found")
 	}
 
-	// if UTXO is enabled, use the CLI cache folder instead of the default.
 	if cache != 0 {
 		clientConfig.UTXOCache.Enable = true
 		clientConfig.UTXOCache.MaxGetCoinThreads = 20
-		homeDirectory := os.Getenv("HOME")
-		if homeDirectory != "" {
-			clientConfig.UTXOCache.CacheLocation = fmt.Sprintf("%v/.cache/%v", homeDirectory, clientCacheDirectory)
-		}
 	}
+	// Use the CLI cache folder instead of the default.
+	homeDirectory := os.Getenv("HOME")
+	if homeDirectory != "" {
+		clientConfig.UTXOCache.CacheLocation = fmt.Sprintf("%v/.cache/%v/%v", homeDirectory, clientCacheDirectory, network)
+	}
+
 	if debug != 0 {
 		clientConfig.LogConfig.Enable = true
 	}
@@ -137,4 +140,8 @@ func parseInput(text string) string {
 	}
 
 	return text
+}
+
+func getCacheDirectory() string {
+	return cfg.sdkConfig.UTXOCache.CacheLocation
 }

@@ -9,6 +9,7 @@ const (
 	InvalidAmountError
 	InvalidIncognitoTxHashError
 	UserInputError
+	CacheLocationNotFoundError
 
 	InvalidPrivateKeyError
 	InvalidPaymentAddressError
@@ -133,6 +134,7 @@ var errCodeMessages = map[int]struct {
 	InvalidAmountError:          {-1003, "Invalid Incognito amount"},
 	InvalidIncognitoTxHashError: {-1004, "Invalid Incognito txHash"},
 	UserInputError:              {-1005, "User input error"},
+	CacheLocationNotFoundError:  {-1006, "Cache location not found"},
 
 	InvalidPrivateKeyError:     {-2000, "Invalid Incognito private key"},
 	InvalidPaymentAddressError: {-2001, "Invalid Incognito payment address"},

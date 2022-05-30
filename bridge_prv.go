@@ -41,7 +41,7 @@ var unShieldPRVMessage = "This function helps withdraw PRV to an EVM network. " 
 var prv20AddressStr string
 
 func prvInitFunc(c *cli.Context) error {
-	err := initNetWork()
+	err := initCLI()
 	if err != nil {
 		return err
 	}

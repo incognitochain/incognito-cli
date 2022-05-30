@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"github.com/incognitochain/bridge-eth/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
@@ -531,5 +532,28 @@ func submitKey(c *cli.Context) error {
 		return newAppError(SubmitKeyError, err)
 	}
 
+	return nil
+}
+
+func clearCache(c *cli.Context) error {
+	otaKey := c.String(otaKeyFlag)
+	if !isValidOtaKey(otaKey) {
+		return newAppError(InvalidOTAKeyError)
+	}
+
+	cacheDirectory := getCacheDirectory()
+	if cacheDirectory == "" {
+		return newAppError(CacheLocationNotFoundError)
+	}
+
+	cacheFile := fmt.Sprintf("%v/%v", cacheDirectory, otaKey)
+	if _, err := os.Stat(cacheFile); errors.Is(err, os.ErrNotExist) {
+		return newAppError(CacheLocationNotFoundError, fmt.Errorf("cache at %v not found", cacheFile))
+	}
+
+	err := os.Remove(cacheFile)
+	if err != nil {
+		return newAppError(CacheLocationNotFoundError, err)
+	}
 	return nil
 }

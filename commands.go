@@ -171,6 +171,16 @@ var accountCommands = []*cli.Command{
 				Action: submitKey,
 				Before: defaultBeforeFunc,
 			},
+			{
+				Name:        "clearcache",
+				Usage:       "Clear the UTXO cache for an account (OTAKey).",
+				Description: "This command clears the local UTXO cache for an account based on the given OTAKey.",
+				Flags: []cli.Flag{
+					defaultFlags[otaKeyFlag],
+				},
+				Action: clearCache,
+				Before: defaultBeforeFunc,
+			},
 		},
 	},
 }

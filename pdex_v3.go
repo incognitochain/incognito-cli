@@ -555,7 +555,7 @@ func pDEXCheckPrice(c *cli.Context) error {
 
 // pDEXGetAllNFTs returns the list of NFTs for a given private key.
 func pDEXGetAllNFTs(c *cli.Context) error {
-	err := initNetWork()
+	err := initCLI()
 	if err != nil {
 		return err
 	}
@@ -575,7 +575,7 @@ func pDEXGetAllNFTs(c *cli.Context) error {
 
 // pDEXGetOrderByID returns the detail of an order given its id.
 func pDEXGetOrderByID(c *cli.Context) error {
-	err := initNetWork()
+	err := initCLI()
 	if err != nil {
 		return err
 	}

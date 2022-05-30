@@ -20,6 +20,8 @@ type Config struct {
 	btcClient *portal.BTCClient
 
 	evmVaultAddresses map[int]common.Address
+
+	sdkConfig *config.ClientConfig
 }
 
 // NewConfig returns a new Config from given parameters.
@@ -310,6 +312,7 @@ func initConfig(clientConfig *config.ClientConfig) error {
 	}
 
 	cfg = NewConfig(incClient, evmClients, btcClient, evmAddresses)
+	cfg.sdkConfig = clientConfig
 
 	return nil
 }
