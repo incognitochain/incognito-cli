@@ -223,13 +223,23 @@ var defaultFlags = map[string]cli.Flag{
 	mnemonicFlag: &cli.StringFlag{
 		Name:     mnemonicFlag,
 		Aliases:  []string{"m"},
-		Usage:    "A 12-word mnemonic phrase, words are separated by a \"-\" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).",
+		Usage:    "A 12-word mnemonic phrase, words are separated by a \"-\", or put in \"\" (Examples: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake, \"artist decline pepper spend good enemy caught sister sure opinion hundred lake\").",
 		Required: true,
 	},
 	numShardsFlag: &cli.IntFlag{
 		Name:  numShardsFlag,
-		Usage: "The number of shard",
+		Usage: "The number of shards",
 		Value: 8,
+	},
+	numAccountsFlag: &cli.IntFlag{
+		Name:  numAccountsFlag,
+		Usage: "The number of accounts",
+		Value: 1,
+	},
+	shardIDFlag: &cli.IntFlag{
+		Name:  shardIDFlag,
+		Usage: fmt.Sprintf("A specific shardID (-2: same shard as the first account (i.e, `Anon`); -1: any shard)"),
+		Value: -2,
 	},
 
 	evmAddressFlag: &cli.StringFlag{
@@ -238,9 +248,10 @@ var defaultFlags = map[string]cli.Flag{
 		Value: "",
 	},
 	tokenAddressFlag: &cli.StringFlag{
-		Name:  tokenAddressFlag,
-		Usage: "ID of the token on ETH/BSC networks",
-		Value: nativeToken,
+		Name:    tokenAddressFlag,
+		Aliases: aliases[tokenAddressFlag],
+		Usage:   "ID of the token on ETH/BSC networks",
+		Value:   nativeToken,
 	},
 	shieldAmountFlag: &cli.Float64Flag{
 		Name:     shieldAmountFlag,
@@ -250,7 +261,7 @@ var defaultFlags = map[string]cli.Flag{
 	},
 	evmFlag: &cli.StringFlag{
 		Name:  evmFlag,
-		Usage: "The EVM network (ETH or BSC)",
+		Usage: "The EVM network (ETH, BSC, PLG or FTM)",
 		Value: "ETH",
 	},
 	externalTxIDFlag: &cli.StringFlag{
@@ -290,5 +301,18 @@ var defaultFlags = map[string]cli.Flag{
 		Usage:    "Whether or not to automatically re-stake (0 - false, <> 0 - true)",
 		Value:    1,
 		Required: false,
+	},
+
+	adminPrivateKeyFlag: &cli.StringFlag{
+		Name:     adminPrivateKeyFlag,
+		Aliases:  aliases[adminPrivateKeyFlag],
+		Usage:    "A base58-encoded Incognito private key of the admin account",
+		Required: true,
+	},
+	tokenNameFlag: &cli.StringFlag{
+		Name:     tokenNameFlag,
+		Aliases:  aliases[tokenNameFlag],
+		Usage:    "The name of the shielding token",
+		Required: true,
 	},
 }

@@ -9,45 +9,40 @@ import (
 
 // pDEXTrade creates and sends a trade to the pDEX.
 func pDEXTrade(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	tokenIdToSell := c.String(tokenIDToSellFlag)
 	if !isValidTokenID(tokenIdToSell) {
-		return fmt.Errorf("%v is invalid", tokenIDToSellFlag)
+		return newAppError(InvalidSellTokenIDError)
 	}
 
 	tokenIdToBuy := c.String(tokenIDToBuyFlag)
 	if !isValidTokenID(tokenIdToBuy) {
-		return fmt.Errorf("%v is invalid", tokenIDToBuyFlag)
+		return newAppError(InvalidBuyTokenIDError)
 	}
 
 	sellingAmount := c.Uint64(sellingAmountFlag)
 	if sellingAmount == 0 {
-		return fmt.Errorf("%v cannot be zero", sellingAmountFlag)
+		return newAppError(InvalidSellAmountError)
 	}
 
 	minAcceptableAmount := c.Uint64(minAcceptableAmountFlag)
 	tradingFee := c.Uint64(tradingFeeFlag)
 	if tradingFee == 0 {
-		return fmt.Errorf("%v cannot be zero", tradingFeeFlag)
+		return newAppError(InvalidTradingFeeError)
 	}
 
 	maxPaths := c.Uint(maxTradingPathLengthFlag)
 	if maxPaths > pdex_v3.MaxPaths {
-		return fmt.Errorf("maximum trading path length allowed %v, got %v", pdex_v3.MaxPaths, maxPaths)
+		return newAppError(InvalidMaxTradingPathError, fmt.Errorf("maximum trading path length allowed %v, got %v", pdex_v3.MaxPaths, maxPaths))
 	}
 
 	allPoolPairs, err := cfg.incClient.GetAllPdexPoolPairs(0)
 	if err != nil {
-		return err
+		return newAppError(GetAllDexPoolPairsError, err)
 	}
 	tmpTradingPath := c.String(tradingPathFlag)
 	tradingPath := make([]string, 0)
@@ -55,17 +50,17 @@ func pDEXTrade(c *cli.Context) error {
 		tradingPath = strings.Split(tmpTradingPath, ",")
 		for _, poolID := range tradingPath {
 			if _, ok := allPoolPairs[poolID]; !ok {
-				return fmt.Errorf("poolID %v not existed", poolID)
+				return newAppError(UnexpectedError, fmt.Errorf("poolID %v not existed", poolID))
 			}
 		}
 	} else {
 		_, tradingPath, _ = pdex_v3.FindGoodTradePath(maxPaths, allPoolPairs, tokenIdToSell, tokenIdToBuy, sellingAmount)
 	}
 	if len(tradingPath) == 0 {
-		return fmt.Errorf("no trading path is found for the pair %v-%v with maxPaths = %v", tokenIdToSell, tokenIdToBuy, maxPaths)
+		return newAppError(InvalidTradingPathError, fmt.Errorf("no trading path is found for the pair %v-%v with maxPaths = %v", tokenIdToSell, tokenIdToBuy, maxPaths))
 	}
 	if len(tradingPath) > int(maxPaths) {
-		return fmt.Errorf("maximum trading path length %v, got %v", maxPaths, len(tradingPath))
+		return newAppError(InvalidTradingPathError, fmt.Errorf("maximum trading path length %v, got %v", maxPaths, len(tradingPath)))
 	}
 
 	prvFee := c.Int(prvFeeFlag)
@@ -81,73 +76,60 @@ func pDEXTrade(c *cli.Context) error {
 		prvFee != 0,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreateDexTradeTransactionError, err)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXMintNFT creates and sends a transaction that mints a new C-NFT for a given user.
 func pDEXMintNFT(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	encodedTx, txHash, err := cfg.incClient.CreatePdexv3MintNFT(privateKey)
 	if err != nil {
-		return err
+		return newAppError(CreateMintNFTTransactionError, err)
 	}
 	err = cfg.incClient.SendRawTx(encodedTx)
 	if err != nil {
-		return err
+		return newAppError(SendRawTxError)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXContribute contributes a token to the pDEX.
 func pDEXContribute(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	nftID := c.String(nftIDFlag)
 
 	pairHash := c.String(pairHashFlag)
 	if pairHash == "" {
-		return fmt.Errorf("%v is invalid", pairHashFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	amount := c.Uint64(amountFlag)
 	if amount == 0 {
-		return fmt.Errorf("%v cannot be zero", amountFlag)
+		return newAppError(InvalidAmountError)
 	}
 
 	amplifier := c.Uint64(amplifierFlag)
 	if amplifier == 0 {
-		return fmt.Errorf("%v cannot be zero", amplifierFlag)
+		return newAppError(InvalidAmplifierError)
 	}
 
 	pairID := c.String(pairIDFlag)
 
 	tokenId := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenId) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	txHash, err := cfg.incClient.CreateAndSendPdexv3ContributeTransaction(
@@ -160,23 +142,17 @@ func pDEXContribute(c *cli.Context) error {
 		amplifier,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreateDexContributionTransactionError, err)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXWithdraw withdraws a pair of tokens from the pDEX.
 func pDEXWithdraw(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	pairID := c.String(pairIDFlag)
@@ -210,25 +186,19 @@ func pDEXWithdraw(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXAddOrder places an order to the pDEX.
 func pDEXAddOrder(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	pairID := c.String(pairIDFlag)
 	if !isValidDEXPairID(pairID) {
-		return fmt.Errorf("%v is invalid", pairHashFlag)
+		return newAppError(InvalidPoolPairIDError)
 	}
 	tokenIDs := strings.Split(pairID, "-")[:2]
 
@@ -245,15 +215,15 @@ func pDEXAddOrder(c *cli.Context) error {
 		}
 	}
 	if !nftExist {
-		return fmt.Errorf("nftID %v does not belong to the private key %v", nftID, privateKey)
+		return newAppError(InvalidNFTError, fmt.Errorf("nftID %v does not belong to the private key %v", nftID, privateKey))
 	}
 
 	tokenIdToSell := c.String(tokenIDToSellFlag)
 	if !isValidTokenID(tokenIdToSell) {
-		return fmt.Errorf("%v is invalid", tokenIDToSellFlag)
+		return newAppError(InvalidSellTokenIDError)
 	}
 	if tokenIdToSell != tokenIDs[0] && tokenIdToSell != tokenIDs[1] {
-		return fmt.Errorf("tokenToSell %v not belong to pool pair %v", tokenIdToSell, pairID)
+		return newAppError(InvalidSellTokenIDError, fmt.Errorf("tokenToSell %v not belong to pool pair %v", tokenIdToSell, pairID))
 	}
 	tokenIdToBuy := tokenIDs[1]
 	if tokenIdToSell == tokenIDs[1] {
@@ -262,12 +232,12 @@ func pDEXAddOrder(c *cli.Context) error {
 
 	sellingAmount := c.Uint64(sellingAmountFlag)
 	if sellingAmount == 0 {
-		return fmt.Errorf("%v cannot be zero", sellingAmountFlag)
+		return newAppError(InvalidSellAmountError)
 	}
 
 	minAcceptableAmount := c.Uint64(minAcceptableAmountFlag)
 	if minAcceptableAmount == 0 {
-		return fmt.Errorf("%v cannot be zero", minAcceptableAmount)
+		return newAppError(InvalidMinAcceptableAmountError)
 	}
 	txHash, err := cfg.incClient.CreateAndSendPdexv3AddOrderTransaction(
 		privateKey,
@@ -279,29 +249,22 @@ func pDEXAddOrder(c *cli.Context) error {
 		minAcceptableAmount,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreateAddOrderTransactionError, err)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXWithdrawOrder withdraws an order from the pDEX.
 func pDEXWithdrawOrder(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	pairID := c.String(pairIDFlag)
 	if !isValidDEXPairID(pairID) {
-		return fmt.Errorf("%v is invalid", pairHashFlag)
+		return newAppError(InvalidPoolPairIDError)
 	}
 	tmpTokenIDs := strings.Split(pairID, "-")[:2]
 	nftID := c.String(nftIDFlag)
@@ -309,12 +272,12 @@ func pDEXWithdrawOrder(c *cli.Context) error {
 
 	tokenId1 := c.String(tokenID1Flag)
 	if !isValidTokenID(tokenId1) && tokenId1 != tmpTokenIDs[0] && tokenId1 != tmpTokenIDs[1] {
-		return fmt.Errorf("%v is invalid", tokenID1Flag)
+		return newAppError(InvalidTokenIDError, fmt.Errorf("%v is invalid", tokenID1Flag))
 	}
 
 	tokenId2 := c.String(tokenID2Flag)
 	if tokenId2 != "" && !isValidTokenID(tokenId2) && tokenId2 != tmpTokenIDs[0] && tokenId2 != tmpTokenIDs[1] {
-		return fmt.Errorf("%v is invalid", tokenID2Flag)
+		return newAppError(InvalidTokenIDError, fmt.Errorf("%v is invalid", tokenID2Flag))
 	}
 
 	amount := c.Uint64(amountFlag)
@@ -332,36 +295,29 @@ func pDEXWithdrawOrder(c *cli.Context) error {
 		tokenIDs...,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreateWithdrawOrderTransactionError, err)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXStake creates a pDEX staking transaction.
 func pDEXStake(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	nftID := c.String(nftIDFlag)
 
 	tokenID := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenID) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	amount := c.Uint64(amountFlag)
 	if amount == 0 {
-		return fmt.Errorf("%v cannot be zero", amountFlag)
+		return newAppError(InvalidAmountError)
 	}
 
 	txHash, err := cfg.incClient.CreateAndSendPdexv3StakingTransaction(
@@ -371,36 +327,29 @@ func pDEXStake(c *cli.Context) error {
 		amount,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreateDexStakingTransactionError, err)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXUnStake creates a pDEX un-staking transaction.
 func pDEXUnStake(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	nftID := c.String(nftIDFlag)
 
 	tokenID := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenID) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	amount := c.Uint64(amountFlag)
 	if amount == 0 {
-		return fmt.Errorf("%v cannot be zero", amountFlag)
+		return newAppError(InvalidAmountError)
 	}
 
 	txHash, err := cfg.incClient.CreateAndSendPdexv3UnstakingTransaction(
@@ -410,51 +359,39 @@ func pDEXUnStake(c *cli.Context) error {
 		amount,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreateDexUnStakingTransactionError, err)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // CheckDEXStakingReward returns the estimated pDEX staking rewards.
 func CheckDEXStakingReward(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	nftID := c.String(nftIDFlag)
 	tokenID := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenID) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	res, err := cfg.incClient.GetEstimatedDEXStakingReward(0, tokenID, nftID)
 	if err != nil {
-		return err
+		return newAppError(EstimateDEXStakingRewardError, err)
 	}
 	return jsonPrint(res)
 }
 
 // pDEXWithdrawStakingReward creates a transaction withdrawing the staking rewards from the pDEX.
 func pDEXWithdrawStakingReward(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	nftID := c.String(nftIDFlag)
 
 	tokenID := c.String(tokenIDFlag)
 	if !isValidTokenID(tokenID) {
-		return fmt.Errorf("%v is invalid", tokenIDFlag)
+		return newAppError(InvalidTokenIDError)
 	}
 
 	txHash, err := cfg.incClient.CreateAndSendPdexv3WithdrawStakeRewardTransaction(
@@ -463,58 +400,45 @@ func pDEXWithdrawStakingReward(c *cli.Context) error {
 		nftID,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreateDexStakingRewardWithdrawalTransactionError, err)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXGetShare returns the share amount of a pDEX nftID with-in a given poolID.
 func pDEXGetShare(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	pairID := c.String(pairIDFlag)
 	nftID := c.String(nftIDFlag)
 
 	share, err := cfg.incClient.GetPoolShareAmount(pairID, nftID)
 	if err != nil {
-		return err
+		return newAppError(GetPoolShareError, err)
 	}
 
-	fmt.Printf("Share: %v\n", share)
-	return nil
+	return jsonPrintWithKey("Share", share)
 }
 
 // pDEXWithdrawLPFee creates a transaction withdrawing the LP fees for an nftID from the pDEX.
 func pDEXWithdrawLPFee(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	nftID := c.String(nftIDFlag)
 
 	pairID := c.String(pairIDFlag)
 	if !isValidDEXPairID(pairID) {
-		return fmt.Errorf("%v is invalid", pairIDFlag)
+		return newAppError(InvalidPoolPairIDError)
 	}
 
 	lpValue, err := cfg.incClient.GetEstimatedLPValue(0, pairID, nftID)
 	if err != nil {
-		return err
+		return newAppError(GetEstimatedLPValueError, err)
 	}
-	if len(lpValue.TradingFee) == 0 {
-		return fmt.Errorf("not enough LP fee to withdraw")
+	if len(lpValue.PoolReward) == 0 {
+		return newAppError(CreateLPFeeWithdrawalTransactionError, fmt.Errorf("not enough reward to withdraw"))
 	}
 
 	txHash, err := cfg.incClient.CreateAndSendPdexv3WithdrawLPFeeTransaction(
@@ -523,98 +447,79 @@ func pDEXWithdrawLPFee(c *cli.Context) error {
 		nftID,
 	)
 	if err != nil {
-		return err
+		return newAppError(CreateLPFeeWithdrawalTransactionError, err)
 	}
 
-	fmt.Printf("TxHash: %v\n", txHash)
-
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // pDEXGetEstimatedLPValue returns the estimated LP values of an LP in a given pool.
 func pDEXGetEstimatedLPValue(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	poolPairID := c.String(pairIDFlag)
 	if !isValidDEXPairID(poolPairID) {
-		return fmt.Errorf("%v is invalid", pairIDFlag)
+		return newAppError(InvalidPoolPairIDError)
 	}
 	nftID := c.String(nftIDFlag)
 
 	res, err := cfg.incClient.GetEstimatedLPValue(0, poolPairID, nftID)
 	if err != nil {
-		return err
+		return newAppError(GetEstimatedLPValueError, err)
 	}
-	err = jsonPrint(res)
 
-	return err
+	return jsonPrint(res)
 }
 
 // pDEXFindPath finds a proper trading path.
 func pDEXFindPath(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	tokenIdToSell := c.String(tokenIDToSellFlag)
 	if !isValidTokenID(tokenIdToSell) {
-		return fmt.Errorf("%v is invalid", tokenIDToSellFlag)
+		return newAppError(InvalidSellTokenIDError)
 	}
 
 	tokenIdToBuy := c.String(tokenIDToBuyFlag)
 	if !isValidTokenID(tokenIdToBuy) {
-		return fmt.Errorf("%v is invalid", tokenIDToBuyFlag)
+		return newAppError(InvalidBuyTokenIDError)
 	}
 
 	sellingAmount := c.Uint64(sellingAmountFlag)
 	if sellingAmount == 0 {
-		return fmt.Errorf("%v cannot be zero", sellingAmountFlag)
+		return newAppError(InvalidSellAmountError)
 	}
 
 	maxPaths := c.Uint(maxTradingPathLengthFlag)
 	if maxPaths > pdex_v3.MaxPaths {
-		return fmt.Errorf("maximum trading path length allowed %v, got %v", pdex_v3.MaxPaths, maxPaths)
+		return newAppError(InvalidMaxTradingPathError, fmt.Errorf("maximum trading path length allowed %v, got %v", pdex_v3.MaxPaths, maxPaths))
 	}
 
 	allPoolPairs, err := cfg.incClient.GetAllPdexPoolPairs(0)
 	if err != nil {
-		return err
+		return newAppError(GetAllDexPoolPairsError, err)
 	}
 	_, tradingPath, maxReceived := pdex_v3.FindGoodTradePath(maxPaths, allPoolPairs, tokenIdToSell, tokenIdToBuy, sellingAmount)
 	if len(tradingPath) == 0 {
-		return fmt.Errorf("no trading path is found for the pair %v-%v with maxPaths = %v", tokenIdToSell, tokenIdToBuy, maxPaths)
+		return newAppError(FindTradingPathError,
+			fmt.Errorf("no trading path is found for the pair %v-%v with maxPaths = %v", tokenIdToSell, tokenIdToBuy, maxPaths))
 	}
 
-	fmt.Printf("MaxReceived: %v\n", maxReceived)
-	fmt.Printf("TradingPath: %v\n", tradingPath)
-
-	return nil
+	return jsonPrint(map[string]interface{}{"MaxReceived": maxReceived, "TradingPath": tradingPath})
 }
 
 // pDEXCheckPrice checks the price of two tokenIds.
 func pDEXCheckPrice(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
+	var err error
 	tokenIdToSell := c.String(tokenIDToSellFlag)
 	if !isValidTokenID(tokenIdToSell) {
-		return fmt.Errorf("%v is invalid", tokenIDToSellFlag)
+		return newAppError(InvalidSellTokenIDError)
 	}
 
 	tokenIdToBuy := c.String(tokenIDToBuyFlag)
 	if !isValidTokenID(tokenIdToBuy) {
-		return fmt.Errorf("%v is invalid", tokenIDToBuyFlag)
+		return newAppError(InvalidBuyTokenIDError)
 	}
 
 	sellingAmount := c.Uint64(sellingAmountFlag)
 	if sellingAmount == 0 {
-		return fmt.Errorf("%v cannot be zero", sellingAmountFlag)
+		return newAppError(InvalidSellAmountError)
 	}
 
 	pairID := c.String(pairIDFlag)
@@ -622,12 +527,11 @@ func pDEXCheckPrice(c *cli.Context) error {
 	if pairID != "" {
 		pairs, err := cfg.incClient.GetPdexPoolPair(0, tokenIdToSell, tokenIdToBuy)
 		if err != nil {
-			return err
+			return newAppError(GetDexPoolPairError, err)
 		}
 		for path := range pairs {
 			expectedPrice, err := cfg.incClient.CheckPrice(path, tokenIdToSell, sellingAmount)
 			if err != nil {
-				fmt.Println(path, err)
 				continue
 			}
 			if expectedPrice > bestExpectedReceive {
@@ -638,16 +542,15 @@ func pDEXCheckPrice(c *cli.Context) error {
 	} else {
 		bestExpectedReceive, err = cfg.incClient.CheckPrice(pairID, tokenIdToSell, sellingAmount)
 		if err != nil {
-			return err
+			return newAppError(DexPriceCheckingError, err)
 		}
 	}
 
 	if bestExpectedReceive == 0 {
-		return fmt.Errorf("cannot find a proper path")
+		return newAppError(DexPriceCheckingError, fmt.Errorf("cannot find a proper path"))
 	}
 
-	fmt.Printf("bestPairID %v: %v\n", pairID, bestExpectedReceive)
-	return nil
+	return jsonPrint(map[string]interface{}{"BestPairID": pairID, "BestReceived": bestExpectedReceive})
 }
 
 // pDEXGetAllNFTs returns the list of NFTs for a given private key.
@@ -659,16 +562,15 @@ func pDEXGetAllNFTs(c *cli.Context) error {
 
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 
 	allNFTs, err := cfg.incClient.GetMyNFTs(privateKey)
 	if err != nil {
-		return err
+		return newAppError(GetAllDexNFTsError, err)
 	}
-	err = jsonPrint(allNFTs)
 
-	return err
+	return jsonPrint(allNFTs)
 }
 
 // pDEXGetOrderByID returns the detail of an order given its id.
@@ -680,14 +582,13 @@ func pDEXGetOrderByID(c *cli.Context) error {
 
 	orderID := c.String(orderIDFlag)
 	if orderID == "" {
-		return fmt.Errorf("%v is invalid", orderIDFlag)
+		return newAppError(InvalidOrderIDError)
 	}
 
 	order, err := cfg.incClient.GetOrderByID(0, orderID)
 	if err != nil {
-		return err
+		return newAppError(GetOrderByIDError, err)
 	}
-	err = jsonPrint(order)
 
-	return err
+	return jsonPrint(order)
 }

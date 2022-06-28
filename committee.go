@@ -8,107 +8,89 @@ import (
 
 // stake creates a staking transaction.
 func stake(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
 	canAddr := c.String(candidateAddressFlag)
 	if canAddr == "" {
 		canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
 	}
 	if !isValidAddress(canAddr) {
-		return fmt.Errorf("%v is invalid", candidateAddressFlag)
+		return newAppError(InvalidPaymentAddressError, fmt.Errorf("%v", canAddr))
 	}
 	rewardAddr := c.String(rewardReceiverFlag)
 	if rewardAddr == "" {
 		rewardAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
 	}
 	if !isValidAddress(rewardAddr) {
-		return fmt.Errorf("%v is invalid", rewardReceiverFlag)
+		return newAppError(InvalidPaymentAddressError, fmt.Errorf("%v", rewardAddr))
 	}
 	miningKey := c.String(miningKeyFlag)
 	if miningKey == "" {
 		miningKey = incclient.PrivateKeyToMiningKey(privateKey)
 	}
 	if !isValidMiningKey(miningKey) {
-		return fmt.Errorf("%v is invalid", miningKeyFlag)
+		return newAppError(InvalidMiningKeyError)
 	}
 	reStake := c.Int(autoReStakeFlag)
 	autoReStake := reStake != 0
 
 	txHash, err := cfg.incClient.CreateAndSendShardStakingTransaction(privateKey, miningKey, canAddr, rewardAddr, autoReStake)
 	if err != nil {
-		return err
+		return newAppError(CreateStakingTransactionError, err)
 	}
-	fmt.Printf("txHash: %v\n", txHash)
 
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // unStake creates an un-staking transaction.
 func unStake(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
-		return fmt.Errorf("%v is invalid", privateKeyFlag)
+		return newAppError(InvalidPrivateKeyError)
 	}
+
 	canAddr := c.String(candidateAddressFlag)
 	if canAddr == "" {
 		canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
 	}
 	if !isValidAddress(canAddr) {
-		return fmt.Errorf("%v is invalid", candidateAddressFlag)
+		return newAppError(InvalidPaymentAddressError)
 	}
+
 	miningKey := c.String(miningKeyFlag)
 	if miningKey == "" {
 		miningKey = incclient.PrivateKeyToMiningKey(privateKey)
 	}
 	if !isValidMiningKey(miningKey) {
-		return fmt.Errorf("%v is invalid", miningKeyFlag)
+		return newAppError(InvalidMiningKeyError)
 	}
 
 	txHash, err := cfg.incClient.CreateAndSendUnStakingTransaction(privateKey, miningKey, canAddr)
 	if err != nil {
-		return err
+		return newAppError(CreateUnStakingTransactionError, err)
 	}
-	fmt.Printf("txHash: %v\n", txHash)
 
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }
 
 // checkRewards gets all rewards of a payment address.
 func checkRewards(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
-	}
-
-	addr := c.String("address")
-	if addr == "" {
-		return fmt.Errorf("payment address is invalid")
+	addr := c.String(addressFlag)
+	if !isValidAddress(addr) {
+		return newAppError(InvalidPaymentAddressError)
 	}
 
 	rewards, err := cfg.incClient.GetRewardAmount(addr)
 	if err != nil {
-		return err
+		return newAppError(GetRewardAmountError, err)
 	}
 
 	if len(rewards) == 0 {
 		fmt.Printf("There is not rewards found for the address %v\n", addr)
 	} else {
-		fmt.Printf("Rewards of address %v:\n", addr)
-		for tokenID, amount := range rewards {
-			fmt.Printf("%v: %v\n", tokenID, amount)
-		}
+		return jsonPrint(rewards)
 	}
 
 	return nil
@@ -116,35 +98,35 @@ func checkRewards(c *cli.Context) error {
 
 // withdrawReward withdraws the reward of a privateKey w.r.t to a tokenID.
 func withdrawReward(c *cli.Context) error {
-	err := initNetWork()
-	if err != nil {
-		return err
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return newAppError(InvalidPrivateKeyError)
 	}
 
-	privateKey := c.String("privateKey")
-	if privateKey == "" {
-		return fmt.Errorf("private key is invalid")
+	addr := c.String(addressFlag)
+	if addr == "" {
+		addr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+	}
+	if !isValidAddress(addr) {
+		return newAppError(InvalidPaymentAddressError)
 	}
 
-	addr := c.String("address")
-
-	tokenIDStr := c.String("tokenID")
-	if tokenIDStr == "" {
-		return fmt.Errorf("tokenID is invalid")
+	tokenIDStr := c.String(tokenIDFlag)
+	if !isValidTokenID(tokenIDStr) {
+		return newAppError(InvalidTokenIDError)
 	}
 
-	version := c.Int("version")
-	if version != 1 && version != 2 {
-		return fmt.Errorf("version must be 1 or 2")
+	version := c.Int(versionFlag)
+	if !isSupportedVersion(int8(version)) {
+		return newAppError(VersionError)
 	}
 
 	fmt.Printf("Withdrawing the reward for tokenID %v, using tx version %v\n", tokenIDStr, version)
 
 	txHash, err := cfg.incClient.CreateAndSendWithDrawRewardTransaction(privateKey, addr, tokenIDStr, int8(version))
 	if err != nil {
-		return err
+		return newAppError(CreateWithdrawRewardTransactionError, err)
 	}
-	fmt.Printf("txHash: %v\n", txHash)
 
-	return nil
+	return jsonPrintWithKey("TxHash", txHash)
 }

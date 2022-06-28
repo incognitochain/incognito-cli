@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
+	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
 )
 
@@ -38,6 +39,7 @@ var accountCommands = []*cli.Command{
 					defaultFlags[tokenIDFlag],
 				},
 				Action: checkBalance,
+				Before: defaultBeforeFunc,
 			},
 			{
 				Name: "balanceall",
@@ -47,6 +49,7 @@ var accountCommands = []*cli.Command{
 					defaultFlags[privateKeyFlag],
 				},
 				Action: getAllBalanceV2,
+				Before: defaultBeforeFunc,
 			},
 			{
 				Name:  "outcoin",
@@ -58,6 +61,7 @@ var accountCommands = []*cli.Command{
 					defaultFlags[tokenIDFlag],
 				},
 				Action: getOutCoins,
+				Before: defaultBeforeFunc,
 			},
 			{
 				Name:  "utxo",
@@ -67,6 +71,7 @@ var accountCommands = []*cli.Command{
 					defaultFlags[tokenIDFlag],
 				},
 				Action: checkUTXOs,
+				Before: defaultBeforeFunc,
 			},
 			{
 				Name:    "consolidate",
@@ -81,6 +86,7 @@ var accountCommands = []*cli.Command{
 					defaultFlags[numThreadsFlag],
 				},
 				Action: consolidateUTXOs,
+				Before: defaultBeforeFunc,
 			},
 			{
 				Name:    "history",
@@ -91,14 +97,37 @@ var accountCommands = []*cli.Command{
 				Flags: []cli.Flag{
 					defaultFlags[privateKeyFlag],
 					&cli.StringFlag{
-						Name:  "tokenID",
-						Usage: "ID of the token",
-						Value: common.PRVIDStr,
+						Aliases: aliases[tokenIDFlag],
+						Name:    tokenIDFlag,
+						Usage:   "ID of the token",
+						Value:   common.PRVIDStr,
 					},
 					defaultFlags[numThreadsFlag],
 					defaultFlags[csvFileFlag],
 				},
 				Action: getHistory,
+				Before: defaultBeforeFunc,
+			},
+			{
+				Name:    "financialexport",
+				Aliases: []string{"finext"},
+				Usage:   "Export the financial history of an account.",
+				Description: "This command helps export the financial history of an account. " +
+					"Please note that this process is time-consuming and requires a considerable amount of CPU. The more " +
+					"transactions you have, the more time it takes to build up the report. If you want to see the log, " +
+					"use the global `debug` flag `--d 1`. Use this command with the main-net network for the best result.",
+				Flags: []cli.Flag{
+					defaultFlags[privateKeyFlag],
+					defaultFlags[numThreadsFlag],
+					&cli.StringFlag{
+						Name:    csvFileFlag,
+						Aliases: aliases[csvFileFlag],
+						Usage:   "The csv file location to store the history",
+						Value:   incclient.DefaultTxHistory,
+					},
+				},
+				Action: financialExport,
+				Before: initForFinancialReport,
 			},
 			{
 				Name:        "generate",
@@ -107,6 +136,8 @@ var accountCommands = []*cli.Command{
 				Description: "This command helps generate a new mnemonic phrase and its Incognito accounts.",
 				Flags: []cli.Flag{
 					defaultFlags[numShardsFlag],
+					defaultFlags[shardIDFlag],
+					defaultFlags[numAccountsFlag],
 				},
 				Action: genKeySet,
 			},
@@ -118,6 +149,8 @@ var accountCommands = []*cli.Command{
 				Flags: []cli.Flag{
 					defaultFlags[mnemonicFlag],
 					defaultFlags[numShardsFlag],
+					defaultFlags[shardIDFlag],
+					defaultFlags[numAccountsFlag],
 				},
 				Action: importMnemonic,
 			},
@@ -136,6 +169,7 @@ var accountCommands = []*cli.Command{
 					defaultFlags[isResetFlag],
 				},
 				Action: submitKey,
+				Before: defaultBeforeFunc,
 			},
 		},
 	},
@@ -155,6 +189,7 @@ var committeeCommands = []*cli.Command{
 			defaultFlags[autoReStakeFlag],
 		},
 		Action: stake,
+		Before: defaultBeforeFunc,
 	},
 	{
 		Name:     "unstake",
@@ -166,6 +201,7 @@ var committeeCommands = []*cli.Command{
 			defaultFlags[candidateAddressFlag],
 		},
 		Action: unStake,
+		Before: defaultBeforeFunc,
 	},
 	{
 		Name:     "checkrewards",
@@ -175,6 +211,7 @@ var committeeCommands = []*cli.Command{
 			defaultFlags[addressFlag],
 		},
 		Action: checkRewards,
+		Before: defaultBeforeFunc,
 	},
 	{
 		Name:     "withdrawreward",
@@ -191,6 +228,7 @@ var committeeCommands = []*cli.Command{
 			defaultFlags[versionFlag],
 		},
 		Action: withdrawReward,
+		Before: defaultBeforeFunc,
 	},
 }
 
@@ -207,10 +245,10 @@ var txCommands = []*cli.Command{
 			defaultFlags[addressFlag],
 			defaultFlags[amountFlag],
 			defaultFlags[tokenIDFlag],
-			defaultFlags[feeFlag],
 			defaultFlags[versionFlag],
 		},
 		Action: send,
+		Before: defaultBeforeFunc,
 	},
 	{
 		Name:  "convert",
@@ -224,6 +262,7 @@ var txCommands = []*cli.Command{
 			defaultFlags[numThreadsFlag],
 		},
 		Action: convertUTXOs,
+		Before: defaultBeforeFunc,
 	},
 	//{
 	//	Name:  "convertall",
@@ -250,11 +289,39 @@ var txCommands = []*cli.Command{
 			defaultFlags[readonlyKeyFlag],
 		},
 		Action: checkReceiver,
+		Before: defaultBeforeFunc,
 	},
 }
 
 // bridgeCommands consists of all bridge-related commands
 var bridgeCommands = []*cli.Command{
+	{
+		Name:    "centralizedshield",
+		Aliases: []string{"cshield"},
+		Usage:   "Perform a centralized shielding operation.",
+		Description: "This command creates and sends a centralized shielding transaction into the Incognito network. Only" +
+			"the one with the admin account can perform this operation.",
+		Category: cenBridgeCat,
+		Flags: []cli.Flag{
+			defaultFlags[adminPrivateKeyFlag],
+			&cli.StringFlag{
+				Name:     addressFlag,
+				Aliases:  []string{"addr"},
+				Usage:    "The receiver's Incognito payment address",
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     tokenIDFlag,
+				Aliases:  aliases[tokenIDFlag],
+				Usage:    "The Incognito ID of the shielding token",
+				Required: true,
+			},
+			defaultFlags[tokenNameFlag],
+			defaultFlags[amountFlag],
+		},
+		Action: shieldCentralized,
+		Before: defaultBeforeFunc,
+	},
 	evmBridgeCommands, portalCommands,
 }
 
@@ -281,6 +348,7 @@ var evmBridgeCommands = &cli.Command{
 				},
 			},
 			Action: shield,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "retryshield",
@@ -293,6 +361,7 @@ var evmBridgeCommands = &cli.Command{
 				defaultFlags[tokenAddressFlag],
 			},
 			Action: retryShield,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "unshield",
@@ -309,6 +378,7 @@ var evmBridgeCommands = &cli.Command{
 				defaultFlags[amountFlag],
 			},
 			Action: unShield,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "retryunshield",
@@ -319,6 +389,75 @@ var evmBridgeCommands = &cli.Command{
 				defaultFlags[evmFlag],
 			},
 			Action: retryUnShield,
+			Before: defaultBeforeFunc,
+		},
+		{
+			Name:        "shieldprv",
+			Usage:       "Shield PRV from EVM networks into Incognito.",
+			Description: "This command helps to burn an amount of PRV from a public EVM network and mint the corresponding amount inside the Incognito network.",
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[shieldAmountFlag],
+				&cli.StringFlag{
+					Name:  evmFlag,
+					Usage: "The EVM network (ETH or BSC)",
+					Value: "ETH",
+				},
+				&cli.StringFlag{
+					Name:    addressFlag,
+					Aliases: aliases[addressFlag],
+					Usage:   "The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)",
+				},
+			},
+			Action: shieldPRV,
+			Before: prvInitFunc,
+		},
+		{
+			Name:        "retryshieldprv",
+			Usage:       "Retry a PRV shield from the given already-been-deposited-to-sc EVM transaction.",
+			Description: "This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.",
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[externalTxIDFlag],
+				&cli.StringFlag{
+					Name:  evmFlag,
+					Usage: "The EVM network (ETH or BSC)",
+					Value: "ETH",
+				},
+			},
+			Action: retryShieldPRV,
+			Before: prvInitFunc,
+		},
+		{
+			Name:        "unshieldprv",
+			Usage:       "Withdraw PRV from Incognito to EVM networks.",
+			Description: "This command helps to burn an amount of PRV from the Incognito network and mint the corresponding amount on an EVM network.",
+			Flags: []cli.Flag{
+				defaultFlags[privateKeyFlag],
+				defaultFlags[amountFlag],
+				&cli.StringFlag{
+					Name:  evmFlag,
+					Usage: "The EVM network (ETH or BSC)",
+					Value: "ETH",
+				},
+			},
+			Action: unShieldPRV,
+			Before: prvInitFunc,
+		},
+		{
+			Name:        "retryunshieldprv",
+			Usage:       "Retry a PRV un-shielding request from the given already-been-burned Incognito transaction.",
+			Description: "This command tries to un-shield PRV from an already-been-burned Incognito transaction in case of prior failure.",
+			Flags: []cli.Flag{
+				defaultFlags[txHashFlag],
+				&cli.StringFlag{
+					Name:  evmFlag,
+					Usage: "The EVM network (ETH or BSC)",
+					Value: "ETH",
+				},
+			},
+			Action: retryUnShieldPRV,
+			Before: prvInitFunc,
 		},
 	},
 }
@@ -344,6 +483,7 @@ var portalCommands = &cli.Command{
 				},
 			},
 			Action: getPortalDepositAddress,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "shield",
@@ -366,6 +506,7 @@ var portalCommands = &cli.Command{
 				},
 			},
 			Action: portalShield,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "shieldstatus",
@@ -379,6 +520,7 @@ var portalCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: getPortalShieldStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "unshield",
@@ -401,6 +543,7 @@ var portalCommands = &cli.Command{
 				},
 			},
 			Action: portalUnShield,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "unshieldstatus",
@@ -414,6 +557,7 @@ var portalCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: getPortalUnShieldStatus,
+			Before: defaultBeforeFunc,
 		},
 	},
 }
@@ -448,6 +592,7 @@ var pDEXActionCommands = &cli.Command{
 				defaultFlags[maxTradingPathLengthFlag],
 			},
 			Action: pDEXTrade,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "mintnft",
@@ -457,6 +602,7 @@ var pDEXActionCommands = &cli.Command{
 				defaultFlags[privateKeyFlag],
 			},
 			Action: pDEXMintNFT,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "contribute",
@@ -476,6 +622,7 @@ var pDEXActionCommands = &cli.Command{
 				},
 			},
 			Action: pDEXContribute,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "withdraw",
@@ -496,6 +643,7 @@ var pDEXActionCommands = &cli.Command{
 				},
 			},
 			Action: pDEXWithdraw,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "addorder",
@@ -515,6 +663,7 @@ var pDEXActionCommands = &cli.Command{
 				},
 			},
 			Action: pDEXAddOrder,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "withdraworder",
@@ -540,6 +689,7 @@ var pDEXActionCommands = &cli.Command{
 				},
 			},
 			Action: pDEXWithdrawOrder,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "stake",
@@ -556,6 +706,7 @@ var pDEXActionCommands = &cli.Command{
 				},
 			},
 			Action: pDEXStake,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "unstake",
@@ -572,6 +723,7 @@ var pDEXActionCommands = &cli.Command{
 				},
 			},
 			Action: pDEXUnStake,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "withdrawstakereward",
@@ -587,6 +739,7 @@ var pDEXActionCommands = &cli.Command{
 				},
 			},
 			Action: pDEXWithdrawStakingReward,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "withdrawlpfee",
@@ -598,6 +751,7 @@ var pDEXActionCommands = &cli.Command{
 				defaultFlags[nftIDFlag],
 			},
 			Action: pDEXWithdrawLPFee,
+			Before: defaultBeforeFunc,
 		},
 	},
 }
@@ -617,6 +771,7 @@ var pDEXInfoCommands = &cli.Command{
 				defaultFlags[privateKeyFlag],
 			},
 			Action: pDEXGetAllNFTs,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "getorder",
@@ -626,6 +781,7 @@ var pDEXInfoCommands = &cli.Command{
 				defaultFlags[orderIDFlag],
 			},
 			Action: pDEXGetOrderByID,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "share",
@@ -640,6 +796,7 @@ var pDEXInfoCommands = &cli.Command{
 				defaultFlags[nftIDFlag],
 			},
 			Action: pDEXGetShare,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "stakereward",
@@ -654,6 +811,7 @@ var pDEXInfoCommands = &cli.Command{
 				},
 			},
 			Action: CheckDEXStakingReward,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "lpvalue",
@@ -664,6 +822,7 @@ var pDEXInfoCommands = &cli.Command{
 				defaultFlags[nftIDFlag],
 			},
 			Action: pDEXGetEstimatedLPValue,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "checkprice",
@@ -681,6 +840,7 @@ var pDEXInfoCommands = &cli.Command{
 				},
 			},
 			Action: pDEXCheckPrice,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:        "findpath",
@@ -693,6 +853,7 @@ var pDEXInfoCommands = &cli.Command{
 				defaultFlags[maxTradingPathLengthFlag],
 			},
 			Action: pDEXFindPath,
+			Before: defaultBeforeFunc,
 		},
 	},
 }
@@ -711,6 +872,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXTradeStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "mintnft",
@@ -719,6 +881,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXMintNFTStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "contribute",
@@ -727,6 +890,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXContributionStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "withdraw",
@@ -735,6 +899,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXWithdrawalStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "addorder",
@@ -743,6 +908,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXOrderAddingStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "withdraworder",
@@ -751,6 +917,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXOrderWithdrawalStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "stake",
@@ -759,6 +926,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXStakingStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "unstake",
@@ -767,6 +935,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXUnStakingStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "withdrawstakereward",
@@ -775,6 +944,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXWithdrawStakingRewardStatus,
+			Before: defaultBeforeFunc,
 		},
 		{
 			Name:  "withdrawlpfee",
@@ -783,6 +953,7 @@ var pDEXStatusCommands = &cli.Command{
 				defaultFlags[txHashFlag],
 			},
 			Action: pDEXWithdrawLPFeeStatus,
+			Before: defaultBeforeFunc,
 		},
 	},
 }
