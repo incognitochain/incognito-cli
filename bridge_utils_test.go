@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
 	"log"
 	"math"
 	"testing"
@@ -16,10 +17,13 @@ const (
 	testIncPrivateKey = "112t8rnZDRztVgPjbYQiXS7mJgaTzn66NvHD7Vus2SrhSAY611AzADsPFzKjKQCKWTgbkgYrCPo9atvSMoCf9KT23Sc7Js9RKhzbNJkxpJU6"
 	erc20TokenAddress = "4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa"
 	bep20TokenAddress = "0xed24fc36d5ee211ea25a80239fb8c4cfd80f12ee"
+	plg20TokenAddress = "0xfe4F5145f6e09952a5ba9e956ED0C25e3Fa4c7F1"
 	pERC20TokenID     = "c7545459764224a000a9b323850648acf271186238210ce474b505cd17cc93a0"
 	pBEP20TokenID     = "a61df4d870c17a7dc62d7e4c16c6f4f847994403842aaaf21c994d1a0024b032"
+	pPLG20TokenID     = "d8681d0d86d1e91e00167939cb6694d2c422acd208a0072939487f6999eb9d18"
 	pETH              = "ffd8d42dc40a8d166ea4848baf8b5f6e9fe0e9c30d60062eb7d44a8df9e00854"
 	pBNB              = "e5032c083f0da67ca141331b6005e4a3740c50218f151a5e829e9d03227e33e2"
+	pPLG              = "dae027b21d8d57114da11209dce8eeb587d01adf59d4fc356a8be5eedc146859"
 )
 
 func init() {
@@ -34,13 +38,13 @@ func TestEstimateGas(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		isBSC := (iCommon.RandInt() % 2) == 0
-		gasPrice, err := estimateGasPrice(isBSC)
+		evmNetworkID := iCommon.RandInt() % 3
+		gasPrice, err := estimateGasPrice(evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
 
-		log.Printf("isBSC: %v, gasPrice: %v\n", isBSC, gasPrice.Uint64())
+		log.Printf("evmNetworkID: %v, gasPrice: %v\n", evmNetworkID, gasPrice.Uint64())
 	}
 }
 
@@ -51,14 +55,14 @@ func TestEVMAccount_GetBalance(t *testing.T) {
 	}
 	acc, err := NewEVMAccount(testEVMPrivateKey)
 
-	ethBalance, ethSynthesizedBalance, err := acc.getBalance(common.HexToAddress(nativeToken), false)
+	ethBalance, ethSynthesizedBalance, err := acc.getBalance(common.HexToAddress(nativeToken), rpc.ETHNetworkID)
 	if err != nil {
 		panic(err)
 	}
 	fBalance, _ := ethSynthesizedBalance.Float64()
 	log.Printf("balanceETH: %v, floatBalance: %v\n", ethBalance.Uint64(), fBalance)
 
-	tokenBalance, tokenSynthesizedBalance, err := acc.getBalance(common.HexToAddress(erc20TokenAddress), false)
+	tokenBalance, tokenSynthesizedBalance, err := acc.getBalance(common.HexToAddress(erc20TokenAddress), rpc.ETHNetworkID)
 	if err != nil {
 		panic(err)
 	}
@@ -77,7 +81,7 @@ func TestEVMAccount_DepositETH(t *testing.T) {
 	depositAmount := 0.00001
 
 	// create a deposit transaction.
-	txHash, err := acc.DepositNative(incAddress, depositAmount, 0, 0)
+	txHash, err := acc.DepositNative(incAddress, depositAmount, 0, 0, rpc.ETHNetworkID)
 	if err != nil {
 		panic(err)
 	}
@@ -99,7 +103,7 @@ func TestEVMAccount_DepositRC20(t *testing.T) {
 		depositAmount := 0.00001
 
 		// create a deposit transaction.
-		txHash, err := acc.DepositToken(incAddress, erc20TokenAddress, depositAmount, 0, 0)
+		txHash, err := acc.DepositToken(incAddress, erc20TokenAddress, depositAmount, 0, 0, rpc.ETHNetworkID)
 		if err != nil {
 			panic(err)
 		}
@@ -123,12 +127,15 @@ func TestEVMAccount_ShieldNativeToken(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		log.Printf("TEST ATTEMPT %v\n", i)
 
-		isBSC := (iCommon.RandInt() % 2) == 1
+		evmNetworkID := iCommon.RandInt() % 3
 		shieldToken := pETH
-		if isBSC {
+		switch evmNetworkID {
+		case rpc.BSCNetworkID:
 			shieldToken = pBNB
+		case rpc.PLGNetworkID:
+			shieldToken = pPLG
 		}
-		log.Printf("ShieldedToken: %v, isBSC:%v\n", shieldToken, isBSC)
+		log.Printf("ShieldedToken: %v, evmNetworkID:%v\n", shieldToken, evmNetworkID)
 
 		oldIncBalance, err := cfg.incClient.GetBalance(testIncPrivateKey, shieldToken)
 		if err != nil {
@@ -139,13 +146,13 @@ func TestEVMAccount_ShieldNativeToken(t *testing.T) {
 		depositAmount := float64(1+iCommon.RandUint64()%10000) / 1e9
 		log.Printf("DepositAmount: %v\n", depositAmount)
 
-		ethTxHash, err := acc.DepositNative(incAddress, depositAmount, 0, 0, isBSC)
+		ethTxHash, err := acc.DepositNative(incAddress, depositAmount, 0, 0, evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
 
 		ethTxHashStr := ethTxHash.String()
-		incTxHash, err := Shield(testIncPrivateKey, shieldToken, ethTxHashStr, isBSC)
+		incTxHash, err := Shield(testIncPrivateKey, shieldToken, ethTxHashStr, evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
@@ -204,16 +211,20 @@ func TestEVMAccount_ShieldToken(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		log.Printf("TEST ATTEMPT %v\n", i)
 
-		isBSC := (iCommon.RandInt() % 2) == 1
+		evmNetworkID := iCommon.RandInt() % 3
 		shieldToken := pERC20TokenID
 		publicTokenAddress := erc20TokenAddress
-		if isBSC {
+		switch evmNetworkID {
+		case rpc.BSCNetworkID:
 			shieldToken = pBEP20TokenID
 			publicTokenAddress = bep20TokenAddress
+		case rpc.PLGNetworkID:
+			shieldToken = pPLG20TokenID
+			publicTokenAddress = plg20TokenAddress
 		}
-		log.Printf("ShieldedToken: %v, isBSC:%v\n", shieldToken, isBSC)
+		log.Printf("ShieldedToken: %v, evmNetworkID:%v\n", shieldToken, evmNetworkID)
 
-		tokenDecimals, err := getDecimals(common.HexToAddress(publicTokenAddress), isBSC)
+		tokenDecimals, err := getDecimals(common.HexToAddress(publicTokenAddress), evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
@@ -225,13 +236,13 @@ func TestEVMAccount_ShieldToken(t *testing.T) {
 		}
 		log.Printf("oldIncBalance %v\n", oldIncBalance)
 
-		evmTxHash, err := acc.DepositToken(incAddress, publicTokenAddress, depositAmount, 0, 0, isBSC)
+		evmTxHash, err := acc.DepositToken(incAddress, publicTokenAddress, depositAmount, 0, 0, evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
 
 		ethTxHashStr := evmTxHash.String()
-		incTxHash, err := Shield(testIncPrivateKey, shieldToken, ethTxHashStr, isBSC)
+		incTxHash, err := Shield(testIncPrivateKey, shieldToken, ethTxHashStr, evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
@@ -286,14 +297,18 @@ func TestEVMAccount_UnShieldNativeToken(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		log.Printf("TEST ATTEMPT %v\n", i)
 
-		isBSC := (iCommon.RandInt() % 2) == 0
+		evmNetworkID := iCommon.RandInt() % 3
 		unShieldToken := pETH
-		if isBSC {
+		switch evmNetworkID {
+		case rpc.BSCNetworkID:
 			unShieldToken = pBNB
+		case rpc.PLGNetworkID:
+			unShieldToken = pPLG
 		}
-		log.Printf("UnShieldedToken: %v, isBSC:%v\n", unShieldToken, isBSC)
 
-		oldEVMBalance, _, err := acc.getBalance(common.HexToAddress(nativeToken), isBSC)
+		log.Printf("UnShieldedToken: %v, evmNetworkID:%v\n", unShieldToken, evmNetworkID)
+
+		oldEVMBalance, _, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
@@ -307,14 +322,14 @@ func TestEVMAccount_UnShieldNativeToken(t *testing.T) {
 			acc.address.String(),
 			unShieldToken,
 			withdrawalAmount,
-			isBSC,
+			evmNetworkID,
 		)
 		if err != nil {
 			panic(err)
 		}
 		log.Printf("incTxHash: %v\n", incTxHash)
 		for {
-			burnProof, err := cfg.incClient.GetBurnProof(incTxHash, isBSC)
+			burnProof, err := cfg.incClient.GetBurnProof(incTxHash, evmNetworkID)
 			if burnProof == nil || err != nil {
 				log.Println("Sleep 20 seconds for the burnProof!!!")
 				time.Sleep(20 * time.Second)
@@ -324,14 +339,14 @@ func TestEVMAccount_UnShieldNativeToken(t *testing.T) {
 			}
 		}
 
-		ethTxHash, err := acc.UnShield(incTxHash, 0, 0, isBSC)
+		ethTxHash, err := acc.UnShield(incTxHash, 0, 0, evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
 		log.Printf("ethWithdrawalTxHash: %v\n", ethTxHash)
 		time.Sleep(30 * time.Second)
 
-		newIncBalance, _, err := acc.getBalance(common.HexToAddress(nativeToken), isBSC)
+		newIncBalance, _, err := acc.getBalance(common.HexToAddress(nativeToken), evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
@@ -357,16 +372,20 @@ func TestEVMAccount_UnshieldToken(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		log.Printf("TEST ATTEMPT %v\n", i)
 
-		isBSC := (iCommon.RandInt() % 2) == 1
+		evmNetworkID := iCommon.RandInt() % 3
 		unShieldToken := pERC20TokenID
 		publicTokenAddress := erc20TokenAddress
-		if isBSC {
+		switch evmNetworkID {
+		case rpc.BSCNetworkID:
 			unShieldToken = pBEP20TokenID
 			publicTokenAddress = bep20TokenAddress
+		case rpc.PLGNetworkID:
+			unShieldToken = pPLG20TokenID
+			publicTokenAddress = plg20TokenAddress
 		}
-		log.Printf("UnShieldedToken: %v, isBSC:%v\n", unShieldToken, isBSC)
+		log.Printf("UnShieldedToken: %v, evmNetworkID:%v\n", unShieldToken, evmNetworkID)
 
-		oldEVMBalance, _, err := acc.getBalance(common.HexToAddress(publicTokenAddress), isBSC)
+		oldEVMBalance, _, err := acc.getBalance(common.HexToAddress(publicTokenAddress), evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
@@ -380,14 +399,14 @@ func TestEVMAccount_UnshieldToken(t *testing.T) {
 			acc.address.String(),
 			unShieldToken,
 			withdrawalAmount,
-			isBSC,
+			evmNetworkID,
 		)
 		if err != nil {
 			panic(err)
 		}
 		log.Printf("incTxHash: %v\n", incTxHash)
 		for {
-			burnProof, err := cfg.incClient.GetBurnProof(incTxHash, isBSC)
+			burnProof, err := cfg.incClient.GetBurnProof(incTxHash, evmNetworkID)
 			if burnProof == nil || err != nil {
 				log.Println("Sleep 10 seconds for the burnedProof!!!")
 				time.Sleep(10 * time.Second)
@@ -397,14 +416,14 @@ func TestEVMAccount_UnshieldToken(t *testing.T) {
 			}
 		}
 
-		ethTxHash, err := acc.UnShield(incTxHash, 0, 0, isBSC)
+		ethTxHash, err := acc.UnShield(incTxHash, 0, 0, evmNetworkID)
 		if err != nil {
 			panic(err)
 		}
 		log.Printf("ethWithdrawalTxHash: %v\n", ethTxHash)
 		time.Sleep(30 * time.Second)
 
-		newEVMBalance, _, err := acc.getBalance(common.HexToAddress(publicTokenAddress), isBSC)
+		newEVMBalance, _, err := acc.getBalance(common.HexToAddress(publicTokenAddress), evmNetworkID)
 		if err != nil {
 			panic(err)
 		}

@@ -28,6 +28,8 @@ COMMANDS:
    BRIDGE:
      evm     Perform an EVM action (e.g, shield, unshield, etc.).
      portal  Perform a portal action (e.g, shield, unshield, etc.).
+   CENTRALIZED BRIDGE:
+     centralizedshield, cshield  Perform a centralized shielding operation.
    COMMITTEES:
      checkrewards    Get all rewards of a payment address.
      stake           Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
@@ -60,6 +62,7 @@ COPYRIGHT:
 		* [`account balance`](#account_balance)
 		* [`account balanceall`](#account_balanceall)
 		* [`account consolidate`](#account_consolidate)
+		* [`account financialexport`](#account_financialexport)
 		* [`account generate`](#account_generate)
 		* [`account history`](#account_history)
 		* [`account importaccount`](#account_importaccount)
@@ -70,15 +73,21 @@ COPYRIGHT:
 * [`BRIDGE`](#bridge)
 	* [`evm`](#evm)
 		* [`evm retryshield`](#evm_retryshield)
+		* [`evm retryshieldprv`](#evm_retryshieldprv)
 		* [`evm retryunshield`](#evm_retryunshield)
+		* [`evm retryunshieldprv`](#evm_retryunshieldprv)
 		* [`evm shield`](#evm_shield)
+		* [`evm shieldprv`](#evm_shieldprv)
 		* [`evm unshield`](#evm_unshield)
+		* [`evm unshieldprv`](#evm_unshieldprv)
 	* [`portal`](#portal)
 		* [`portal shield`](#portal_shield)
 		* [`portal shieldaddress`](#portal_shieldaddress)
 		* [`portal shieldstatus`](#portal_shieldstatus)
 		* [`portal unshield`](#portal_unshield)
 		* [`portal unshieldstatus`](#portal_unshieldstatus)
+* [`CENTRALIZED BRIDGE`](#centralized bridge)
+	* [`centralizedshield`](#centralizedshield)
 * [`COMMITTEES`](#committees)
 	* [`checkrewards`](#checkrewards)
 	* [`stake`](#stake)
@@ -193,6 +202,28 @@ OPTIONS:
    
 ```
 
+#### account_financialexport
+This command helps export the financial history of an account. Please note that this process is time-consuming and requires a considerable amount of CPU. The more transactions you have, the more time it takes to build up the report. If you want to see the log, use the global `debug` flag `--d 1`. Use this command with the main-net network for the best result.
+```shell
+$ incognito-cli account help financialexport
+NAME:
+   incognito-cli account financialexport - Export the financial history of an account.
+
+USAGE:
+   account financialexport --privateKey PRIVATE_KEY [--numThreads NUM_THREADS] [--csvFile CSV_FILE]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command helps export the financial history of an account. Please note that this process is time-consuming and requires a considerable amount of CPU. The more transactions you have, the more time it takes to build up the report. If you want to see the log, use the global `debug` flag `--d 1`. Use this command with the main-net network for the best result.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --numThreads value                            Number of threads used in this action (default: 4)
+   --csvFile value, --csv value                  The csv file location to store the history (default: "txHistory.csv")
+   
+```
+
 #### account_generate
 This command helps generate a new mnemonic phrase and its Incognito accounts.
 ```shell
@@ -201,7 +232,7 @@ NAME:
    incognito-cli account generate - Generate a new Incognito account.
 
 USAGE:
-   account generate [--numShards NUM_SHARDS]
+   account generate [--numShards NUM_SHARDS] [--shardID SHARD_ID] [--numAccounts NUM_ACCOUNTS]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -209,7 +240,9 @@ DESCRIPTION:
    This command helps generate a new mnemonic phrase and its Incognito accounts.
 
 OPTIONS:
-   --numShards value  The number of shard (default: 8)
+   --numShards value    The number of shards (default: 8)
+   --shardID Anon       A specific shardID (-2: same shard as the first account (i.e, Anon); -1: any shard) (default: -2)
+   --numAccounts value  The number of accounts (default: 1)
    
 ```
 
@@ -230,7 +263,7 @@ DESCRIPTION:
 
 OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
-   --tokenID value                               ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
+   --tokenID value, --id value, --ID value       ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
    --numThreads value                            Number of threads used in this action (default: 4)
    --csvFile value, --csv value                  The csv file location to store the history
    
@@ -244,7 +277,7 @@ NAME:
    incognito-cli account importaccount - Import a mnemonic of 12 words.
 
 USAGE:
-   account importaccount --mnemonic MNEMONIC [--numShards NUM_SHARDS]
+   account importaccount --mnemonic MNEMONIC [--numShards NUM_SHARDS] [--shardID SHARD_ID] [--numAccounts NUM_ACCOUNTS]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -252,8 +285,10 @@ DESCRIPTION:
    This command helps generate Incognito accounts given a mnemonic.
 
 OPTIONS:
-   --mnemonic value, -m value  A 12-word mnemonic phrase, words are separated by a "-" (Example: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake).
-   --numShards value           The number of shard (default: 8)
+   --mnemonic value, -m value  A 12-word mnemonic phrase, words are separated by a "-", or put in "" (Examples: artist-decline-pepper-spend-good-enemy-caught-sister-sure-opinion-hundred-lake, "artist decline pepper spend good enemy caught sister sure opinion hundred lake").
+   --numShards value           The number of shards (default: 8)
+   --shardID Anon              A specific shardID (-2: same shard as the first account (i.e, Anon); -1: any shard) (default: -2)
+   --numAccounts value         The number of accounts (default: 1)
    
 ```
 
@@ -367,10 +402,32 @@ DESCRIPTION:
    This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.
 
 OPTIONS:
+   --privateKey value, -p value, --prvKey value        A base58-encoded Incognito private key
+   --externalTxHash value, --eTxID value               The external transaction hash
+   --evm value                                         The EVM network (ETH, BSC, PLG or FTM) (default: "ETH")
+   --externalTokenAddress value, --evmTokenAddr value  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   
+```
+
+#### evm_retryshieldprv
+This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.
+```shell
+$ incognito-cli evm help retryshieldprv
+NAME:
+   incognito-cli evm retryshieldprv - Retry a PRV shield from the given already-been-deposited-to-sc EVM transaction.
+
+USAGE:
+   evm retryshieldprv --privateKey PRIVATE_KEY --externalTxHash EXTERNAL_TX_HASH [--evm EVM]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command re-shields an already-been-deposited-to-sc transaction in case of prior failure.
+
+OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --externalTxHash value, --eTxID value         The external transaction hash
    --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
-   --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    
 ```
 
@@ -391,12 +448,33 @@ DESCRIPTION:
 
 OPTIONS:
    --txHash value, --iTxID value  An Incognito transaction hash
+   --evm value                    The EVM network (ETH, BSC, PLG or FTM) (default: "ETH")
+   
+```
+
+#### evm_retryunshieldprv
+This command tries to un-shield PRV from an already-been-burned Incognito transaction in case of prior failure.
+```shell
+$ incognito-cli evm help retryunshieldprv
+NAME:
+   incognito-cli evm retryunshieldprv - Retry a PRV un-shielding request from the given already-been-burned Incognito transaction.
+
+USAGE:
+   evm retryunshieldprv --txHash TX_HASH [--evm EVM]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command tries to un-shield PRV from an already-been-burned Incognito transaction in case of prior failure.
+
+OPTIONS:
+   --txHash value, --iTxID value  An Incognito transaction hash
    --evm value                    The EVM network (ETH or BSC) (default: "ETH")
    
 ```
 
 #### evm_shield
-This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+This function helps shield an EVM (ETH/BNB/ERC20/BEP20, etc.) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
 	 1. Deposit the EVM asset into the corresponding smart contract.
 		 1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
 	 2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
@@ -414,7 +492,7 @@ USAGE:
    OPTIONAL flags are denoted by a [] bracket.
 
 DESCRIPTION:
-   This function helps shield an EVM (ETH/BNB/ERC20/BEP20) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
+   This function helps shield an EVM (ETH/BNB/ERC20/BEP20, etc.) token into the Incognito network. It will ask for users' EVM PRIVATE KEY to proceed. The shielding process consists of the following operations.
       1. Deposit the EVM asset into the corresponding smart contract.
         1.1. In case the asset is an ERC20/BEP20 token, an approval transaction is performed (if needed) the before the actual deposit. For this operation, a prompt will be displayed to ask for user's approval.
       2. Get the deposited EVM transaction, parse the depositing proof and submit it to the Incognito network. This step requires an Incognito private key with a sufficient amount of PRV to create an issuing transaction.
@@ -423,16 +501,39 @@ DESCRIPTION:
    DO NOT USE THIS FUNCTION UNLESS YOU UNDERSTAND THE SHIELDING PROCESS.
 
 OPTIONS:
+   --privateKey value, -p value, --prvKey value        A base58-encoded Incognito private key
+   --shieldAmount value, --amt value                   The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
+   --evm value                                         The EVM network (ETH, BSC, PLG or FTM) (default: "ETH")
+   --externalTokenAddress value, --evmTokenAddr value  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
+   --address value, --addr value                       The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
+   
+```
+
+#### evm_shieldprv
+This command helps to burn an amount of PRV from a public EVM network and mint the corresponding amount inside the Incognito network.
+```shell
+$ incognito-cli evm help shieldprv
+NAME:
+   incognito-cli evm shieldprv - Shield PRV from EVM networks into Incognito.
+
+USAGE:
+   evm shieldprv --privateKey PRIVATE_KEY --shieldAmount SHIELD_AMOUNT [--evm EVM] [--address ADDRESS]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command helps to burn an amount of PRV from a public EVM network and mint the corresponding amount inside the Incognito network.
+
+OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --shieldAmount value, --amt value             The shielding amount measured in token unit (e.g, 10, 1, 0.1, 0.01) (default: 0)
    --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
-   --externalTokenAddress value                  ID of the token on ETH/BSC networks (default: "0x0000000000000000000000000000000000000000")
    --address value, --addr value                 The Incognito payment address to receive the shielding asset (default: the payment address of the privateKey)
    
 ```
 
 #### evm_unshield
-This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
+This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20, etc.) token out of the Incognito network. The un-shielding process consists the following operations.
 	 1. Users burn the token inside the Incognito chain.
 	 2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
 	 3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
@@ -448,7 +549,7 @@ USAGE:
    evm unshield --privateKey PRIVATE_KEY --tokenID TOKEN_ID --amount AMOUNT
 
 DESCRIPTION:
-   This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20) token out of the Incognito network.The un-shielding process consists the following operations.
+   This function helps withdraw an EVM (ETH/BNB/ERC20/BEP20, etc.) token out of the Incognito network. The un-shielding process consists the following operations.
       1. Users burn the token inside the Incognito chain.
       2. After the burning is success, wait for 1-2 Incognito blocks and retrieve the corresponding burn proof from the Incognito chain.
       3. After successfully retrieving the burn proof, users submit the burn proof to the smart contract to get back the corresponding public token. This step will ask for users' EVM PRIVATE KEY to proceed. Note that ONLY UNTIL this step, it is feasible to estimate the actual un-shielding fee (mainly is the fee interacting with the smart contract).
@@ -460,6 +561,28 @@ OPTIONS:
    --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
    --tokenID value, --id value, --ID value       The Incognito tokenID of the un-shielding asset
    --amount value, --amt value                   The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
+   
+```
+
+#### evm_unshieldprv
+This command helps to burn an amount of PRV from the Incognito network and mint the corresponding amount on an EVM network.
+```shell
+$ incognito-cli evm help unshieldprv
+NAME:
+   incognito-cli evm unshieldprv - Withdraw PRV from Incognito to EVM networks.
+
+USAGE:
+   evm unshieldprv --privateKey PRIVATE_KEY --amount AMOUNT [--evm EVM]
+
+   OPTIONAL flags are denoted by a [] bracket.
+
+DESCRIPTION:
+   This command helps to burn an amount of PRV from the Incognito network and mint the corresponding amount on an EVM network.
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value  A base58-encoded Incognito private key
+   --amount value, --amt value                   The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
+   --evm value                                   The EVM network (ETH or BSC) (default: "ETH")
    
 ```
 
@@ -588,6 +711,32 @@ DESCRIPTION:
 
 OPTIONS:
    --txHash value, --iTxID value  An Incognito transaction hash
+   
+```
+
+## CENTRALIZED BRIDGE
+### centralizedshield
+This command creates and sends a centralized shielding transaction into the Incognito network. Onlythe one with the admin account can perform this operation.
+```shell
+$ incognito-cli help centralizedshield
+NAME:
+   incognito-cli centralizedshield - Perform a centralized shielding operation.
+
+USAGE:
+   centralizedshield --adminPrivateKey ADMIN_PRIVATE_KEY --address ADDRESS --tokenID TOKEN_ID --tokenName TOKEN_NAME --amount AMOUNT
+
+CATEGORY:
+   CENTRALIZED BRIDGE
+
+DESCRIPTION:
+   This command creates and sends a centralized shielding transaction into the Incognito network. Onlythe one with the admin account can perform this operation.
+
+OPTIONS:
+   --adminPrivateKey value                  A base58-encoded Incognito private key of the admin account
+   --address value, --addr value            The receiver's Incognito payment address
+   --tokenID value, --id value, --ID value  The Incognito ID of the shielding token
+   --tokenName value                        The name of the shielding token
+   --amount value, --amt value              The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
    
 ```
 
@@ -1311,7 +1460,7 @@ NAME:
    incognito-cli send - Send an amount of PRV or token from one wallet to another wallet.
 
 USAGE:
-   send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--fee FEE] [--version VERSION]
+   send --privateKey PRIVATE_KEY --address ADDRESS --amount AMOUNT [--tokenID TOKEN_ID] [--version VERSION]
 
    OPTIONAL flags are denoted by a [] bracket.
 
@@ -1326,7 +1475,6 @@ OPTIONS:
    --address value, --addr value                 A base58-encoded payment address
    --amount value, --amt value                   The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000) (default: 0)
    --tokenID value, --id value, --ID value       The Incognito ID of the token (default: "0000000000000000000000000000000000000000000000000000000000000004")
-   --fee value                                   The PRV amount for paying the transaction fee (default: 100)
    --version value, -v value                     Version of the transaction (1 or 2) (default: 2)
    
 ```

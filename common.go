@@ -55,8 +55,10 @@ const (
 	amplifierFlag            = "amplifier"
 	paramsFlag               = "params"
 
-	mnemonicFlag  = "mnemonic"
-	numShardsFlag = "numShards"
+	mnemonicFlag    = "mnemonic"
+	numShardsFlag   = "numShards"
+	numAccountsFlag = "numAccounts"
+	shardIDFlag     = "shardID"
 
 	evmAddressFlag      = "evmAddress"
 	tokenAddressFlag    = "externalTokenAddress"
@@ -69,6 +71,9 @@ const (
 	candidateAddressFlag = "candidateAddress"
 	rewardReceiverFlag   = "rewardAddress"
 	autoReStakeFlag      = "autoReStake"
+
+	adminPrivateKeyFlag = "adminPrivateKey"
+	tokenNameFlag       = "tokenName"
 )
 
 // aliases for defaultFlags
@@ -87,6 +92,7 @@ var aliases = map[string][]string{
 	csvFileFlag:          {"csv"},
 	shieldAmountFlag:     {"amt"},
 	externalAddressFlag:  {"eAddr"},
+	tokenAddressFlag:     {"evmTokenAddr"},
 	txHashFlag:           {"iTxID"},
 	externalTxIDFlag:     {"eTxID"},
 	miningKeyFlag:        {"mKey", "vKey"},
@@ -110,6 +116,7 @@ const (
 	committeeCat   = "COMMITTEES"
 	transactionCat = "TRANSACTIONS"
 	pDEXCat        = "DEX"
+	cenBridgeCat   = "CENTRALIZED BRIDGE"
 	evmBridgeCat   = "BRIDGE"
 	portalCat      = "BRIDGE"
 )
@@ -244,6 +251,9 @@ func isValidDEXPairID(pairIDStr string) bool {
 
 // isValidEVMAddress checks if a string tokenAddress is valid or not.
 func isValidEVMAddress(tokenAddress string) bool {
+	if tokenAddress == "" {
+		return false
+	}
 	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
 	if !re.MatchString(tokenAddress) {
 		return false
@@ -261,9 +271,27 @@ func isValidEVMAddress(tokenAddress string) bool {
 	return true
 }
 
+// isValidIncTxHash checks if an Incognito string txHash is valid or not.
+func isValidIncTxHash(txHash string) bool {
+	if txHash == "" {
+		return false
+	}
+
+	_, err := iCommon.Hash{}.NewHashFromStr(txHash)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
 // isSupportedVersion checks if the given version of transaction is supported or not.
 func isSupportedVersion(version int8) bool {
 	return version == 1 || version == 2
+}
+
+func jsonPrintWithKey(key string, val interface{}) error {
+	return jsonPrint(map[string]interface{}{key: val})
 }
 
 func jsonPrint(val interface{}) error {
