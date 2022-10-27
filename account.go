@@ -2,19 +2,22 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
-	"github.com/incognitochain/bridge-eth/common/base58"
-	"github.com/incognitochain/go-incognito-sdk-v2/common"
-	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
-	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
-	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
-	"github.com/urfave/cli/v2"
+	"io/ioutil"
 	"log"
 	"math"
 	"os"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/incognitochain/bridge-eth/common/base58"
+	"github.com/incognitochain/go-incognito-sdk-v2/common"
+	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler/rpc"
+	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
+	"github.com/urfave/cli/v2"
 )
 
 func checkBalance(c *cli.Context) error {
@@ -424,6 +427,13 @@ func genKeySet(c *cli.Context) error {
 
 	numAccounts := c.Int(numAccountsFlag)
 
+	type Key struct {
+		PrivateKey     string `json:"private_key"`
+		PaymentAddress string `json:"payment_address"`
+	}
+
+	var keys []Key
+
 	accounts := make([]*accountInfo, 0)
 	genCount := 0
 	index := 1
@@ -444,12 +454,23 @@ func genKeySet(c *cli.Context) error {
 			supportedShards[info.ShardID] = true
 		}
 		if supportedShards[info.ShardID] {
+			keys = append(keys, Key{PrivateKey: info.PrivateKey, PaymentAddress: info.PaymentAddress})
 			accounts = append(accounts, &accountInfo{Index: index, KeyInfo: info})
 			genCount++
 		}
 
 		index++
 	}
+
+	data, err := json.Marshal(keys)
+	if err != nil {
+		panic(err)
+	}
+	err = ioutil.WriteFile("accounts.json", data, 0644)
+	if err != nil {
+		panic(err)
+	}
+
 	return jsonPrint(masterKeyInfo{Mnemonic: mnemonic, Accounts: accounts})
 }
 
