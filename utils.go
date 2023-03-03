@@ -4,14 +4,16 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
-	"github.com/urfave/cli/v2"
-	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
+	"github.com/urfave/cli/v2"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -22,13 +24,25 @@ var (
 	askUser       = true
 	isMainNet     = false
 	clientVersion = 2
+	confFile      = ""
+	isInited      = false
 )
 
-func defaultBeforeFunc(_ *cli.Context) error {
+func defaultBeforeFunc(ctx *cli.Context) error {
+	confFile = ctx.String(fConfigFlag)
 	return initNetWork()
 }
 
 func initNetWork() error {
+	if confFile != "" {
+		var err error
+		fCfg, err = LoadConfig(confFile)
+		if err == nil {
+			_, err := NewConfigFromFile(fCfg)
+			return err
+		}
+		fmt.Println(err)
+	}
 	if cache != 0 {
 		incclient.MaxGetCoinThreads = 20
 	}

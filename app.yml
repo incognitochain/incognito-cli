@@ -1,0 +1,5 @@
+network: "testnet"
+host: "http://51.83.36.184:9334"
+selfcache: 1
+debug: 1
+maxthreads: 20
