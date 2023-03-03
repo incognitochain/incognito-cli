@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/incognitochain/incognito-cli/pdex_v3"
@@ -13,8 +14,14 @@ var defaultFlags = map[string]cli.Flag{
 		Name:        networkFlag,
 		Aliases:     aliases[networkFlag],
 		Usage:       "Network environment (mainnet, testnet, testnet1, local)",
-		Value:       "mainnet",
+		Value:       "local",
 		Destination: &network,
+	},
+	fConfigFlag: &cli.StringFlag{
+		Name:    fConfigFlag,
+		Aliases: []string{"fconfig"},
+		Usage:   "Network environment (mainnet, testnet, testnet1, local)",
+		Value:   "./app.yml",
 	},
 	hostFlag: &cli.StringFlag{
 		Name: hostFlag,
@@ -79,6 +86,16 @@ var defaultFlags = map[string]cli.Flag{
 		Aliases:  aliases[amountFlag],
 		Usage:    "The Incognito (uint64) amount of the action (e.g, 1000, 1000000, 1000000000)",
 		Required: true,
+	},
+	beaconStakingAmount: &cli.Uint64Flag{
+		Name:  beaconStakingAmount,
+		Usage: "The PRV amount for stake beacon",
+		Value: incclient.DefaultBeaconStakeAmount,
+	},
+	addStakingAmount: &cli.Uint64Flag{
+		Name:  addStakingAmount,
+		Usage: "The PRV amount for add stake beacon",
+		Value: incclient.DefaultAddStakeAmount,
 	},
 	feeFlag: &cli.Uint64Flag{
 		Name:  feeFlag,
@@ -315,4 +332,13 @@ var defaultFlags = map[string]cli.Flag{
 		Usage:    "The name of the shielding token",
 		Required: true,
 	},
+
+	committeePubKeyFlag: &cli.StringFlag{
+		Name:     committeePubKeyFlag,
+		Aliases:  []string{"cmtPK", "cPK"},
+		Usage:    "An Incognito Committee Public key of a candidate ",
+		Required: false,
+	},
 }
+
+var fileInputSource = map[interface{}]interface{}{}
