@@ -783,6 +783,61 @@ OPTIONS:
    
 ```
 
+###  stake beacon
+Create a stake transaction for beacon
+```shell
+$ incognito-cli help stakebeacon
+NAME:
+   incognito-cli stakebeacon - Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
+
+USAGE:
+   stakebeacon --privateKey PRIVATE_KEY [--miningKey MINING_KEY] [--candidateAddress CANDIDATE_ADDRESS] [--rewardAddress REWARD_ADDRESS] [--bstakeamount BSTAKEAMOUNT]
+
+      OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   COMMITTEES
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value   A base58-encoded Incognito private key
+   --miningKey value, --mKey value, --vKey value  An Incognito mining key of the committee candidate (default: the mining key associated with the privateKey)
+   --candidateAddress value, --canAddr value      The Incognito payment address of the committee candidate (default: the payment address of the privateKey)
+   --rewardAddress value, --rwdAddr value         The Incognito payment address of the reward receiver (default: the payment address of the privateKey)
+   --bstakeamount value                           The PRV amount for stake beacon (default: 0)
+   --help, -h                                     show help
+```
+
+**Example**:
+```shell
+incognito-cli stakebeacon --p <privatekey> -miningKey <miningkey> -candidateAddress <candidate address> -rewardAddress <reward receiver> --bstakeamount 87500000000000
+```
+
+### add stake beacon
+Create a add-stake transaction for beacon
+```shell
+$ incognito-cli help stake
+NAME:
+   incognito-cli addstake - Create a add staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).
+
+USAGE:
+   addstake --privateKey PRIVATE_KEY [--miningKey MINING_KEY] [--candidateAddress CANDIDATE_ADDRESS] [--addstakeamount ADDSTAKEAMOUNT]
+
+      OPTIONAL flags are denoted by a [] bracket.
+
+CATEGORY:
+   COMMITTEES
+
+OPTIONS:
+   --privateKey value, -p value, --prvKey value   A base58-encoded Incognito private key
+   --miningKey value, --mKey value, --vKey value  An Incognito mining key of the committee candidate (default: the mining key associated with the privateKey)
+   --candidateAddress value, --canAddr value      The Incognito payment address of the committee candidate (default: the payment address of the privateKey)
+   --addstakeamount value                         The PRV amount for add stake beacon (default: 5250000000000)
+   --help, -h                                     show help
+```
+**Example**:
+```shell
+incognito-cli addstake --p <privatekey> -miningKey <miningkey> -candidateAddress <candidate address> --addstakeamount 8750000000000
+```
 ### unstake
 Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).
 ```shell

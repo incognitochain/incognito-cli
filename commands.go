@@ -194,7 +194,7 @@ var committeeCommands = []*cli.Command{
 	},
 	{
 		Name:     "addstake",
-		Usage:    "Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).",
+		Usage:    "Create a add staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).",
 		Category: committeeCat,
 		Flags: []cli.Flag{
 			defaultFlags[privateKeyFlag],
