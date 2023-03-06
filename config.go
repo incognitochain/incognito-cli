@@ -16,8 +16,8 @@ import (
 type FConfig struct {
 	Network           string   `mapstructure:"network"`
 	Host              string   `mapstructure:"host"`
-	PrivateKeys       string   `mapstructure:"privatekeys"`
-	MiningKeys        string   `mapstructure:"miningkeys"`
+	PrivateKeys       []string `mapstructure:"privatekeys"`
+	MiningKeys        []string `mapstructure:"miningkeys"`
 	SelfCache         bool     `mapstructure:"selfcache"`
 	Debug             bool     `mapstructure:"debug"`
 	MaxGetCoinThreads int      `mapstructure:"maxthreads"`

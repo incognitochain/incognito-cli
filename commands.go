@@ -295,7 +295,7 @@ var committeeCommands = []*cli.Command{
 		Before: defaultBeforeFunc,
 	},
 	{
-		Name:     "getbeacommitteestate",
+		Name:     "getbeaconcommitteestate",
 		Usage:    "Get information of beacon committee state at specific block, if you set the blockheight is 0, it will return the current state.",
 		Category: committeeCat,
 		Flags: []cli.Flag{
@@ -306,11 +306,6 @@ var committeeCommands = []*cli.Command{
 				Usage:       "The beacon height to get committee state (default: 0 - return the current state)",
 				DefaultText: "0",
 				Value:       0,
-			},
-			&cli.StringFlag{
-				Name:    addressFlag,
-				Aliases: aliases[addressFlag],
-				Usage:   "the payment address of a candidate (default: the payment address of the privateKey)",
 			},
 		},
 		Action: getBeaconCommitteeState,

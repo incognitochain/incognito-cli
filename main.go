@@ -1,17 +1,18 @@
 package main
 
 import (
-	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 	"sort"
+
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	app := &cli.App{
 		Name:    "incognito-cli",
 		Usage:   "A simple CLI application for the Incognito network",
-		Version: "v1.0.0",
+		Version: "v1.1.0",
 		Description: "A simple CLI application for the Incognito network. With this tool, you can run some basic functions" +
 			" on your computer to interact with the Incognito network such as checking balances, transferring PRV or tokens," +
 			" consolidating and converting your UTXOs, transferring tokens, manipulating with the pDEX, shielding or un-shielding " +
