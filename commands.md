@@ -91,6 +91,8 @@ COPYRIGHT:
 * [`COMMITTEES`](#committees)
 	* [`checkrewards`](#checkrewards)
 	* [`stake`](#stake)
+   * [`stakebeacon`](#stake-beacon)
+   * [`addstake`](#add-stake-beacon)
 	* [`unstake`](#unstake)
 	* [`withdrawreward`](#withdrawreward)
 * [`DEX`](#dex)
