@@ -33,6 +33,7 @@ func main() {
 		defaultFlags[hostFlag],
 		defaultFlags[debugFlag],
 		defaultFlags[cacheFlag],
+		defaultFlags[fConfigFlag],
 	}
 
 	app.Commands = make([]*cli.Command, 0)

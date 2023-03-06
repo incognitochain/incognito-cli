@@ -86,7 +86,7 @@ COPYRIGHT:
 		* [`portal shieldstatus`](#portal_shieldstatus)
 		* [`portal unshield`](#portal_unshield)
 		* [`portal unshieldstatus`](#portal_unshieldstatus)
-* [`CENTRALIZED BRIDGE`](#centralized bridge)
+* [`CENTRALIZED BRIDGE`](#centralized-bridge)
 	* [`centralizedshield`](#centralizedshield)
 * [`COMMITTEES`](#committees)
 	* [`checkrewards`](#checkrewards)
