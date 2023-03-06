@@ -3,19 +3,21 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/camelcase"
 	iCommon "github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/common/base58"
 	"github.com/incognitochain/go-incognito-sdk-v2/wallet"
 	"github.com/urfave/cli/v2"
-	"regexp"
-	"strings"
 )
 
 // flag constants
 const (
 	networkFlag       = "network"
+	fConfigFlag       = "fileconfig"
 	hostFlag          = "host"
 	clientVersionFlag = "clientVersion"
 	debugFlag         = "debug"
@@ -69,6 +71,9 @@ const (
 	candidateAddressFlag = "candidateAddress"
 	rewardReceiverFlag   = "rewardAddress"
 	autoReStakeFlag      = "autoReStake"
+	beaconStakingAmount  = "bstakeamount"
+	addStakingAmount     = "addstakeamount"
+	committeePubKeyFlag  = "committeePubKey"
 
 	adminPrivateKeyFlag = "adminPrivateKey"
 	tokenNameFlag       = "tokenName"
@@ -120,6 +125,7 @@ const (
 )
 
 var cfg *Config
+var fCfg *FConfig
 
 // isValidPrivateKey checks if a base58-encoded private key is valid or not.
 func isValidPrivateKey(privateKey string) bool {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/incognitochain/go-incognito-sdk-v2/common"
 	"github.com/incognitochain/go-incognito-sdk-v2/incclient"
 	"github.com/urfave/cli/v2"
@@ -192,6 +193,33 @@ var committeeCommands = []*cli.Command{
 		Before: defaultBeforeFunc,
 	},
 	{
+		Name:     "addstake",
+		Usage:    "Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).",
+		Category: committeeCat,
+		Flags: []cli.Flag{
+			defaultFlags[privateKeyFlag],
+			defaultFlags[miningKeyFlag],
+			defaultFlags[candidateAddressFlag],
+			defaultFlags[addStakingAmount],
+		},
+		Action: addStakeBeacon,
+		Before: defaultBeforeFunc,
+	},
+	{
+		Name:     "stakebeacon",
+		Usage:    "Create a staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/stake.md).",
+		Category: committeeCat,
+		Flags: []cli.Flag{
+			defaultFlags[privateKeyFlag],
+			defaultFlags[miningKeyFlag],
+			defaultFlags[candidateAddressFlag],
+			defaultFlags[rewardReceiverFlag],
+			defaultFlags[beaconStakingAmount],
+		},
+		Action: stakeBeacon,
+		Before: defaultBeforeFunc,
+	},
+	{
 		Name:     "unstake",
 		Usage:    "Create an un-staking transaction (https://github.com/incognitochain/go-incognito-sdk-v2/blob/master/tutorials/docs/staking/unstake.md).",
 		Category: committeeCat,
@@ -228,6 +256,64 @@ var committeeCommands = []*cli.Command{
 			defaultFlags[versionFlag],
 		},
 		Action: withdrawReward,
+		Before: defaultBeforeFunc,
+	},
+	{
+		Name:     "getbeaconstaker",
+		Usage:    "Get information of a beacon staker by committee public key. This command not require private key, if you can provide committee public key, just add -p noneed to by pass privatekey flag",
+		Category: committeeCat,
+		Flags: []cli.Flag{
+			defaultFlags[fConfigFlag],
+			defaultFlags[privateKeyFlag],
+			defaultFlags[miningKeyFlag],
+			defaultFlags[committeePubKeyFlag],
+			&cli.StringFlag{
+				Name:    addressFlag,
+				Aliases: aliases[addressFlag],
+				Usage:   "the payment address of a candidate (default: the payment address of the privateKey)",
+			},
+		},
+		Action: getBeaconStaker,
+		Before: defaultBeforeFunc,
+	},
+	{
+		Name:     "getshardstaker",
+		Usage:    "Get information of a beacon staker by committee public key. This command not require private key, if you can provide committee public key, just add -p noneed to by pass privatekey flag",
+		Category: committeeCat,
+		Flags: []cli.Flag{
+			defaultFlags[fConfigFlag],
+			defaultFlags[privateKeyFlag],
+			defaultFlags[miningKeyFlag],
+			defaultFlags[committeePubKeyFlag],
+			&cli.StringFlag{
+				Name:    addressFlag,
+				Aliases: aliases[addressFlag],
+				Usage:   "the payment address of a candidate (default: the payment address of the privateKey)",
+			},
+		},
+		Action: getShardStaker,
+		Before: defaultBeforeFunc,
+	},
+	{
+		Name:     "getbeacommitteestate",
+		Usage:    "Get information of beacon committee state at specific block, if you set the blockheight is 0, it will return the current state.",
+		Category: committeeCat,
+		Flags: []cli.Flag{
+			defaultFlags[fConfigFlag],
+			&cli.Uint64Flag{
+				Name:        "beaconheight",
+				Aliases:     []string{"bHeight"},
+				Usage:       "The beacon height to get committee state (default: 0 - return the current state)",
+				DefaultText: "0",
+				Value:       0,
+			},
+			&cli.StringFlag{
+				Name:    addressFlag,
+				Aliases: aliases[addressFlag],
+				Usage:   "the payment address of a candidate (default: the payment address of the privateKey)",
+			},
+		},
+		Action: getBeaconCommitteeState,
 		Before: defaultBeforeFunc,
 	},
 }
