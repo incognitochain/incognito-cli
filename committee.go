@@ -50,13 +50,9 @@ func stakeBeacon(c *cli.Context) error {
 	if !isValidPrivateKey(privateKey) {
 		return newAppError(InvalidPrivateKeyError)
 	}
-	canAddr := c.String(candidateAddressFlag)
-	if canAddr == "" {
-		canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
-	}
-	if !isValidAddress(canAddr) {
-		return newAppError(InvalidPaymentAddressError, fmt.Errorf("%v", canAddr))
-	}
+	bStakeAmount := c.Uint64(beaconStakingAmount)
+	cpk := c.String(committeePubKeyFlag)
+
 	rewardAddr := c.String(rewardReceiverFlag)
 	if rewardAddr == "" {
 		rewardAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
@@ -64,17 +60,75 @@ func stakeBeacon(c *cli.Context) error {
 	if !isValidAddress(rewardAddr) {
 		return newAppError(InvalidPaymentAddressError, fmt.Errorf("%v", rewardAddr))
 	}
-	miningKey := c.String(miningKeyFlag)
-	if miningKey == "" {
-		miningKey = incclient.PrivateKeyToMiningKey(privateKey)
+	if cpk == "" {
+		canAddr := c.String(candidateAddressFlag)
+		if canAddr == "" {
+			canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+		}
+		if !isValidAddress(canAddr) {
+			return newAppError(InvalidPaymentAddressError, fmt.Errorf("%v", canAddr))
+		}
+
+		miningKey := c.String(miningKeyFlag)
+		if miningKey == "" {
+			miningKey = incclient.PrivateKeyToMiningKey(privateKey)
+		}
+		if !isValidMiningKey(miningKey) {
+			return newAppError(InvalidMiningKeyError)
+		}
+
+		txHash, err := cfg.incClient.CreateAndSendBeaconStakingTransaction(privateKey, miningKey, canAddr, rewardAddr, bStakeAmount)
+		if err != nil {
+			return newAppError(CreateStakingTransactionError, err)
+		}
+
+		return jsonPrintWithKey("TxHash", txHash)
 	}
-	if !isValidMiningKey(miningKey) {
-		return newAppError(InvalidMiningKeyError)
+	txHash, err := cfg.incClient.CreateAndSendBeaconStakingTransactionV2(privateKey, cpk, rewardAddr, bStakeAmount)
+	if err != nil {
+		return newAppError(CreateStakingTransactionError, err)
 	}
-	bStakeAmount := c.Uint64(beaconStakingAmount)
-	fmt.Println(bStakeAmount)
-	// panic("a")
-	txHash, err := cfg.incClient.CreateAndSendBeaconStakingTransaction(privateKey, miningKey, canAddr, rewardAddr, bStakeAmount)
+	return jsonPrintWithKey("TxHash", txHash)
+}
+
+func addStakeBeacon(c *cli.Context) error {
+	privateKey := c.String(privateKeyFlag)
+	if !isValidPrivateKey(privateKey) {
+		return newAppError(InvalidPrivateKeyError)
+	}
+	bStakeAmount := c.Uint64(addStakingAmount)
+	cpk := c.String(committeePubKeyFlag)
+	if cpk == "" {
+		canAddr := c.String(candidateAddressFlag)
+		if canAddr == "" {
+			canAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+		}
+		if !isValidAddress(canAddr) {
+			return newAppError(InvalidPaymentAddressError, fmt.Errorf("%v", canAddr))
+		}
+		rewardAddr := c.String(rewardReceiverFlag)
+		if rewardAddr == "" {
+			rewardAddr = incclient.PrivateKeyToPaymentAddress(privateKey, -1)
+		}
+		if !isValidAddress(rewardAddr) {
+			return newAppError(InvalidPaymentAddressError, fmt.Errorf("%v", rewardAddr))
+		}
+		miningKey := c.String(miningKeyFlag)
+		if miningKey == "" {
+			miningKey = incclient.PrivateKeyToMiningKey(privateKey)
+		}
+		if !isValidMiningKey(miningKey) {
+			return newAppError(InvalidMiningKeyError)
+		}
+
+		txHash, err := cfg.incClient.CreateAndSendBeaconAddStakingTransaction(privateKey, miningKey, canAddr, bStakeAmount)
+		if err != nil {
+			return newAppError(CreateStakingTransactionError, err)
+		}
+
+		return jsonPrintWithKey("TxHash", txHash)
+	}
+	txHash, err := cfg.incClient.CreateAndSendBeaconAddStakingTransactionV2(privateKey, cpk, bStakeAmount)
 	if err != nil {
 		return newAppError(CreateStakingTransactionError, err)
 	}
@@ -82,7 +136,7 @@ func stakeBeacon(c *cli.Context) error {
 	return jsonPrintWithKey("TxHash", txHash)
 }
 
-func addStakeBeacon(c *cli.Context) error {
+func delegate(c *cli.Context) error {
 	privateKey := c.String(privateKeyFlag)
 	if !isValidPrivateKey(privateKey) {
 		return newAppError(InvalidPrivateKeyError)
@@ -108,9 +162,9 @@ func addStakeBeacon(c *cli.Context) error {
 	if !isValidMiningKey(miningKey) {
 		return newAppError(InvalidMiningKeyError)
 	}
-	bStakeAmount := c.Uint64(addStakingAmount)
+	delegatePK := c.String("beaconcandidatepubkey")
 
-	txHash, err := cfg.incClient.CreateAndSendBeaconAddStakingTransaction(privateKey, miningKey, canAddr, bStakeAmount)
+	txHash, err := cfg.incClient.CreateAndSendReDelegateTransaction(privateKey, miningKey, canAddr, delegatePK)
 	if err != nil {
 		return newAppError(CreateStakingTransactionError, err)
 	}
